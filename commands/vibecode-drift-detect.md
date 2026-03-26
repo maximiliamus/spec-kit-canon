@@ -3,7 +3,7 @@ description: Detect spec-level drift — scan tasks.drift.md and derive spec dis
 handoffs:
   - label: Plan Canonization
     agent: speckit.canon.vibecode-drift-reconcile
-    prompt: Compare spec.drift.md against canon and generate canonization.md.
+    prompt: Compare spec.drift.md against canon and generate canon.drift.md.
     send: true
 scripts:
   sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-tasks-drift

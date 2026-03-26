@@ -145,16 +145,6 @@ validate_environment() {
         exit 1
     fi
     
-    # Check if plan.md exists
-    if [[ ! -f "$NEW_PLAN" ]]; then
-        log_error "No plan.md found at $NEW_PLAN"
-        log_info "Make sure you're working on a feature with a corresponding spec directory"
-        if [[ "$HAS_GIT" != "true" ]]; then
-            log_info "Use: export SPECIFY_FEATURE=your-feature-name or create a new feature first"
-        fi
-        exit 1
-    fi
-    
     # Check if template exists (needed for new files)
     if [[ ! -f "$TEMPLATE_FILE" ]]; then
         log_warning "Template file not found at $TEMPLATE_FILE"
@@ -182,8 +172,13 @@ parse_plan_data() {
     local plan_file="$1"
     
     if [[ ! -f "$plan_file" ]]; then
-        log_error "Plan file not found: $plan_file"
-        return 1
+        log_warning "No plan.md found at $plan_file. Continuing without plan-derived metadata."
+        log_info "This is expected for vibecode or other lightweight workflows that skip plan.md."
+        NEW_LANG=""
+        NEW_FRAMEWORK=""
+        NEW_DB=""
+        NEW_PROJECT_TYPE=""
+        return 0
     fi
     
     if [[ ! -r "$plan_file" ]]; then

@@ -14,6 +14,7 @@ WORKFLOW_NAME = "test-speckit-canon-extension"
 PROGRESS_FILE_NAME = "test-speckit-canon-extension-progress.json"
 STEP_DEFINITIONS = (
     ("reset_sandbox", "Reset the sandbox project"),
+    ("verify_constitution_config", "Run constitution and verify config-driven rendering"),
     ("initialize_canon", "Initialize the canon baseline"),
     ("standard_feature_workflow", "Run the standard feature workflow"),
     ("api_drift", "Add update todo and run standard drift"),
@@ -110,7 +111,7 @@ def build_state(workspace_root: Path, project_dir: Path, progress_file: Path, cl
     timestamp = now_iso()
     return {
         "workflow": WORKFLOW_NAME,
-        "version": 1,
+        "version": 2,
         "workspace_root": str(workspace_root),
         "project_dir": str(project_dir),
         "progress_file": str(progress_file),
@@ -135,7 +136,10 @@ def ensure_step_structure(state: dict) -> None:
         raise SystemExit("Invalid progress file: missing steps list.")
     known = {item.get("id") for item in steps if isinstance(item, dict)}
     if known != STEP_IDS:
-        raise SystemExit("Invalid progress file: step ids do not match the current workflow.")
+        raise SystemExit(
+            "Invalid progress file: step ids do not match the current workflow. "
+            "Re-run manage_progress.py init --force to refresh the state for the current step set."
+        )
 
 
 def load_state(progress_file: Path) -> dict:

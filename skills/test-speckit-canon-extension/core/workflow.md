@@ -39,6 +39,7 @@ resume from `current_step` and do not redo completed steps.
 Use these step ids when updating progress:
 
 - `reset_sandbox`
+- `verify_constitution_config`
 - `initialize_canon`
 - `standard_feature_workflow`
 - `api_drift`
@@ -61,6 +62,23 @@ python skills/test-speckit-canon-extension/scripts/manage_progress.py complete <
 If the workflow is interrupted, run `show` again and continue from the stored
 `current_step`.
 
+## Git Notes
+
+- `spec-kit-canon-test` is part of the test surface. Branch creation, commits,
+  and the fast-forward merge back to `master` are required workflow steps, not
+  optional cleanup.
+- The progress file at
+  `.specify/tmp/test-speckit-canon-extension-progress.json` changes throughout
+  the run. If `git checkout master` is blocked, commit or stash that file
+  before switching branches.
+- Before `git add -A` or any sandbox commit, confirm
+  `.specify/extensions/canon/.git` is absent. Never commit nested git metadata
+  from the installed extension copy. If it appears, remove it from the sandbox
+  and treat it as an extension packaging bug to fix in `spec-kit-canon`.
+- Keep transient Python artifacts such as `__pycache__/` and `*.pyc` out of the
+  sandbox commits so the merge step tests real project state, not local cache
+  noise.
+
 ## Workflow
 
 ### 1. Reset the sandbox project (`reset_sandbox`)
@@ -68,20 +86,21 @@ If the workflow is interrupted, run `show` again and continue from the stored
 Run:
 
 ```powershell
-python skills/test-speckit-canon-extension/scripts/reset_test_project.py --project-name "Spec Kit Canon Test"
+python skills/test-speckit-canon-extension/scripts/reset_test_project.py
 ```
 
 If the progress file says `clear_test_project` is `true`, add
 `--clear-test-project` to that command.
 
 Use the script output as the source of truth for `workspace_root`,
-`test_project_dir`, and the installed config paths.
+`test_project_dir`, `config_fixture`, and the installed config paths.
 
 After the script finishes, verify:
 
 - `spec-kit`, `spec-kit-canon`, and `spec-kit-canon-test` were resolved as sibling directories
 - `spec-kit-canon-test/.specify/extensions/canon` exists
 - `spec-kit-canon-test/.specify/presets/canon-core` exists
+- the reported `applied_config` matches the shared constitution config fixture
 
 When the reset and verification are done, run:
 
@@ -89,21 +108,45 @@ When the reset and verification are done, run:
 python skills/test-speckit-canon-extension/scripts/manage_progress.py complete reset_sandbox
 ```
 
-### 2. Initialize the canon baseline (`initialize_canon`)
+### 2. Verify constitution config rendering (`verify_constitution_config`)
 
 From `spec-kit-canon-test`:
 
-1. Open `.specify/extensions/canon/canon-config.yml` and confirm
-   `project.name` is `Spec Kit Canon Test`.
-2. Run `/speckit.constitution` with no arguments.
-3. Switch back to the `spec-kit-canon` repo root and copy the bundled canon
+1. Open the shared config fixture from [test-flow.md](./test-flow.md) and the
+   installed `.specify/extensions/canon/canon-config.yml`.
+2. Confirm the installed config matches the fixture values for:
+   - `project.name`
+   - `canon.root`
+   - `branching.types`
+   - `branching.scopes`
+3. Run `/speckit.constitution` with no arguments.
+4. Switch back to the `spec-kit-canon` repo root and run:
+
+```powershell
+python skills/test-speckit-canon-extension/scripts/verify_constitution_config.py
+```
+
+5. Verify the script reports success for the config-driven constitution checks
+   from [test-flow.md](./test-flow.md), including the rendered Section 6 type
+   and scope tables, the configured canon root, and the generated `_toc.md`
+   location.
+
+When the constitution verification passes, run:
+
+```powershell
+python skills/test-speckit-canon-extension/scripts/manage_progress.py complete verify_constitution_config
+```
+
+### 3. Initialize the canon baseline (`initialize_canon`)
+
+Switch back to the `spec-kit-canon` repo root and copy the bundled canon
    template:
 
 ```powershell
 python skills/test-speckit-canon-extension/scripts/seed_canon_template.py
 ```
 
-4. Verify the copied baseline from [test-flow.md](./test-flow.md):
+Verify the copied baseline from [test-flow.md](./test-flow.md):
    - `_toc.md` remains the canon entry point
    - `overview.md` defines the Todo entity
    - `architecture.md` captures the baseline structure
@@ -115,7 +158,7 @@ When the baseline is seeded and verified, run:
 python skills/test-speckit-canon-extension/scripts/manage_progress.py complete initialize_canon
 ```
 
-### 3. Run the standard feature workflow (`standard_feature_workflow`)
+### 4. Run the standard feature workflow (`standard_feature_workflow`)
 
 Use the standard feature prompt from [test-flow.md](./test-flow.md).
 
@@ -143,7 +186,7 @@ When the feature workflow and smoke check pass, run:
 python skills/test-speckit-canon-extension/scripts/manage_progress.py complete standard_feature_workflow
 ```
 
-### 4. Add the third API method directly, then run standard drift (`api_drift`)
+### 5. Add the third API method directly, then run standard drift (`api_drift`)
 
 Stay on the same feature branch. Do not start a new spec workflow for this
 step.
@@ -173,13 +216,14 @@ When the drift pass finishes and the canon evidence is confirmed, run:
 python skills/test-speckit-canon-extension/scripts/manage_progress.py complete api_drift
 ```
 
-### 5. Merge the first branch back to `master` (`merge_to_master`)
+### 6. Merge the first branch back to `master` (`merge_to_master`)
 
 The vibecode entry command must start from `master`.
 
 Before starting the second pass:
 
-1. ensure the feature branch worktree is clean
+1. ensure the feature branch worktree is clean; if the progress file was just
+   updated, commit or stash it before `git checkout master`
 2. create a local commit for the first feature
 3. `git checkout master`
 4. `git merge --ff-only <first-feature-branch>`
@@ -190,7 +234,7 @@ When `master` contains the first feature and the worktree is clean, run:
 python skills/test-speckit-canon-extension/scripts/manage_progress.py complete merge_to_master
 ```
 
-### 6. Run the vibecode web UI pass (`web_ui_vibecode`)
+### 7. Run the vibecode web UI pass (`web_ui_vibecode`)
 
 From `master`, run `/speckit.canon.vibecode-specify` with the web UI prompt
 from [test-flow.md](./test-flow.md).
@@ -204,7 +248,7 @@ When the UI implementation and vibecode drift pass finish, run:
 python skills/test-speckit-canon-extension/scripts/manage_progress.py complete web_ui_vibecode
 ```
 
-### 7. Verify the final canon (`verify_final_canon`)
+### 8. Verify the final canon (`verify_final_canon`)
 
 Confirm the final canon documents now cover:
 
@@ -212,9 +256,10 @@ Confirm the final canon documents now cover:
 - the web UI surface that lists todos, loads a single todo, and updates a todo
 - `_toc.md` links for every canon file introduced during the test
 
-Use `rg -n "todo|update|web|html|javascript|ui" specs/000-canon` or
-equivalent to find the updated canon sections, then inspect the actual files
-instead of relying on the grep output alone.
+Use `rg -n "todo|update|web|html|javascript|ui" docs/canon` or equivalent to
+find the updated canon sections, then inspect the actual files instead of
+relying on the grep output alone. If the shared config fixture changes the
+canon root in the future, use that configured root instead.
 
 When the final canon evidence is confirmed, run:
 

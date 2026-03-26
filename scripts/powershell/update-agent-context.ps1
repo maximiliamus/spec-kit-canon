@@ -114,12 +114,6 @@ function Validate-Environment {
         if ($HAS_GIT) { Write-Info "Make sure you're on a feature branch" } else { Write-Info 'Set SPECIFY_FEATURE environment variable or create a feature first' }
         exit 1
     }
-    if (-not (Test-Path $NEW_PLAN)) {
-        Write-Err "No plan.md found at $NEW_PLAN"
-        Write-Info 'Ensure you are working on a feature with a corresponding spec directory'
-        if (-not $HAS_GIT) { Write-Info 'Use: $env:SPECIFY_FEATURE=your-feature-name or create a new feature first' }
-        exit 1
-    }
     if (-not (Test-Path $TEMPLATE_FILE)) {
         Write-Err "Template file not found at $TEMPLATE_FILE"
         Write-Info 'Run specify init to scaffold .specify/templates, or add agent-file-template.md there.'
@@ -150,7 +144,15 @@ function Parse-PlanData {
         [Parameter(Mandatory=$true)]
         [string]$PlanFile
     )
-    if (-not (Test-Path $PlanFile)) { Write-Err "Plan file not found: $PlanFile"; return $false }
+    if (-not (Test-Path $PlanFile)) {
+        Write-WarningMsg "No plan.md found at $PlanFile. Continuing without plan-derived metadata."
+        Write-Info 'This is expected for vibecode or other lightweight workflows that skip plan.md.'
+        $script:NEW_LANG = ''
+        $script:NEW_FRAMEWORK = ''
+        $script:NEW_DB = ''
+        $script:NEW_PROJECT_TYPE = ''
+        return $true
+    }
     Write-Info "Parsing plan data from $PlanFile"
     $script:NEW_LANG        = Extract-PlanField -FieldPattern 'Language/Version' -PlanFile $PlanFile
     $script:NEW_FRAMEWORK   = Extract-PlanField -FieldPattern 'Primary Dependencies' -PlanFile $PlanFile

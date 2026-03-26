@@ -158,6 +158,77 @@ clean_branch_name() {
     echo "$name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//' | sed 's/-$//'
 }
 
+get_configured_base_branch() {
+    local default_base_branch="main"
+    local extension_dir=""
+    local config_file=""
+    local extension_file=""
+    local python_cmd=""
+
+    extension_dir="$(CDPATH="" cd "$SCRIPT_DIR/../.." 2>/dev/null && pwd)" || {
+        echo "$default_base_branch"
+        return
+    }
+
+    config_file="$extension_dir/canon-config.yml"
+    extension_file="$extension_dir/extension.yml"
+
+    if command -v python3 >/dev/null 2>&1; then
+        python_cmd="python3"
+    elif command -v python >/dev/null 2>&1; then
+        python_cmd="python"
+    else
+        echo "$default_base_branch"
+        return
+    fi
+
+    local base_branch=""
+    if base_branch=$(SPECKIT_CANON_CONFIG="$config_file" SPECKIT_CANON_EXTENSION="$extension_file" "$python_cmd" - <<'PY' 2>/dev/null
+import os
+import sys
+
+try:
+    import yaml
+except Exception:
+    sys.exit(1)
+
+DEFAULT_BASE_BRANCH = "main"
+
+
+def load_yaml(path):
+    if not path or not os.path.isfile(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+    return data if isinstance(data, dict) else {}
+
+
+config = load_yaml(os.environ.get("SPECKIT_CANON_CONFIG"))
+extension = load_yaml(os.environ.get("SPECKIT_CANON_EXTENSION"))
+
+base_branch = (
+    ((config.get("branching") or {}).get("base"))
+    or ((((extension.get("config") or {}).get("defaults") or {}).get("branching") or {}).get("base"))
+    or DEFAULT_BASE_BRANCH
+)
+
+if not isinstance(base_branch, str):
+    base_branch = DEFAULT_BASE_BRANCH
+
+base_branch = base_branch.strip()
+print(base_branch or DEFAULT_BASE_BRANCH)
+PY
+    ); then
+        base_branch="${base_branch//$'\r'/}"
+        if [[ -n "$base_branch" ]]; then
+            echo "$base_branch"
+            return
+        fi
+    fi
+
+    echo "$default_base_branch"
+}
+
 # Resolve repository root using common.sh functions which prioritize .specify over git
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
@@ -172,6 +243,21 @@ else
 fi
 
 cd "$REPO_ROOT"
+
+if [ "$HAS_GIT" = true ]; then
+    BASE_BRANCH=$(get_configured_base_branch)
+    CURRENT_BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+
+    if [ -z "$CURRENT_BRANCH" ]; then
+        echo "Error: Could not determine the current git branch before starting vibecoding." >&2
+        exit 1
+    fi
+
+    if [ "$CURRENT_BRANCH" != "$BASE_BRANCH" ]; then
+        echo "Error: Vibecode sessions must be started from the configured base branch '$BASE_BRANCH'. Current branch: '$CURRENT_BRANCH'." >&2
+        exit 1
+    fi
+fi
 
 SPECS_DIR="$REPO_ROOT/specs"
 mkdir -p "$SPECS_DIR"

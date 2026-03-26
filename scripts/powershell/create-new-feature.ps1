@@ -115,6 +115,77 @@ function ConvertTo-CleanBranchName {
     
     return $Name.ToLower() -replace '[^a-z0-9]', '-' -replace '-{2,}', '-' -replace '^-', '' -replace '-$', ''
 }
+
+function Get-ConfiguredBaseBranch {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ExtensionDir
+    )
+
+    $defaultBaseBranch = 'main'
+    $configFile = Join-Path $ExtensionDir 'canon-config.yml'
+    $extensionFile = Join-Path $ExtensionDir 'extension.yml'
+    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+
+    if (-not $pythonCmd) {
+        $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue
+    }
+
+    if (-not $pythonCmd) {
+        return $defaultBaseBranch
+    }
+
+    $script = @'
+import os
+import sys
+
+try:
+    import yaml
+except Exception:
+    sys.exit(1)
+
+DEFAULT_BASE_BRANCH = "main"
+
+
+def load_yaml(path):
+    if not path or not os.path.isfile(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+    return data if isinstance(data, dict) else {}
+
+
+config = load_yaml(os.environ.get("SPECKIT_CANON_CONFIG"))
+extension = load_yaml(os.environ.get("SPECKIT_CANON_EXTENSION"))
+
+base_branch = (
+    ((config.get("branching") or {}).get("base"))
+    or ((((extension.get("config") or {}).get("defaults") or {}).get("branching") or {}).get("base"))
+    or DEFAULT_BASE_BRANCH
+)
+
+if not isinstance(base_branch, str):
+    base_branch = DEFAULT_BASE_BRANCH
+
+base_branch = base_branch.strip()
+print(base_branch or DEFAULT_BASE_BRANCH)
+'@
+
+    $env:SPECKIT_CANON_CONFIG = $configFile
+    $env:SPECKIT_CANON_EXTENSION = $extensionFile
+
+    try {
+        $baseBranch = & $pythonCmd.Source -c $script 2>$null
+        if ($LASTEXITCODE -eq 0 -and $baseBranch) {
+            return $baseBranch.Trim()
+        }
+    } finally {
+        Remove-Item Env:SPECKIT_CANON_CONFIG -ErrorAction SilentlyContinue
+        Remove-Item Env:SPECKIT_CANON_EXTENSION -ErrorAction SilentlyContinue
+    }
+
+    return $defaultBaseBranch
+}
 # Load common functions (includes Get-RepoRoot, Test-HasGit, Resolve-Template)
 . "$PSScriptRoot/common.ps1"
 
@@ -125,6 +196,23 @@ $repoRoot = Get-RepoRoot
 $hasGit = Test-HasGit
 
 Set-Location $repoRoot
+
+if ($hasGit) {
+    $extensionDir = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+    $baseBranch = Get-ConfiguredBaseBranch -ExtensionDir $extensionDir
+    $currentBranch = git -C $repoRoot rev-parse --abbrev-ref HEAD 2>$null
+
+    if ($LASTEXITCODE -ne 0 -or -not $currentBranch) {
+        Write-Error 'Error: Could not determine the current git branch before starting vibecoding.'
+        exit 1
+    }
+
+    $currentBranch = $currentBranch.Trim()
+    if ($currentBranch -ne $baseBranch) {
+        Write-Error "Error: Vibecode sessions must be started from the configured base branch '$baseBranch'. Current branch: '$currentBranch'."
+        exit 1
+    }
+}
 
 $specsDir = Join-Path $repoRoot 'specs'
 New-Item -ItemType Directory -Path $specsDir -Force | Out-Null
@@ -290,4 +378,3 @@ if ($Json) {
     Write-Output "HAS_GIT: $hasGit"
     Write-Output "SPECIFY_FEATURE environment variable set to: $branchName"
 }
-

@@ -3,7 +3,7 @@
 # Unified prerequisite checking for the drift workflow.
 #
 # Provides REPO_ROOT, BRANCH, FEATURE_DIR, FEATURE_SPEC, TASKS, TASKS_DRIFT,
-# SPEC_DRIFT, and CANONIZATION always.
+# SPEC_DRIFT, CANON_DRIFT, and CANON_REPAIR always.
 # Optionally validates drift-specific artifacts and includes canon paths.
 #
 # Usage: ./check-drift-prerequisites.ps1 [OPTIONS]
@@ -13,7 +13,7 @@
 #   -RequireTasks         Require tasks.md to exist
 #   -RequireTasksDrift    Require tasks.drift.md to exist
 #   -RequireSpecDrift     Require spec.drift.md to exist
-#   -RequireCanonization  Require canonization.md to exist
+#   -RequireCanonDrift    Require canon.drift.md to exist
 #   -Canon                Include CANON_ROOT and CANON_TOC in output
 #   -Help, -h             Show help message
 
@@ -23,7 +23,7 @@ param(
     [switch]$RequireTasks,
     [switch]$RequireTasksDrift,
     [switch]$RequireSpecDrift,
-    [switch]$RequireCanonization,
+    [switch]$RequireCanonDrift,
     [switch]$Canon,
     [Alias('h')]
     [switch]$Help
@@ -51,7 +51,7 @@ Usage: check-drift-prerequisites.ps1 [OPTIONS]
 Unified prerequisite checking for the drift workflow.
 
 Always outputs: REPO_ROOT, BRANCH, FEATURE_DIR, FEATURE_SPEC, TASKS,
-                TASKS_DRIFT, SPEC_DRIFT, CANONIZATION
+                TASKS_DRIFT, SPEC_DRIFT, CANON_DRIFT, CANON_REPAIR, BASE_BRANCH
 With -Canon:    Also outputs CANON_ROOT, CANON_TOC
 
 OPTIONS:
@@ -59,7 +59,7 @@ OPTIONS:
   -RequireTasks         Require tasks.md to exist
   -RequireTasksDrift    Require tasks.drift.md to exist
   -RequireSpecDrift     Require spec.drift.md to exist
-  -RequireCanonization  Require canonization.md to exist
+  -RequireCanonDrift    Require canon.drift.md to exist
   -Canon                Include canon paths in output
   -Help, -h             Show this help message
 
@@ -76,8 +76,8 @@ EXAMPLES:
   # drift.reconcile: needs spec.drift.md + canon paths
   ./check-drift-prerequisites.ps1 -Json -RequireSpecDrift -Canon
 
-  # drift.canonize: needs canonization.md + canon paths
-  ./check-drift-prerequisites.ps1 -Json -RequireCanonization -Canon
+  # drift.canonize: needs canon.drift.md + canon paths
+  ./check-drift-prerequisites.ps1 -Json -RequireCanonDrift -Canon
 
 "@
     exit 0
@@ -85,13 +85,14 @@ EXAMPLES:
 
 . "$PSScriptRoot/common.ps1"
 
-function Get-CanonRootRelativePath {
+function Get-CanonConfigSettings {
     param(
         [Parameter(Mandatory = $true)]
         [string]$ExtensionDir
     )
 
     $defaultRoot = 'specs/000-canon'
+    $defaultBaseBranch = 'main'
     $configFile = Join-Path $ExtensionDir 'canon-config.yml'
     $extensionFile = Join-Path $ExtensionDir 'extension.yml'
     $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
@@ -101,7 +102,10 @@ function Get-CanonRootRelativePath {
     }
 
     if (-not $pythonCmd) {
-        return $defaultRoot
+        return [PSCustomObject]@{
+            CanonRoot = $defaultRoot
+            BaseBranch = $defaultBaseBranch
+        }
     }
 
     $script = @'
@@ -114,6 +118,7 @@ except Exception:
     sys.exit(1)
 
 DEFAULT_ROOT = "specs/000-canon"
+DEFAULT_BASE_BRANCH = "main"
 
 
 def load_yaml(path):
@@ -133,27 +138,48 @@ root = (
     or DEFAULT_ROOT
 )
 
+base_branch = (
+    ((config.get("branching") or {}).get("base"))
+    or ((((extension.get("config") or {}).get("defaults") or {}).get("branching") or {}).get("base"))
+    or DEFAULT_BASE_BRANCH
+)
+
 if not isinstance(root, str):
     root = DEFAULT_ROOT
 
+if not isinstance(base_branch, str):
+    base_branch = DEFAULT_BASE_BRANCH
+
 root = root.strip().replace("\\", "/").rstrip("/")
+base_branch = base_branch.strip()
+
 print(root or DEFAULT_ROOT)
+print(base_branch or DEFAULT_BASE_BRANCH)
 '@
 
     $env:SPECKIT_CANON_CONFIG = $configFile
     $env:SPECKIT_CANON_EXTENSION = $extensionFile
 
     try {
-        $root = & $pythonCmd.Source -c $script 2>$null
-        if ($LASTEXITCODE -eq 0 -and $root) {
-            return $root.Trim().TrimEnd('/', '\')
+        $values = @(& $pythonCmd.Source -c $script 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $values.Count -ge 1) {
+            $canonRoot = $values[0].Trim().TrimEnd('/', '\')
+            $baseBranch = if ($values.Count -ge 2) { $values[1].Trim() } else { $defaultBaseBranch }
+
+            return [PSCustomObject]@{
+                CanonRoot = if ($canonRoot) { $canonRoot } else { $defaultRoot }
+                BaseBranch = if ($baseBranch) { $baseBranch } else { $defaultBaseBranch }
+            }
         }
     } finally {
         Remove-Item Env:SPECKIT_CANON_CONFIG -ErrorAction SilentlyContinue
         Remove-Item Env:SPECKIT_CANON_EXTENSION -ErrorAction SilentlyContinue
     }
 
-    return $defaultRoot
+    return [PSCustomObject]@{
+        CanonRoot = $defaultRoot
+        BaseBranch = $defaultBaseBranch
+    }
 }
 
 $paths = Get-FeaturePathsEnv
@@ -162,10 +188,13 @@ if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit:$paths.HAS_GI
 }
 
 $extensionDir = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
-$canonRootRelative = Get-CanonRootRelativePath -ExtensionDir $extensionDir
+$configSettings = Get-CanonConfigSettings -ExtensionDir $extensionDir
+$canonRootRelative = $configSettings.CanonRoot
+$baseBranch = $configSettings.BaseBranch
 $tasksDrift = Join-Path $paths.FEATURE_DIR 'tasks.drift.md'
 $specDrift = Join-Path $paths.FEATURE_DIR 'spec.drift.md'
-$canonization = Join-Path $paths.FEATURE_DIR 'canonization.md'
+$canonDrift = Join-Path $paths.FEATURE_DIR 'canon.drift.md'
+$canonRepair = Join-Path $paths.FEATURE_DIR 'canon.repair.md'
 $canonRoot = if ([System.IO.Path]::IsPathRooted($canonRootRelative)) {
     $canonRootRelative
 } else {
@@ -201,9 +230,9 @@ if ($RequireSpecDrift -and -not (Test-Path -LiteralPath $specDrift -PathType Lea
     )
 }
 
-if ($RequireCanonization -and -not (Test-Path -LiteralPath $canonization -PathType Leaf)) {
+if ($RequireCanonDrift -and -not (Test-Path -LiteralPath $canonDrift -PathType Leaf)) {
     Write-FailAndExit @(
-        "ERROR: canonization.md not found in $($paths.FEATURE_DIR)",
+        "ERROR: canon.drift.md not found in $($paths.FEATURE_DIR)",
         'Run /speckit.canon.drift-reconcile first to infer canon gaps.'
     )
 }
@@ -217,7 +246,9 @@ if ($Json) {
         TASKS = $paths.TASKS
         TASKS_DRIFT = $tasksDrift
         SPEC_DRIFT = $specDrift
-        CANONIZATION = $canonization
+        CANON_DRIFT = $canonDrift
+        CANON_REPAIR = $canonRepair
+        BASE_BRANCH = $baseBranch
     }
 
     if ($Canon) {
@@ -236,7 +267,9 @@ Write-Output "FEATURE_SPEC: $($paths.FEATURE_SPEC)"
 Write-Output "TASKS: $($paths.TASKS)"
 Write-Output "TASKS_DRIFT: $tasksDrift"
 Write-Output "SPEC_DRIFT: $specDrift"
-Write-Output "CANONIZATION: $canonization"
+Write-Output "CANON_DRIFT: $canonDrift"
+Write-Output "CANON_REPAIR: $canonRepair"
+Write-Output "BASE_BRANCH: $baseBranch"
 if ($Canon) {
     Write-Output "CANON_ROOT: $canonRoot"
     Write-Output "CANON_TOC: $canonToc"

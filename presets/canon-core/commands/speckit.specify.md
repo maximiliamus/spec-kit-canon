@@ -19,7 +19,7 @@ Before generating the branch name or writing any content:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 6 — Git Branching Strategy**: use the `<type>-<area>-<short-description>` template with the exact type and area codes defined in the tables; the numeric prefix `###-` is prepended by Spec-Kit tooling
+   - **Section 6 — Git Branching Strategy**: use the `<type>-<scope>-<short-description>` template with the exact type and scope codes defined in the tables; the numeric prefix `###-` is prepended by Spec-Kit tooling
    - **Section 5 — Change Classification**: declare exactly one primary change type per the allowed list
    - **Section 4 — Mandatory Change Declaration**: every spec must include canon references, change type, impact analysis, acceptance criteria, and migration notes if applicable
    - **Section 3 — Separation of Abstraction Levels**: spec.md describes WHAT/WHY only; never include HOW, architecture decisions, or code structure

@@ -1,13 +1,13 @@
 ---
-description: Repair canon after post-canonization analysis — reads analyze findings, generates correction entries, and applies fixes to canon files. Closes the feedback loop between canonize and analyze.
+description: Repair canon after post-canon analysis — reads analyze findings, generates correction entries, and applies fixes to canon files. Closes the feedback loop between canonize and analyze.
 handoffs:
   - label: Verify Repairs
     agent: speckit.canon.drift-analyze
     prompt: Verify the repaired canon for contradictions and missing links. This is a post-repair verification — check that all repair corrections were applied correctly.
     send: true
 scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-canonization --canon
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json -RequireCanonization -Canon
+  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-canon-drift --canon
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json -RequireCanonDrift -Canon
 agent_scripts:
   sh: bash .specify/extensions/canon/scripts/bash/update-agent-context.sh
   ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/update-agent-context.ps1
@@ -36,18 +36,18 @@ You **MUST** consider the user input before proceeding (if not empty). The user 
 
 ## Setup
 
-**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANONIZATION`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
+**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANON_DRIFT`, `CANON_REPAIR`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
 
 ---
 
 ## Step 1 — Load context
 
-- Read `CANONIZATION` — confirm `Status` is `applied` (repair only runs after canonize)
-  - If `Status` is not `applied` → stop: _"canonization.md has not been applied yet. Run /speckit.canon.drift-canonize (or /speckit.canon.vibecode-drift-canonize) first."_
+- Read `CANON_DRIFT` — confirm `Status` is `applied` (repair only runs after canonize)
+  - If `Status` is not `applied` → stop: _"canon.drift.md has not been applied yet. Run /speckit.canon.drift-canonize (or /speckit.canon.vibecode-drift-canonize) first."_
 - Read `SPEC_DRIFT` for drift context
-- Read `CANON_TOC` and all canon files targeted by the applied canonization entries
-- Check if `FEATURE_DIR/canonization-repair.md` already exists:
-  - If it exists with `Status: applied` → stop: _"A repair has already been applied. Run /speckit.canon.drift-analyze to verify, or delete canonization-repair.md to re-run repair."_
+- Read `CANON_TOC` and all canon files targeted by the applied canon entries
+- Check if `CANON_REPAIR` already exists:
+  - If it exists with `Status: applied` → stop: _"A repair has already been applied. Run /speckit.canon.drift-analyze to verify, or delete canon.repair.md to re-run repair."_
   - If it exists with `Status: draft` → ask operator whether to overwrite or abort
 
 ---
@@ -62,9 +62,9 @@ Extract repair candidates from the user input or analyze report. Each candidate 
 - **Action**: add, modify, or remove
 - **Description**: what needs to be corrected
 
-If no repair candidates are provided or parseable, re-read the canon files modified by canonization and independently verify against `spec.drift.md`:
+If no repair candidates are provided or parseable, re-read the canon files modified by canon apply and independently verify against `spec.drift.md`:
 
-- Check that each ACCEPTED canonization entry was correctly applied
+- Check that each ACCEPTED canon entry was correctly applied
 - Check for contradictions between newly applied sections and pre-existing canon
 - Check for missing cross-references
 - Generate repair candidates from any issues found
@@ -79,7 +79,7 @@ For each repair candidate:
 
 - **CANON-FIX** (wrong content applied):
   - Read the target canon section
-  - Read the original spec.drift.md item and canonization entry
+  - Read the original spec.drift.md item and canon entry
   - Generate a `modify` entry with the corrected text
 
 - **CANON-GAP** (missing cross-reference or section):
@@ -93,14 +93,14 @@ For each repair candidate:
 
 ---
 
-## Step 4 — Write `FEATURE_DIR/canonization-repair.md`
+## Step 4 — Write `CANON_REPAIR`
 
-Load `.specify/extensions/canon/templates/canonization-repair-template.md` and use it as the structural guide. Fill in entries from Step 3.
+Load `.specify/extensions/canon/templates/canon-repair-template.md` and use it as the structural guide. Fill in entries from Step 3.
 
 - Use CR-XXX IDs (Canon Repair) to distinguish from original C-XXX entries
 - Set `**Status**: draft`
-- Set `**Source**: Post-canonization analysis repair`
-- Each entry references the original R-XXX repair candidate and, where applicable, the original C-XXX canonization entry
+- Set `**Source**: Post-canon analysis repair`
+- Each entry references the original R-XXX repair candidate and, where applicable, the original C-XXX canon entry
 
 ---
 
@@ -111,13 +111,13 @@ Display a summary of all corrections:
 - List each CR-XXX entry with its target canon file, section, change type, and brief description
 - Reference the original R-XXX repair candidate for each
 - Ask: _"[N] canon corrections will be applied to [M] files. Proceed? (yes / no)"_
-  - **no** → stop; `canonization-repair.md` is preserved as draft for manual review
+  - **no** → stop; `CANON_REPAIR` is preserved as draft for manual review
 
 ---
 
 ## Step 6 — Apply corrections
 
-For each entry in canonization-repair.md:
+For each entry in `CANON_REPAIR`:
 
 - Apply the specified change to the target canon file
 - Write in authoritative present-tense language only
@@ -134,11 +134,11 @@ If new sections or files were added to canon, update `CANON_TOC`.
 
 ## Step 8 — Add traceability comments
 
-In each corrected canon section, append: `<!-- Repaired from specs/<BRANCH>/canonization-repair.md -->`
+In each corrected canon section, append: `<!-- Repaired from specs/<BRANCH>/canon.repair.md -->`
 
 ---
 
-## Step 9 — Mark canonization-repair.md as applied
+## Step 9 — Mark `CANON_REPAIR` as applied
 
 Update the top-level `Status` field to `applied`.
 
@@ -173,8 +173,8 @@ The expected feedback loop is: `canonize → drift.analyze → repair → drift.
 ## Rules
 
 - This command only corrects canon files. It does NOT re-run drift detection or reconciliation.
-- Do NOT modify `spec.drift.md`, `tasks.drift.md`, `canonization.md`, `spec.md`, or any implementation files.
-- Only write `FEATURE_DIR/canonization-repair.md` and modify `CANON_ROOT/**` and `CANON_TOC`.
-- This command works for both the full pipeline and the vibecode pipeline — it operates post-canonization regardless of which pipeline produced the canonization.
+- Do NOT modify `spec.drift.md`, `tasks.drift.md`, `canon.drift.md`, `spec.md`, or any implementation files.
+- Only write `CANON_REPAIR` and modify `CANON_ROOT/**` and `CANON_TOC`.
+- This command works for both the full pipeline and the vibecode pipeline — it operates after canon apply regardless of which pipeline produced the canon plan.
 - If the operator provides repair candidates inline (rather than from an analyze report), use them directly without requiring a formal report format.
 

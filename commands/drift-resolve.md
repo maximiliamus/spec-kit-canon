@@ -1,5 +1,5 @@
 ---
-description: Resolve outstanding IMPL-REJECTED and SPEC-REJECTED drift items in spec.drift.md — finalize so canonization can proceed.
+description: Resolve outstanding IMPL-REJECTED and SPEC-REJECTED drift items in spec.drift.md — finalize so canon updates can proceed.
 handoffs:
   - label: Plan Canonization
     agent: speckit.canon.drift-reconcile

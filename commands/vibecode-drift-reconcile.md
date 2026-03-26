@@ -1,9 +1,9 @@
 ---
-description: Infer canon gaps — compare the resolved spec.drift.md against canon and write a canonization plan to canonization.md. Vibecode variant — all entries auto-ACCEPTED.
+description: Infer canon gaps — compare the resolved spec.drift.md against canon and write a canon plan to canon.drift.md. Vibecode variant — all entries auto-ACCEPTED.
 handoffs:
   - label: Apply Canonization
     agent: speckit.canon.vibecode-drift-canonize
-    prompt: Apply the canonization plan to canon files.
+    prompt: Apply the canon plan to canon files.
     send: true
 scripts:
   sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-spec-drift --canon
@@ -17,9 +17,9 @@ Before analyzing anything:
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
    - **Section 1.2 — Rules for Canon**: do not compress, duplicate, or invent content; always reference canon sections by exact file path
-   - **Section 3 — Separation of Abstraction Levels**: canonization.md proposes WHAT-level canon changes only
+   - **Section 3 — Separation of Abstraction Levels**: canon.drift.md proposes WHAT-level canon changes only
    - **Section 8 — No Hallucinated Requirements**: only report gaps that are directly observable by comparing spec.drift.md against canon; never infer undocumented behavior
-   - **Section 10 — Terminology**: use Canon terminology when describing canon gaps; flag terminology drift as its own canonization entry
+   - **Section 10 — Terminology**: use Canon terminology when describing canon gaps; flag terminology drift as its own canon entry
 
 ## User Input
 
@@ -33,13 +33,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Setup
 
-**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANONIZATION`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
+**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANON_DRIFT`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
 
 Check `Resolution Status` in `SPEC_DRIFT` header:
 
   - If not `resolved` → stop and report: "spec.drift.md is not fully resolved — run /speckit.canon.vibecode-drift-detect to generate a resolved spec.drift.md."
 
-Then check `CANONIZATION`:
+Then check `CANON_DRIFT`:
 
 - If it exists, read it first and ask the operator whether to overwrite or abort.
 
@@ -84,17 +84,17 @@ For each identified gap:
 
 ---
 
-## Step 4 — Write `CANONIZATION`
+## Step 4 — Write `CANON_DRIFT`
 
-Load `.specify/extensions/canon/templates/canonization-template.md` and use it as the structural guide. Fill in entries from Steps 2–3, replacing placeholders with concrete data. Set `**Status**: draft`. Set `**Drift source**` to `[SPEC_DRIFT]`.
+Load `.specify/extensions/canon/templates/canon-drift-template.md` and use it as the structural guide. Fill in entries from Steps 2–3, replacing placeholders with concrete data. Set `**Status**: draft`. Set `**Drift source**` to `[SPEC_DRIFT]`.
 
 **All entries MUST have `**Status**: ACCEPTED`**. This is a vibecoding workflow — all discovered canon gaps are treated as intentional implementation that canon must reflect.
 
 ---
 
-## Step 5 — Validate canonization.md
+## Step 5 — Validate canon.drift.md
 
-- Every canon-relevant spec.drift.md item should map to at least one canonization entry
+- Every canon-relevant spec.drift.md item should map to at least one canon entry
 - All entries are ACCEPTED
 - Proposed canon text is written in authoritative present-tense language
 - No implementation details (file paths, framework names) in proposed canon text unless they are part of the canonical project structure
@@ -106,15 +106,15 @@ Load `.specify/extensions/canon/templates/canonization-template.md` and use it a
 
 After completing all steps, output:
 
-1. **Canonization summary**: path to `CANONIZATION`, total entry count, list of target canon files with change types
-2. **Next step**: "Review the canonization plan, then run /speckit.canon.vibecode-drift-canonize to apply canon changes."
+1. **Canon summary**: path to `CANON_DRIFT`, total entry count, list of target canon files with change types
+2. **Next step**: "Review the canon plan, then run /speckit.canon.vibecode-drift-canonize to apply canon changes."
 
 ---
 
 ## Rules
 
 - This is a single-pass, non-interactive workflow. Do NOT ask the operator for classification decisions.
-- All canonization entries are ACCEPTED — this workflow assumes all spec items reflect intentional implementation.
-- Do NOT modify any canon files. Only write to `CANONIZATION`.
-- Ensure the output file follows the canonization-template format exactly.
+- All canon entries are ACCEPTED — this workflow assumes all spec items reflect intentional implementation.
+- Do NOT modify any canon files. Only write to `CANON_DRIFT`.
+- Ensure the output file follows the canon-drift-template format exactly.
 

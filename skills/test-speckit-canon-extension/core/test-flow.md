@@ -10,6 +10,37 @@
 - Track workflow state in `spec-kit-canon-test/.specify/tmp/test-speckit-canon-extension-progress.json`.
 - Resume from the `current_step` stored in that file unless the run was reinitialized with `--clear-test-project`.
 
+## Shared Constitution Config Fixture
+
+Use the shared config fixture at:
+
+```text
+skills/test-speckit-canon-extension/assets/constitution-config-fixture.json
+```
+
+The fixture values under test are:
+
+- `project.name`: `Spec Kit Canon Config Test`
+- `canon.root`: `docs/canon`
+- `branching.types`:
+  - `feature` -> `Feature`
+  - `fix` -> `Bug Fix`
+  - `polish` -> `Non-Functional`
+  - `document` -> `Documentation Only`
+- `branching.scopes`:
+  - `api` -> `Todo API surface`
+  - `web` -> `Todo browser UI`
+  - `ops` -> `Operational tooling`
+
+After `/speckit.constitution`, verify that:
+
+- `.specify/extensions/canon/canon-config.yml` matches the fixture exactly
+- `.specify/memory/constitution.md` uses `docs/canon/_toc.md` and `docs/canon/**`
+- `.specify/templates/constitution-template.md` also uses the configured canon root while preserving only the approved metadata placeholders
+- the Section 6 type and scope tables in both constitution files match the fixture order and values exactly
+- the Section 6 example branch names use only the configured type and scope codes
+- `docs/canon/_toc.md` exists and its H1 matches `Spec Kit Canon Config Test`
+
 ## Canon Seed
 
 After `/speckit.constitution`, return to the `spec-kit-canon` repo root and
@@ -30,6 +61,8 @@ The copied baseline must contain:
   - fetch one todo by id
 
 Keep the writing authoritative and technology-agnostic.
+The seed script must copy the baseline into the configured canon root from the
+shared config fixture, which is `docs/canon` for the shared test flow.
 
 ## Standard Feature Prompt
 

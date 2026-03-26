@@ -1,0 +1,42 @@
+{
+  "project": {
+    "name": "Spec Kit Canon Config Test"
+  },
+  "canon": {
+    "root": "docs/canon"
+  },
+  "branching": {
+    "types": [
+      {
+        "code": "feature",
+        "classification": "Feature"
+      },
+      {
+        "code": "fix",
+        "classification": "Bug Fix"
+      },
+      {
+        "code": "polish",
+        "classification": "Non-Functional"
+      },
+      {
+        "code": "document",
+        "classification": "Documentation Only"
+      }
+    ],
+    "scopes": [
+      {
+        "code": "api",
+        "description": "Todo API surface"
+      },
+      {
+        "code": "web",
+        "description": "Todo browser UI"
+      },
+      {
+        "code": "ops",
+        "description": "Operational tooling"
+      }
+    ]
+  }
+}

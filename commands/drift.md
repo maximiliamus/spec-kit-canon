@@ -105,8 +105,8 @@ Step 7 — Repair:     [skipped | N repairs applied | N warnings remaining]
 Artifacts:
   - FEATURE_DIR/tasks.drift.md
   - FEATURE_DIR/spec.drift.md
-  - FEATURE_DIR/canonization.md
-  [- FEATURE_DIR/canonization-repair.md]  (if repairs were needed)
+  - FEATURE_DIR/canon.drift.md
+  [- FEATURE_DIR/canon.repair.md]  (if repairs were needed)
 
 Canon updated successfully.
 ```

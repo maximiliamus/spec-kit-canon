@@ -32,7 +32,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Setup
 
-**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `TASKS`, and `TASKS_DRIFT`. All paths must be absolute.
+**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `TASKS`, `TASKS_DRIFT`, and `BASE_BRANCH`. All path values must be absolute.
 
 Then check `TASKS_DRIFT`:
 
@@ -55,8 +55,8 @@ Then check `TASKS_DRIFT`:
 
 ### 2.1 Collect changes
 
-- Run `git diff main...HEAD --name-status` to identify all files added, modified, or deleted on this branch
-- Run `git log main..HEAD --oneline` to understand the commit history on this branch
+- Run `git diff <BASE_BRANCH>...HEAD --name-status` to identify all files added, modified, or deleted on this branch
+- Run `git log <BASE_BRANCH>..HEAD --oneline` to understand the commit history on this branch
 - If there are uncommitted worktree changes, also run `git diff --name-status` and `git diff --cached --name-status` to capture staged and unstaged changes
 - Combine all sources into a single deduplicated file list
 

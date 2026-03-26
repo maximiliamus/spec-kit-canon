@@ -1,4 +1,4 @@
-# Canonization Plan
+# Canon Drift Plan
 
 **Branch**: `[branch]`
 **Drift Source**: `[SPEC_DRIFT]`

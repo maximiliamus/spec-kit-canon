@@ -149,7 +149,7 @@ After the report: _"Ready for vibecoding. Make your changes, then run /speckit.c
 
 ## Rules
 
-- This command MUST be run from the master branch (constitution Section 2 / workflow note).
+- This command MUST be run from the base branch configured in `.specify/extensions/canon/canon-config.yml` under `branching.base`.
 - Do NOT create spec.md, plan.md, tasks.md, or any other standard spec artifacts. The only artifact is vibecode.md.
 - Do NOT run the full specify/clarify/plan/tasks pipeline. This is the vibecoding entry point — minimal ceremony by design.
 - The branch and feature directory are created the same way as `/speckit.specify` — the only difference is what goes inside.

@@ -3,7 +3,7 @@ description: Express drift-to-canon pipeline — runs the entire vibecode drift 
 handoffs:
   - label: Verify Canon
     agent: speckit.canon.drift-analyze
-    prompt: Verify the applied canonization entries against canon files and produce repair candidates if needed.
+    prompt: Verify the applied canon entries against canon files and produce repair candidates if needed.
     send: true
 scripts:
   sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --canon
@@ -37,11 +37,11 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Setup
 
-**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `TASKS_DRIFT`, `SPEC_DRIFT`, `CANONIZATION`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
+**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `TASKS_DRIFT`, `SPEC_DRIFT`, `CANON_DRIFT`, `CANON_ROOT`, `CANON_TOC`, and `BASE_BRANCH`. All path values must be absolute.
 
 Check for existing drift artifacts in `FEATURE_DIR`:
 
-- If `TASKS_DRIFT`, `SPEC_DRIFT`, or `CANONIZATION` exist, list which ones are present and ask the operator: _"Existing drift artifacts found: [list]. Express mode will overwrite them. Proceed? (yes / no)"_
+- If `TASKS_DRIFT`, `SPEC_DRIFT`, or `CANON_DRIFT` exist, list which ones are present and ask the operator: _"Existing drift artifacts found: [list]. Express mode will overwrite them. Proceed? (yes / no)"_
   - **no** → stop
 
 ---
@@ -50,8 +50,8 @@ Check for existing drift artifacts in `FEATURE_DIR`:
 
 ### 1.1 Collect changes
 
-- Run `git diff main...HEAD --name-status` to identify all files added, modified, or deleted on this branch
-- Run `git log main..HEAD --oneline` to understand the commit history
+- Run `git diff <BASE_BRANCH>...HEAD --name-status` to identify all files added, modified, or deleted on this branch
+- Run `git log <BASE_BRANCH>..HEAD --oneline` to understand the commit history
 - If there are uncommitted worktree changes, also run `git diff --name-status` and `git diff --cached --name-status`
 - Combine all sources into a single deduplicated file list
 
@@ -136,9 +136,9 @@ Classification guidance:
 
 For each gap: identify target canon file and section, change type (add / modify / remove), and write proposed canon text.
 
-### 3.4 Write `CANONIZATION`
+### 3.4 Write `CANON_DRIFT`
 
-Load `.specify/extensions/canon/templates/canonization-template.md` and use it as the structural guide. Set `**Status**: draft`. All entries have `**Status**: ACCEPTED`.
+Load `.specify/extensions/canon/templates/canon-drift-template.md` and use it as the structural guide. Set `**Status**: draft`. All entries have `**Status**: ACCEPTED`.
 
 ### 3.5 Early exit check
 
@@ -157,11 +157,11 @@ Display a summary of all changes that will be applied:
 - Each canon change entry with its target file, section, and change type
 
 Ask: _"Express pipeline complete. [N] canon changes will be applied to [M] files. Proceed? (yes / no)"_
-  - **no** → stop; artifacts are preserved but canon is NOT modified. Report: _"Artifacts written (tasks.drift.md, spec.drift.md, canonization.md) but canon not updated. You can review the artifacts and run /speckit.canon.vibecode-drift-canonize to apply later."_
+  - **no** → stop; artifacts are preserved but canon is NOT modified. Report: _"Artifacts written (tasks.drift.md, spec.drift.md, canon.drift.md) but canon not updated. You can review the artifacts and run /speckit.canon.vibecode-drift-canonize to apply later."_
 
 ### 4.2 Apply changes
 
-For each `ACCEPTED` entry in `CANONIZATION`:
+For each `ACCEPTED` entry in `CANON_DRIFT`:
 
 - Apply the specified change to the target canon file
 - Write in authoritative present-tense language only
@@ -176,9 +176,9 @@ If new sections or files were added to canon, update `CANON_TOC`.
 
 In each updated canon section, append: `<!-- Canonicalized from specs/<BRANCH>/spec.drift.md -->`
 
-### 4.5 Mark `CANONIZATION` as applied
+### 4.5 Mark `CANON_DRIFT` as applied
 
-Update the top-level `Status` field in `CANONIZATION` to `applied`.
+Update the top-level `Status` field in `CANON_DRIFT` to `applied`.
 
 ### 4.6 Update agent context
 
@@ -201,7 +201,7 @@ Phase 4 — Canonize:   [N] canon files modified
 Artifacts written:
   - TASKS_DRIFT
   - SPEC_DRIFT
-  - CANONIZATION
+  - CANON_DRIFT
 
 Canon updated successfully.
 ```

@@ -28,17 +28,26 @@ tokens `CANON_ROOT` and `CANON_TOC` that must be resolved from configuration
 before writing project files. Treat it as the structural and wording baseline
 for this project family.
 
+The bundled baseline's Section 6 branch type rows, branch scope rows, and
+example branch names are seed scaffolding only. They are NOT the source of
+truth and MUST be regenerated from `.specify/extensions/canon/canon-config.yml`
+for every constitution run before either project file is written.
+
 The project-local working template remains
 `.specify/templates/constitution-template.md`. Keep that file synchronized with
 the bundled preset baseline and with the active constitution so future project
 bootstrap and recovery operations use the canon version instead of the stock
 placeholder scaffold. In that template file, preserve the same four approved
 placeholders rather than replacing them with project-specific values.
+That placeholder rule applies only to the four approved metadata placeholders;
+Section 6 branch lists and example branch names in the project-local template
+must be concrete config-derived content.
 
 Your goals are to:
 
 1. Initialize or repair `.specify/templates/constitution-template.md` from the
-   bundled preset baseline when needed.
+   bundled preset baseline when needed, including rendering Section 6 branch
+   rows and examples from config.
 2. Initialize or repair the configured canon root `CANON_ROOT`, including
    `CANON_TOC`, when it is missing.
 3. Initialize `.specify/memory/constitution.md` from
@@ -59,9 +68,14 @@ Follow this execution flow:
 
 2. Load `.specify/templates/constitution-template.md` if it exists.
    - This is the project-local template that Spec Kit bootstrap logic reads.
-   - If it is missing, initialize it from the bundled preset baseline.
+   - If it is missing, initialize it from the bundled preset baseline, then
+     immediately replace the bundled Section 6 type rows, scope rows, and
+     example branch names with config-rendered content before using it as the
+     project template.
    - If it still contains the generic placeholder scaffold or has drifted in a
      way that conflicts with the canon baseline, repair it before proceeding.
+   - Treat a Section 6 mismatch against config as template drift even when the
+     rest of the template is structurally valid.
 
 3. Load `.specify/presets/canon-core/templates/canon-toc-template.md`.
    - Use it as the bundled starter for `CANON_TOC`.
@@ -76,20 +90,28 @@ Follow this execution flow:
      `config.defaults.project.name`,
      `config.defaults.canon.root`,
      `config.defaults.branching.types`, and
+     `config.defaults.branching.scopes`.
+   - Legacy fallback defaults source for backward compatibility:
      `config.defaults.branching.areas`.
    - If the project config file is missing but the extension defaults exist,
      initialize `.specify/extensions/canon/canon-config.yml` from those
      defaults before continuing.
    - Treat `.specify/extensions/canon/canon-config.yml` as the project source
      of truth for project identity, canon root, branch type configuration, and
-     branch area configuration after it has been initialized.
+     branch scope configuration after it has been initialized.
+   - Do NOT use the bundled preset template as a source for branch type rows,
+     branch scope rows, or example branch names.
    - Project config fields:
      - `project.name`: human-readable project name used for constitution title
        and canon TOC title
      - `canon.root`: repo-relative canon root directory used to initialize the
        canon baseline and render canon paths in the constitution
      - `branching.types`: list of configured branch type rows for Section 6
-     - `branching.areas`: list of configured branch area rows for Section 6
+     - `branching.scopes`: list of configured branch scope rows for Section 6
+   - If `branching.scopes` is missing but `branching.areas` exists, treat
+     `branching.areas` as a legacy alias, migrate the project config to
+     `branching.scopes`, and continue using the migrated values as the source
+     of truth.
    - Validate that `project.name`, if present, is a non-empty string after
      trimming whitespace.
    - Validate that `canon.root`, if present, is a non-empty repo-relative path
@@ -102,15 +124,21 @@ Follow this execution flow:
      - `code`: lowercase branch prefix token suitable for `<type>`
      - `classification`: exact Section 5 change-classification label mapped by
        the type table
-   - Each area entry must be an object with:
-     - `code`: lowercase branch segment token suitable for `<area>`
+   - Each scope entry must be an object with:
+     - `code`: lowercase branch segment token suitable for `<scope>`
      - `description`: human-readable description for the constitution table
-   - Validate that at least one type and one area are configured.
+   - Validate that at least one type and one scope are configured.
    - Validate that type codes are unique, match `^[a-z0-9-]+$`, and that
      classifications are non-empty and match one of the allowed Section 5
      change classifications exactly.
-   - Validate that area codes are unique, match `^[a-z0-9-]+$`, and that
+   - Validate that scope codes are unique, match `^[a-z0-9-]+$`, and that
      descriptions are non-empty.
+   - Resolve the exact ordered Section 6 type rows and scope rows that will be
+     rendered into both `.specify/templates/constitution-template.md` and
+     `.specify/memory/constitution.md`.
+   - Resolve example branch names from the configured type and scope codes.
+     These examples MUST be regenerated from config during constitution
+     creation, not copied from the bundled preset baseline.
    - If the user requests a project rename, update
      `.specify/extensions/canon/canon-config.yml` first and then regenerate the
      constitution from it.
@@ -121,10 +149,10 @@ Follow this execution flow:
      classification changes, update
      `.specify/extensions/canon/canon-config.yml` first and then regenerate the
      constitution from it.
-   - If the user requests branch area additions, removals, renames, or
+   - If the user requests branch scope additions, removals, renames, or
      description changes, update `.specify/extensions/canon/canon-config.yml`
      first and then regenerate the constitution from it.
-   - Do NOT preserve stale hardcoded type or area rows when config says
+   - Do NOT preserve stale hardcoded type or scope rows when config says
      otherwise.
 
 5. Ensure the canon root exists:
@@ -137,7 +165,7 @@ Follow this execution flow:
    - Keep `CANON_TOC` H1 synchronized with the resolved `PROJECT_NAME`.
 
 6. Load `.specify/memory/constitution.md` if it exists.
-   - If it does not exist, start from the template content verbatim.
+   - If it does not exist, start from the already re-rendered template content.
    - If it exists, use it as the current state and compare it against the
      template to detect project drift or missing sections.
 
@@ -189,8 +217,8 @@ Follow this execution flow:
    - Keep the metadata header format
      `> Version: ... | Ratified: ... | Last Amended: ...`.
    - Keep the numbered section model and canon-specific terminology such as
-     `Canon`, `drift`, `canonization`, and `vibecoding` unless the user asks to
-     rename them.
+     `Canon`, `drift`, `canon updates`, and `vibecoding` unless the user asks
+     to rename them.
    - Keep exact command names, workflow sequences, and file paths aligned with
      the current project naming.
    - Keep the canon root path aligned with configured `canon.root`, resolved as
@@ -198,28 +226,33 @@ Follow this execution flow:
    - Keep `CANON_TOC` as the canon entry point.
    - Replace `CANON_ROOT` and `CANON_TOC` tokens in both the template and the
      concrete constitution with the resolved configured paths.
+   - Re-render Section 6 from config on every constitution write, including
+     first-time initialization, repair-only runs, and amendment runs.
    - Render the Section 6 type table from
      `.specify/extensions/canon/canon-config.yml`.
-   - Render the Section 6 area table from
+   - Render the Section 6 scope table from
      `.specify/extensions/canon/canon-config.yml`.
    - Replace the hardcoded type rows in both the template and the concrete
      constitution with the configured rows in the same order as the config.
-   - Replace the hardcoded area rows in both the template and the concrete
+   - Replace the hardcoded scope rows in both the template and the concrete
      constitution with the configured rows in the same order as the config.
    - Render the type table in this exact markdown shape:
      - Header row: `| Type | Map to Change Classification |`
      - Separator row: `| ---- | ---------------------------- |`
      - Data row format: `| \`<code>\` | <classification> |`
    - Render the table in this exact markdown shape:
-     - Header row: `| Area | Description |`
+     - Header row: `| Scope | Description |`
      - Separator row: `| ---- | ----------- |`
      - Data row format: `| \`<code>\` | <description> |`
    - Render the example branch names as concrete human-readable examples, not
-     as `<type>` / `<area>` placeholders.
-   - Example branch names are illustrative only; the type and area tables
+     as `<type>` / `<scope>` placeholders.
+   - Example branch names are illustrative only; the type and scope tables
      remain the source of truth.
-   - Prefer examples that use configured type and area codes and read like
+   - Prefer examples that use configured type and scope codes and read like
      realistic branch names such as `feature-api-add-capability`.
+   - In `.specify/templates/constitution-template.md`, leave only the four
+     approved metadata placeholders unresolved. The Section 6 tables and
+     examples must already be filled with config-derived content.
 
 10. Apply amendments carefully:
    - Prefer targeted edits over broad rewrites.
@@ -258,12 +291,15 @@ Follow this execution flow:
    - Ensure `CANON_ROOT` exists.
    - Ensure `CANON_TOC` exists with a resolved project title.
    - Ensure `.specify/extensions/canon/canon-config.yml` exists and reflects
-     the intended project name, canon root, branch type list, and branch area
+     the intended project name, canon root, branch type list, and branch scope
      list.
    - Write the updated concrete constitution to `.specify/memory/constitution.md`.
    - Write the project baseline template to
      `.specify/templates/constitution-template.md` so future initialization uses
      the updated canon version instead of the stock placeholder scaffold.
+   - Before writing either constitution file, replace the bundled preset's
+     Section 6 type rows, scope rows, and example branch names with the rows and
+     examples resolved from `.specify/extensions/canon/canon-config.yml`.
    - In `.specify/templates/constitution-template.md`, preserve exactly these
      placeholder tokens and no others:
      `[PROJECT_NAME]`, `[CONSTITUTION_VERSION]`, `[RATIFICATION_DATE]`,
@@ -279,10 +315,12 @@ Follow this execution flow:
    - `CANON_TOC` exists and has an H1 title matching the resolved project
      name.
    - `.specify/extensions/canon/canon-config.yml` exists and contains the
-     effective project name, canon root, branch type list, and branch area
+     effective project name, canon root, branch type list, and branch scope
      list.
    - The Section 6 type table matches the configured branch types exactly.
-   - The Section 6 area table matches the configured branch areas exactly.
+   - The Section 6 scope table matches the configured branch scopes exactly.
+   - The Section 6 example branch names use configured type and scope codes
+     rather than stale bundled preset examples.
    - `.specify/memory/constitution.md` is a concrete constitution with no
      unresolved placeholders.
    - `.specify/templates/constitution-template.md` preserves only the four
@@ -323,7 +361,7 @@ Formatting & Style Requirements:
   template.
 - Keep the four approved metadata placeholders only in the template copy, not
   in the generated memory constitution.
-- Keep branch type and area configuration in
+- Keep branch type and scope configuration in
   `.specify/extensions/canon/canon-config.yml` as the project source of truth.
   Do not let the constitution drift from it.
 - Keep `project.name` in `.specify/extensions/canon/canon-config.yml` as the

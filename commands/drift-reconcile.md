@@ -1,9 +1,9 @@
 ---
-description: Infer canon gaps — compare the resolved spec.drift.md against canon and write a canonization plan to canonization.md.
+description: Infer canon gaps — compare the resolved spec.drift.md against canon and write a canon plan to canon.drift.md.
 handoffs:
-  - label: Apply Canonization
+  - label: Apply Canon
     agent: speckit.canon.drift-canonize
-    prompt: Apply the ACCEPTED canonization entries to canon files.
+    prompt: Apply the ACCEPTED canon entries to canon files.
     send: false
 scripts:
   sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-spec-drift --canon
@@ -17,7 +17,7 @@ Before making any changes to canon:
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
    - **Section 1.2 — Rules for Canon**: do not compress, duplicate, or invent content; always reference canon sections by exact file path
-   - **Section 9 — Definition of Done**: canonize only when spec, plan, tasks, and drift are complete or when canonization already prepared on phase 1
+   - **Section 9 — Definition of Done**: canonize only when spec, plan, tasks, and drift are complete or when the canon plan was already prepared in phase 1
    - **Section 10 — Terminology**: all canon edits must use Canon terminology exactly; no synonyms
 
 ## User Input
@@ -32,13 +32,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Setup
 
-**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANONIZATION`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
+**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANON_DRIFT`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
 - Check `Resolution Status` in spec.drift.md header:
   - If not `resolved` → stop and report: "spec.drift.md is not fully resolved — run /speckit.canon.drift-resolve to complete resolution before reconciling."
-- `CANONIZATION` must NOT exist — if it exists:
+- `CANON_DRIFT` must NOT exist — if it exists:
   - Check top-level `Status`:
-    - If `draft` → stop and report: "canonization.md already exists. Review it and run /speckit.canon.drift-canonize to apply, or delete it and re-run /speckit.canon.drift-reconcile."
-    - If `applied` → stop and report: "canonization.md is already applied. Delete it and re-run /speckit.canon.drift-reconcile to re-infer."
+    - If `draft` → stop and report: "canon.drift.md already exists. Review it and run /speckit.canon.drift-canonize to apply, or delete it and re-run /speckit.canon.drift-reconcile."
+    - If `applied` → stop and report: "canon.drift.md is already applied. Delete it and re-run /speckit.canon.drift-reconcile to re-infer."
 
 ---
 
@@ -95,9 +95,9 @@ For every identified gap, assign exactly one status:
 
 ---
 
-## Step 5 — Write `CANONIZATION`
+## Step 5 — Write `CANON_DRIFT`
 
-Load `.specify/extensions/canon/templates/canonization-template.md` and use it as the structural guide. Fill in entries from Steps 2–4, replacing placeholders with concrete data. Set `**Status**: draft`. Set `**Drift source**` to `[SPEC_DRIFT]`.
+Load `.specify/extensions/canon/templates/canon-drift-template.md` and use it as the structural guide. Fill in entries from Steps 2–4, replacing placeholders with concrete data. Set `**Status**: draft`. Set `**Drift source**` to `[SPEC_DRIFT]`.
 
 ---
 
@@ -107,7 +107,7 @@ Output:
 
 - Count of items per status (ACCEPTED, REJECTED)
 - Any classification decisions that required significant judgment (flag for operator review)
-- Instruction: "Review `CANONIZATION`, edit any misclassifications or proposed text, then run /speckit.canon.drift-canonize to apply."
+- Instruction: "Review `CANON_DRIFT`, edit any misclassifications or proposed text, then run /speckit.canon.drift-canonize to apply."
 
 Do NOT modify any canon file or spec.md.
 
@@ -117,7 +117,7 @@ Do NOT modify any canon file or spec.md.
 
 - This command infers canon gaps only — it does NOT modify canon files.
 - Do NOT modify any canon file, spec.md, spec.drift.md, or tasks.drift.md.
-- Only write `CANONIZATION`.
+- Only write `CANON_DRIFT`.
 - Do NOT compress canon into a single file.
 - Do NOT copy the entire incremental spec into canon.
 - Do NOT invent content not in `FEATURE_SPEC`, `SPEC_DRIFT`, or directly observable in the implementation.

@@ -16,6 +16,7 @@ config:
     canon:
       root: "specs/000-canon"
     branching:
+      base: "main"
       types:
         - code: "feature"
           classification: "Feature"
@@ -29,11 +30,17 @@ config:
           classification: "Refactor"
         - code: "deprecat"
           classification: "Deprecation"
-        - code: "nonfunc"
-          classification: "Non-Functional"
-        - code: "document"
-          classification: "Documentation Only"
-      areas:
+        - code: perform
+          classification: "Non-Functional: Performance"
+        - code: security
+          classification: "Non-Functional: Security"
+        - code: devops
+          classification: "Non-Functional: DevOps"
+        - code: document
+          classification: "Non-Functional: Documentation"
+        - code: nonfunc
+          classification: "Non-Functional: Other"
+      scopes:
         - code: "api"
           description: "Public API"
         - code: "worker"
@@ -56,11 +63,11 @@ provides:
 
     - name: "speckit.canon.drift-analyze"
       file: "commands/drift-analyze.md"
-      description: "Analyze canon after drift canonization and produce repair candidates."
+      description: "Analyze canon after canon apply and produce repair candidates."
       
     - name: "speckit.canon.drift-canonize"
       file: "commands/drift-canonize.md"
-      description: "Apply accepted canonization entries to canon files."
+      description: "Apply accepted canon entries to canon files."
 
     - name: "speckit.canon.drift-detect"
       file: "commands/drift-detect.md"
@@ -68,11 +75,11 @@ provides:
 
     - name: "speckit.canon.drift-reconcile"
       file: "commands/drift-reconcile.md"
-      description: "Infer canon gaps and write canonization.md."
+      description: "Infer canon gaps and write canon.drift.md."
 
     - name: "speckit.canon.drift-repair"
       file: "commands/drift-repair.md"
-      description: "Repair canon after post-canonization analysis."
+      description: "Repair canon after post-canon analysis."
 
     - name: "speckit.canon.drift-resolve"
       file: "commands/drift-resolve.md"
@@ -88,7 +95,7 @@ provides:
 
     - name: "speckit.canon.vibecode-drift-canonize"
       file: "commands/vibecode-drift-canonize.md"
-      description: "Apply a fully accepted vibecode canonization plan."
+      description: "Apply a fully accepted vibecode canon plan."
 
     - name: "speckit.canon.vibecode-drift-detect"
       file: "commands/vibecode-drift-detect.md"

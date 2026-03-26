@@ -1,13 +1,13 @@
 ---
-description: Post-canonization analysis — verify that canon changes were applied correctly, check for contradictions and missing cross-references, and produce structured repair candidates for /speckit.canon.drift-repair.
+description: Post-canon analysis — verify that canon changes were applied correctly, check for contradictions and missing cross-references, and produce structured repair candidates for /speckit.canon.drift-repair.
 handoffs:
   - label: Repair Canon
     agent: speckit.canon.drift-repair
     prompt: Read the repair candidates from the analysis and apply corrections to canon files.
     send: true
 scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-canonization --canon
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json -RequireCanonization -Canon
+  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-canon-drift --canon
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json -RequireCanonDrift -Canon
 ---
 
 ## Pre-conditions (execute before any other step)
@@ -41,28 +41,28 @@ Verify the integrity of canon after `/speckit.canon.drift-canonize` (or `/specki
 
 ## Setup
 
-**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANONIZATION`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
+**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANON_DRIFT`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
 
-Check `CANONIZATION`:
+Check `CANON_DRIFT`:
 
-- If `Status` is not `applied` → stop: _"canonization.md has not been applied. Run /speckit.canon.drift-canonize first, then re-run /speckit.canon.drift-analyze."_
+- If `Status` is not `applied` → stop: _"canon.drift.md has not been applied. Run /speckit.canon.drift-canonize first, then re-run /speckit.canon.drift-analyze."_
 
 ---
 
 ## Step 1 — Load context
 
-- Read `CANONIZATION` — the applied canonization plan with all entries
+- Read `CANON_DRIFT` — the applied canon plan with all entries
 - Read `SPEC_DRIFT` — resolved spec drift items with task drift references
 - Read `FEATURE_SPEC` (spec.md) if it exists
-- Read `CANON_TOC` and all canon files targeted by ACCEPTED canonization entries
+- Read `CANON_TOC` and all canon files targeted by ACCEPTED canon entries
 - Read any additional canon files in `CANON_ROOT` that are adjacent to or cross-referenced by modified sections
 - Read `.specify/memory/constitution.md` for principle validation
 
 ---
 
-## Step 2 — Canonization Verification
+## Step 2 — Canon Entry Verification
 
-For each ACCEPTED entry in `CANONIZATION`:
+For each ACCEPTED entry in `CANON_DRIFT`:
 
 ### A. Application verification
 
@@ -90,7 +90,7 @@ For each ACCEPTED entry in `CANONIZATION`:
 
 ### E. REJECTED entry review
 
-- For each REJECTED entry in `CANONIZATION`: verify the rejection rationale still holds given the final canon state
+- For each REJECTED entry in `CANON_DRIFT`: verify the rejection rationale still holds given the final canon state
 - Flag any REJECTED entries that may need revisiting (e.g., if a related ACCEPTED entry introduced a dependency on the rejected content)
 
 ---
@@ -108,7 +108,7 @@ For each ACCEPTED entry in `CANONIZATION`:
 For every actionable issue found in Steps 2–3, generate a structured repair candidate entry. Classify each into one of:
 
 - `CANON-FIX`: Canon text needs correction — wrong content was applied, field name mismatch, incorrect phrasing
-- `CANON-GAP`: Missing cross-reference or section that should have been added during canonization
+- `CANON-GAP`: Missing cross-reference or section that should have been added during canon apply
 - `CANON-CONFLICT`: Contradiction between a newly canonized section and a pre-existing canon section
 
 Issues that are informational only (e.g., style suggestions, minor wording preferences) should NOT be included as repair candidates.
@@ -120,7 +120,7 @@ Each repair candidate must specify:
 - **Canon Target**: exact file path and section heading (e.g., `CANON_ROOT/api.md § Endpoints`)
 - **Action**: add | modify | remove
 - **Description**: concise explanation of what is wrong and what the correction should be
-- **Canonization ref**: C-XXX from canonization.md (if traceable to a specific entry)
+- **Canon ref**: C-XXX from canon.drift.md (if traceable to a specific entry)
 
 ---
 
@@ -128,10 +128,10 @@ Each repair candidate must specify:
 
 Output a Markdown report (no file writes) with the following structure:
 
-### Drift Canonization Analysis Report
+### Drift Canon Analysis Report
 
 **Branch**: `BRANCH`
-**Canonization**: `CANONIZATION` (Status: applied)
+**Canon**: `CANON_DRIFT` (Status: applied)
 **Canon files analyzed**: [list of files]
 
 #### Verification Summary
@@ -155,16 +155,16 @@ Severity levels:
 
 If any repair candidates were generated in Step 4, include this table:
 
-| ID  | Category       | Canon Target                         | Action | Canonization Ref | Description                         |
-|-----|---------------|--------------------------------------|--------|------------------|-------------------------------------|
-| R-1 | CANON-FIX     | CANON_ROOT/api.md § Endpoints   | modify | C-003            | Wrong field name; should be ...     |
-| R-2 | CANON-GAP     | CANON_ROOT/data.md § Models     | add    | —                | Missing cross-ref to new entity ... |
+| ID  | Category       | Canon Target                   | Action | Canon Ref | Description                         |
+|-----|----------------|--------------------------------|--------|-----------|-------------------------------------|
+| R-1 | CANON-FIX      | CANON_ROOT/api.md § Endpoints | modify | C-003     | Wrong field name; should be ...     |
+| R-2 | CANON-GAP      | CANON_ROOT/data.md § Models    | add    | —         | Missing cross-ref to new entity ... |
 
-If zero repair candidates: _"Canonization verified — no repairs needed."_
+If zero repair candidates: _"Canon verified — no repairs needed."_
 
 #### Metrics
 
-- Total canonization entries: N (ACCEPTED: N, REJECTED: N)
+- Total canon entries: N (ACCEPTED: N, REJECTED: N)
 - Entries verified OK: N
 - Entries with issues: N
 - Repair candidates generated: N
@@ -183,8 +183,8 @@ If zero repair candidates: _"Canonization verified — no repairs needed."_
 ## Rules
 
 - **STRICTLY READ-ONLY** — do NOT modify any files
-- This command analyzes canon state AFTER canonization. It does NOT re-run drift detection or reconciliation.
-- Only report issues that are directly observable by comparing `CANONIZATION` entries against actual canon file contents.
-- Do NOT propose new canon content beyond what was in the original canonization plan or spec.drift.md.
-- This command works for both the full pipeline and the vibecode pipeline — it operates post-canonization regardless of which pipeline produced the canonization.
+- This command analyzes canon state after canon apply. It does NOT re-run drift detection or reconciliation.
+- Only report issues that are directly observable by comparing `CANON_DRIFT` entries against actual canon file contents.
+- Do NOT propose new canon content beyond what was in the original canon plan or spec.drift.md.
+- This command works for both the full pipeline and the vibecode pipeline — it operates after canon apply regardless of which pipeline produced the canon plan.
 
