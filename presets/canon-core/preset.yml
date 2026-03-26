@@ -1,0 +1,79 @@
+schema_version: "1.0"
+
+preset:
+  id: "canon-core"
+  name: "Canon Core Overrides"
+  version: "0.1.0"
+  description: "Canon-driven overrides for core Spec Kit commands."
+  author: "Maxim Stupakov"
+  repository: "https://github.com/maximiliamus/spec-kit-canon"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.1.0"
+
+provides:
+  templates:
+    - type: "template"
+      name: "constitution-template"
+      file: "templates/constitution-template.md"
+      description: "Canon constitution baseline with limited metadata placeholders for project-specific initialization."
+      replaces: "constitution-template"
+      
+    - type: "template"
+      name: "canon-toc-template"
+      file: "templates/canon-toc-template.md"
+      description: "Starter canon table of contents used to initialize the configured canon TOC."
+
+    - type: "command"
+      name: "speckit.specify"
+      file: "commands/speckit.specify.md"
+      description: "Canon-driven core specification workflow."
+      replaces: "speckit.specify"
+
+    - type: "command"
+      name: "speckit.clarify"
+      file: "commands/speckit.clarify.md"
+      description: "Canon-driven clarification workflow."
+      replaces: "speckit.clarify"
+
+    - type: "command"
+      name: "speckit.checklist"
+      file: "commands/speckit.checklist.md"
+      description: "Canon-driven checklist generation workflow."
+      replaces: "speckit.checklist"
+
+    - type: "command"
+      name: "speckit.plan"
+      file: "commands/speckit.plan.md"
+      description: "Canon-driven planning workflow."
+      replaces: "speckit.plan"
+
+    - type: "command"
+      name: "speckit.tasks"
+      file: "commands/speckit.tasks.md"
+      description: "Canon-driven task generation workflow."
+      replaces: "speckit.tasks"
+
+    - type: "command"
+      name: "speckit.analyze"
+      file: "commands/speckit.analyze.md"
+      description: "Canon-driven cross-artifact analysis workflow."
+      replaces: "speckit.analyze"
+
+    - type: "command"
+      name: "speckit.implement"
+      file: "commands/speckit.implement.md"
+      description: "Canon-driven implementation workflow."
+      replaces: "speckit.implement"
+
+    - type: "command"
+      name: "speckit.constitution"
+      file: "commands/speckit.constitution.md"
+      description: "Constitution workflow aligned with the canon-driven command set."
+      replaces: "speckit.constitution"
+
+tags:
+  - "canon"
+  - "preset"
+  - "workflow"

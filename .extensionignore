@@ -1,0 +1,9 @@
+# Development-only files
+AGENTS.md
+CLAUDE.md
+INSTRUCTIONS.md
+INSTRUCTIONS.local.md
+docs/
+presets/
+spec-kit-canon.code-workspace
+.gitignore
