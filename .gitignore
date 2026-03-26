@@ -1,6 +1,7 @@
-# VS Code
-spec-kit-canon.code-workspace
-
 # Local Data
 *.local.md
 .claude/settings.local.json
+
+# Python
+__pycache__/
+*.pyc

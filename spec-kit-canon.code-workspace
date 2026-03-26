@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../spec-kit"
+		},
+		{
+			"path": "../spec-kit-canon-test"
+		}
+	],
+	"settings": {}
+}

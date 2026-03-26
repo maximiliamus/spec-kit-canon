@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Spec-Kit Canon"
+  short_description: "Run or resume the canon extension test flow"
+  default_prompt: "Use $test-speckit-canon-extension to start or resume the full extension validation workflow. Use the progress file to continue from the current step, and only clear spec-kit-canon-test when the run was initialized with --clear-test-project."

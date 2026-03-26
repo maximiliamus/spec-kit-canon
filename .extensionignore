@@ -3,7 +3,9 @@ AGENTS.md
 CLAUDE.md
 INSTRUCTIONS.md
 INSTRUCTIONS.local.md
-docs/
+.claude/
+.codex/
 presets/
+skills/
 spec-kit-canon.code-workspace
 .gitignore
