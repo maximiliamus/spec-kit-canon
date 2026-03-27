@@ -79,13 +79,19 @@ def load_config_fixture(config_fixture: Path) -> dict:
             "Constitution config fixture must contain project, canon, and branching objects."
         )
 
+    base_branch = branching.get("base")
     branch_types = branching.get("types")
     branch_scopes = branching.get("scopes")
     if branch_scopes is None:
         branch_scopes = branching.get("areas")
     if not isinstance(branch_types, list) or not isinstance(branch_scopes, list):
         raise SystemExit("Constitution config fixture branching.types and branching.scopes must be lists.")
+    if base_branch is not None and (not isinstance(base_branch, str) or not base_branch.strip()):
+        raise SystemExit(
+            "Constitution config fixture branching.base must be a non-empty string when provided."
+        )
 
+    raw["branching"]["base"] = base_branch.strip() if isinstance(base_branch, str) else None
     raw["branching"]["scopes"] = branch_scopes
     raw["branching"].pop("areas", None)
     return raw
@@ -103,7 +109,7 @@ def parse_canon_config(config_path: Path) -> dict:
     result = {
         "project": {"name": ""},
         "canon": {"root": ""},
-        "branching": {"types": [], "scopes": []},
+        "branching": {"base": None, "types": [], "scopes": []},
     }
 
     section: str | None = None
@@ -137,6 +143,10 @@ def parse_canon_config(config_path: Path) -> dict:
             if list_name == "areas":
                 list_name = "scopes"
             current_item = None
+            continue
+
+        if stripped.startswith("base:"):
+            result["branching"]["base"] = strip_quotes(stripped.split(":", 1)[1])
             continue
 
         if stripped.startswith("- code:"):

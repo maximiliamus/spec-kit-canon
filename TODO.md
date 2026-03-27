@@ -1,3 +1,3 @@
 # TODO
 
-- Gather use cases to generate acceptance tests.
+- Gather use cases separately to generate acceptance tests in the future.

@@ -4,8 +4,8 @@
 
 - Follow links and read additional .md files referenced in README.md files only if the link descriptions or filenames are relevant to your task or if you are explicitly instructed to do so.
 
-- Guide for Spek-Kit extensions development: ../spec-kit/extensions/**
+- Guide for Spek-Kit extensions development: ../spec-kit/extensions
 
-- Guide for Spek-Kit presets development: ../spec-kit/presets/**
+- Guide for Spek-Kit presets development: ../spec-kit/presets
 
 @INSTRUCTIONS.local.md

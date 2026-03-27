@@ -160,7 +160,9 @@ For these, inspect and test against `../spec-kit` directly, especially under:
 
 ## Script Validation
 
-Before reinstalling into a test project, validate bundled scripts locally.
+Before reinstalling into a test project, validate bundled scripts locally. Use
+the bash checks as the default documented path and the PowerShell parser check
+when you specifically need the Windows variant.
 
 ### Bash
 
@@ -168,7 +170,7 @@ Before reinstalling into a test project, validate bundled scripts locally.
 bash -n scripts/bash/check-drift-prerequisites.sh
 ```
 
-### PowerShell
+### PowerShell Alternative
 
 ```powershell
 $null = [System.Management.Automation.Language.Parser]::ParseFile(
@@ -186,22 +188,26 @@ If a change touches anything that depends on how Spec Kit installs, resolves,
 or executes extensions and presets, treat `../spec-kit` as required, not
 optional.
 
+All test steps that work with `/speckit.*` commands must not take longer than
+5-10 minutes. If a step trends longer than that, tighten the prompt boundaries or
+reduce scope before treating the workflow as acceptable.
+
 ## Shared Agent Skill
 
 The shared skill source for this repo stays in:
 
 ```text
-skills/test-speckit-canon-extension
+skills/testing-spec-kit-canon-extension
 ```
 
 This skill is not Codex-specific. The shared workflow, prompts, scripts, and
-template assets live under `skills/test-speckit-canon-extension`. Project-local
+template assets live under `skills/testing-spec-kit-canon-extension`. Project-local
 entrypoints and shortcuts live in agent-specific repo folders:
 
 ```text
-.claude/skills/test-speckit-canon-extension/SKILL.md
-.claude/commands/test-speckit-canon-extension.md
-.codex/prompts/test-speckit-canon-extension.md
+.claude/skills/testing-spec-kit-canon-extension/SKILL.md
+.claude/commands/testing-spec-kit-canon-extension.md
+.codex/prompts/testing-spec-kit-canon-extension.md
 ```
 
 The agent entrypoints stay thin and should only point at the shared material.
@@ -211,30 +217,30 @@ skill.
 The shared workflow stores resumable run state in:
 
 ```text
-../spec-kit-canon-test/.specify/tmp/test-speckit-canon-extension-progress.json
+../spec-kit-canon-test/.specify/tmp/testing-spec-kit-canon-extension-progress.json
 ```
 
-Initialize or reset that state with `skills/test-speckit-canon-extension/scripts/manage_progress.py`.
+Initialize or reset that state with `skills/testing-spec-kit-canon-extension/scripts/manage_progress.py`.
 Use `--clear-test-project` there when the next run should fully wipe
 `spec-kit-canon-test` before reinstalling the extension and preset.
 
 Copilot is intentionally not part of this setup.
 
 Codex uses a global skill registry. Register or unregister the repo-local skill
-source with the scripts in `.codex`:
-
-### PowerShell
-
-```powershell
-pwsh -NoProfile -File .codex/register-skill.ps1
-pwsh -NoProfile -File .codex/unregister-skill.ps1
-```
+source with the scripts in `.codex`. Use the bash helpers by default:
 
 ### Bash
 
 ```bash
 bash .codex/register-skill.sh
 bash .codex/unregister-skill.sh
+```
+
+### PowerShell Alternative
+
+```powershell
+pwsh -NoProfile -File .codex/register-skill.ps1
+pwsh -NoProfile -File .codex/unregister-skill.ps1
 ```
 
 These scripts keep the repository as the single source of truth for the shared

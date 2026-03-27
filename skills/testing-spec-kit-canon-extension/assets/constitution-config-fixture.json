@@ -6,6 +6,7 @@
     "root": "docs/canon"
   },
   "branching": {
+    "base": "master",
     "types": [
       {
         "code": "feature",

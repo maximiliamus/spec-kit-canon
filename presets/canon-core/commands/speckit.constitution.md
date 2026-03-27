@@ -43,20 +43,28 @@ That placeholder rule applies only to the four approved metadata placeholders;
 Section 6 branch lists and example branch names in the project-local template
 must be concrete config-derived content.
 
+This preset also ships a repo-root line-ending baseline at
+`.specify/presets/canon-core/templates/root-gitattributes-template.txt`.
+Use it to initialize or repair `.gitattributes` so bash-based and
+PowerShell-based Git commands observe the same clean working tree on Windows.
+
 Your goals are to:
 
 1. Initialize or repair `.specify/templates/constitution-template.md` from the
    bundled preset baseline when needed, including rendering Section 6 branch
    rows and examples from config.
-2. Initialize or repair the configured canon root `CANON_ROOT`, including
+2. Initialize or repair the repo-root `.gitattributes` from the bundled
+   line-ending baseline when needed.
+3. Initialize or repair the configured canon root `CANON_ROOT`, including
    `CANON_TOC`, when it is missing.
-3. Initialize `.specify/memory/constitution.md` from
+4. Initialize `.specify/memory/constitution.md` from
    `.specify/templates/constitution-template.md` if it is missing.
-4. Apply any user-requested amendments while preserving the canon-oriented
+5. Apply any user-requested amendments while preserving the canon-oriented
    structure unless the user explicitly asks to change that structure.
-5. Keep `.specify/templates/constitution-template.md` synchronized with the
+6. Keep `.specify/templates/constitution-template.md` synchronized with the
    updated constitution when the amendment becomes the new project baseline.
-6. Validate that dependent templates, prompts, and docs remain aligned.
+7. Validate that dependent templates, prompts, docs, and repo bootstrap files
+   remain aligned.
 
 Follow this execution flow:
 
@@ -79,6 +87,11 @@ Follow this execution flow:
 
 3. Load `.specify/presets/canon-core/templates/canon-toc-template.md`.
    - Use it as the bundled starter for `CANON_TOC`.
+   - If it is missing, stop and report that the `canon-core` preset install is
+     incomplete.
+   - Also load
+     `.specify/presets/canon-core/templates/root-gitattributes-template.txt`.
+   - Use it as the bundled starter for the repo-root `.gitattributes`.
    - If it is missing, stop and report that the `canon-core` preset install is
      incomplete.
 
@@ -155,7 +168,16 @@ Follow this execution flow:
    - Do NOT preserve stale hardcoded type or scope rows when config says
      otherwise.
 
-5. Ensure the canon root exists:
+5. Ensure the repo bootstrap files exist:
+   - Required repo-root line-ending policy path: `.gitattributes`.
+   - If `.gitattributes` does not exist, initialize it from the bundled
+     line-ending template.
+   - If `.gitattributes` exists but no longer enforces LF for general text
+     files and CRLF for PowerShell entrypoints, repair it from the bundled
+     line-ending template.
+   - Treat a repo-root line-ending policy that would make bash-based `git
+     status` or `git diff` report widespread false modifications on Windows as
+     project drift that must be repaired before continuing.
    - Required canon root path: `CANON_ROOT`.
    - Required canon TOC path: `CANON_TOC`.
    - If `CANON_ROOT` does not exist, create it.
@@ -288,6 +310,8 @@ Follow this execution flow:
      changes affect documented workflow or terminology.
 
 13. Write results:
+   - Ensure the repo-root `.gitattributes` exists and matches the bundled
+     line-ending template.
    - Ensure `CANON_ROOT` exists.
    - Ensure `CANON_TOC` exists with a resolved project title.
    - Ensure `.specify/extensions/canon/canon-config.yml` exists and reflects
@@ -311,6 +335,8 @@ Follow this execution flow:
      `.specify/memory/constitution.md`.
 
 14. Validation before final output:
+   - The repo-root `.gitattributes` exists and matches the bundled
+     line-ending template.
    - `CANON_ROOT` exists.
    - `CANON_TOC` exists and has an H1 title matching the resolved project
      name.
@@ -340,6 +366,8 @@ Follow this execution flow:
     - Version change and bump rationale.
     - Files synchronized, including whether the project-local template was
       repaired from the bundled preset baseline.
+    - Whether the repo-root `.gitattributes` was created or updated from the
+      bundled line-ending template.
     - Whether `CANON_TOC` was created or updated.
     - Which branch strategy config source was used and whether
       `.specify/extensions/canon/canon-config.yml` was created or updated.

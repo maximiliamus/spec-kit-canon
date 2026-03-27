@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
-"""Track resumable progress for the test-speckit-canon-extension workflow."""
+"""Track resumable progress for the testing-spec-kit-canon-extension workflow."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 
 REQUIRED_DIRS = ("spec-kit", "spec-kit-canon", "spec-kit-canon-test")
-WORKFLOW_NAME = "test-speckit-canon-extension"
-PROGRESS_FILE_NAME = "test-speckit-canon-extension-progress.json"
+WORKFLOW_NAME = "testing-spec-kit-canon-extension"
+PROGRESS_FILE_NAME = "testing-spec-kit-canon-extension-progress.json"
+SCHEMA_VERSION = 5
+VALID_SCRIPT_TYPES = {"sh", "ps"}
 STEP_DEFINITIONS = (
     ("reset_sandbox", "Reset the sandbox project"),
     ("verify_constitution_config", "Run constitution and verify config-driven rendering"),
@@ -21,8 +24,11 @@ STEP_DEFINITIONS = (
     ("merge_to_master", "Merge the first branch back to master"),
     ("web_ui_vibecode", "Run the vibecode web UI pass"),
     ("verify_final_canon", "Verify the final canon"),
+    ("generate_test_report", "Generate the final test report"),
 )
 STEP_IDS = {step_id for step_id, _title in STEP_DEFINITIONS}
+STEP_TITLES = {step_id: title for step_id, title in STEP_DEFINITIONS}
+VALID_STEP_STATUSES = {"pending", "in_progress", "completed"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--progress-file",
         type=Path,
-        help="Explicit progress file path. Defaults to <project-dir>/.specify/tmp/test-speckit-canon-extension-progress.json.",
+        help="Explicit progress file path. Defaults to <project-dir>/.specify/tmp/testing-spec-kit-canon-extension-progress.json.",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -58,6 +64,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite any existing progress file even without --clear-test-project.",
     )
+    init_parser.add_argument(
+        "--script",
+        choices=sorted(VALID_SCRIPT_TYPES),
+        help="Persist which Spec-Kit script variant the sandbox should use: sh or ps.",
+    )
 
     subparsers.add_parser("show", help="Print the current workflow progress state.")
 
@@ -69,11 +80,22 @@ def parse_args() -> argparse.Namespace:
     complete_parser.add_argument("step_id", choices=sorted(STEP_IDS), help="Step identifier to complete.")
     complete_parser.add_argument("--note", help="Optional note to append to the history entry.")
 
+    error_parser = subparsers.add_parser(
+        "error",
+        help="Record a failed attempt for the current step and leave it ready to retry.",
+    )
+    error_parser.add_argument("step_id", choices=sorted(STEP_IDS), help="Step identifier that hit an error.")
+    error_parser.add_argument("--note", help="Optional failure note to append to the history entry.")
+
     return parser.parse_args()
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def default_script() -> str:
+    return "ps" if os.name == "nt" else "sh"
 
 
 def find_workspace_root(explicit_root: Path | None) -> Path:
@@ -106,16 +128,23 @@ def build_steps() -> list[dict[str, str]]:
     return [{"id": step_id, "title": title, "status": "pending"} for step_id, title in STEP_DEFINITIONS]
 
 
-def build_state(workspace_root: Path, project_dir: Path, progress_file: Path, clear_test_project: bool) -> dict:
+def build_state(
+    workspace_root: Path,
+    project_dir: Path,
+    progress_file: Path,
+    clear_test_project: bool,
+    script: str,
+) -> dict:
     current_step = STEP_DEFINITIONS[0][0]
     timestamp = now_iso()
     return {
         "workflow": WORKFLOW_NAME,
-        "version": 2,
+        "version": SCHEMA_VERSION,
         "workspace_root": str(workspace_root),
         "project_dir": str(project_dir),
         "progress_file": str(progress_file),
         "clear_test_project": clear_test_project,
+        "script": script,
         "status": "ready",
         "current_step": current_step,
         "steps": build_steps(),
@@ -124,6 +153,7 @@ def build_state(workspace_root: Path, project_dir: Path, progress_file: Path, cl
                 "event": "initialized",
                 "timestamp": timestamp,
                 "clear_test_project": clear_test_project,
+                "script": script,
             }
         ],
         "updated_at": timestamp,
@@ -134,12 +164,79 @@ def ensure_step_structure(state: dict) -> None:
     steps = state.get("steps")
     if not isinstance(steps, list):
         raise SystemExit("Invalid progress file: missing steps list.")
-    known = {item.get("id") for item in steps if isinstance(item, dict)}
-    if known != STEP_IDS:
-        raise SystemExit(
-            "Invalid progress file: step ids do not match the current workflow. "
-            "Re-run manage_progress.py init --force to refresh the state for the current step set."
+
+
+def normalize_step_list(steps: list[dict[str, object]]) -> list[dict[str, str]]:
+    existing: dict[str, str] = {}
+    for item in steps:
+        if not isinstance(item, dict):
+            continue
+        step_id = item.get("id")
+        if step_id not in STEP_IDS or step_id in existing:
+            continue
+        status = item.get("status")
+        existing[step_id] = status if status in VALID_STEP_STATUSES else "pending"
+
+    normalized: list[dict[str, str]] = []
+    for step_id, title in STEP_DEFINITIONS:
+        normalized.append(
+            {
+                "id": step_id,
+                "title": title,
+                "status": existing.get(step_id, "pending"),
+            }
         )
+    return normalized
+
+
+def refresh_current_step(state: dict) -> None:
+    next_step = find_next_pending_step(state)
+    if next_step is None:
+        state["current_step"] = None
+        state["status"] = "completed"
+        return
+
+    step = get_step(state, next_step)
+    if step["status"] == "in_progress":
+        set_step_statuses(state, current_step=next_step, active_status="in_progress")
+        state["status"] = "in_progress"
+        return
+
+    set_step_statuses(state, current_step=next_step)
+    state["status"] = "ready"
+
+
+def migrate_state_schema(state: dict) -> bool:
+    original_steps = state.get("steps")
+    if not isinstance(original_steps, list):
+        raise SystemExit("Invalid progress file: missing steps list.")
+
+    normalized_steps = normalize_step_list(original_steps)
+    normalized_script = state.get("script")
+    if normalized_script not in VALID_SCRIPT_TYPES:
+        normalized_script = default_script()
+    changed = (
+        state.get("version") != SCHEMA_VERSION
+        or state.get("workflow") != WORKFLOW_NAME
+        or state.get("script") != normalized_script
+        or original_steps != normalized_steps
+        or state.get("current_step") not in STEP_IDS | {None}
+        or state.get("status") not in {"ready", "in_progress", "completed"}
+    )
+    if not changed:
+        return False
+
+    state["version"] = SCHEMA_VERSION
+    state["workflow"] = WORKFLOW_NAME
+    state["script"] = normalized_script
+    state["steps"] = normalized_steps
+    refresh_current_step(state)
+    append_history(
+        state,
+        "migrated",
+        note="Upgraded the progress file to the current workflow schema, refreshed resumable step state, and normalized script settings.",
+    )
+    return True
 
 
 def load_state(progress_file: Path) -> dict:
@@ -152,6 +249,8 @@ def load_state(progress_file: Path) -> dict:
     if state.get("workflow") != WORKFLOW_NAME:
         raise SystemExit(f"Unexpected workflow name in {progress_file}")
     ensure_step_structure(state)
+    if migrate_state_schema(state):
+        write_state(progress_file, state)
     return state
 
 
@@ -197,15 +296,33 @@ def append_history(state: dict, event: str, step_id: str | None = None, note: st
     state["history"].append(entry)
 
 
+def workflow_has_completed_steps(state: dict) -> bool:
+    return any(step["status"] == "completed" for step in state["steps"])
+
+
 def handle_init(args: argparse.Namespace, workspace_root: Path, project_dir: Path, progress_file: Path) -> dict:
     if progress_file.exists() and not args.force and not args.clear_test_project:
         state = load_state(progress_file)
         state["workspace_root"] = str(workspace_root)
         state["project_dir"] = str(project_dir)
+        requested_script = args.script
+        if requested_script and requested_script != state.get("script"):
+            if workflow_has_completed_steps(state):
+                raise SystemExit(
+                    "Cannot change script after the workflow has already completed steps. "
+                    "Re-run init with --clear-test-project or --force to restart with a different script."
+                )
+            state["script"] = requested_script
+            append_history(
+                state,
+                "reconfigured",
+                note=f"Updated the stored script to {requested_script}.",
+            )
         write_state(progress_file, state)
         return state
 
-    state = build_state(workspace_root, project_dir, progress_file, args.clear_test_project)
+    script = args.script or default_script()
+    state = build_state(workspace_root, project_dir, progress_file, args.clear_test_project, script)
     write_state(progress_file, state)
     return state
 
@@ -261,6 +378,29 @@ def handle_complete(progress_file: Path, step_id: str, note: str | None) -> dict
     return state
 
 
+def handle_error(progress_file: Path, step_id: str, note: str | None) -> dict:
+    state = load_state(progress_file)
+    current_step = state.get("current_step")
+    if current_step != step_id:
+        raise SystemExit(
+            f"Cannot record an error for step {step_id!r}; current resumable step is {current_step!r}."
+        )
+
+    step = get_step(state, step_id)
+    if step["status"] == "completed":
+        raise SystemExit(f"Step {step_id!r} is already completed.")
+    if step["status"] != "in_progress":
+        raise SystemExit(
+            f"Cannot record an error for step {step_id!r}; start the step first so the active attempt is tracked."
+        )
+
+    set_step_statuses(state, current_step=step_id)
+    state["status"] = "ready"
+    append_history(state, "error", step_id=step_id, note=note)
+    write_state(progress_file, state)
+    return state
+
+
 def main() -> int:
     args = parse_args()
     workspace_root, project_dir, progress_file = resolve_paths(args)
@@ -273,6 +413,8 @@ def main() -> int:
         state = handle_start(progress_file, args.step_id, args.note)
     elif args.command == "complete":
         state = handle_complete(progress_file, args.step_id, args.note)
+    elif args.command == "error":
+        state = handle_error(progress_file, args.step_id, args.note)
     else:
         raise SystemExit(f"Unsupported command: {args.command}")
 

@@ -5,3 +5,6 @@
 # Python
 __pycache__/
 *.pyc
+
+# Local test reporting for extension developers
+tests/history/

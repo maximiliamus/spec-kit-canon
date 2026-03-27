@@ -2,10 +2,10 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source_path="$repo_root/skills/test-speckit-canon-extension"
+source_path="$repo_root/skills/testing-spec-kit-canon-extension"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 skills_dir="$codex_home/skills"
-target_path="$skills_dir/test-speckit-canon-extension"
+target_path="$skills_dir/testing-spec-kit-canon-extension"
 
 mkdir -p "$skills_dir"
 

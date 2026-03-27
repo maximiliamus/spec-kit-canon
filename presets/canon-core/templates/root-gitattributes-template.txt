@@ -1,0 +1,8 @@
+# Keep text files stable for bash-driven workflows on Windows while preserving
+# native endings for PowerShell entrypoints.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf

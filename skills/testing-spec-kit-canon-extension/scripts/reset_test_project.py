@@ -14,8 +14,9 @@ from pathlib import Path
 
 
 REQUIRED_DIRS = ("spec-kit", "spec-kit-canon", "spec-kit-canon-test")
-PROGRESS_FILE_RELATIVE = Path(".specify") / "tmp" / "test-speckit-canon-extension-progress.json"
+PROGRESS_FILE_RELATIVE = Path(".specify") / "tmp" / "testing-spec-kit-canon-extension-progress.json"
 DEFAULT_CONFIG_FIXTURE = Path("assets") / "constitution-config-fixture.json"
+VALID_SCRIPT_TYPES = {"sh", "ps"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -40,6 +41,11 @@ def parse_args() -> argparse.Namespace:
         "--clear-test-project",
         action="store_true",
         help="Delete the contents of spec-kit-canon-test before reinstalling the local extension and preset.",
+    )
+    parser.add_argument(
+        "--script",
+        choices=sorted(VALID_SCRIPT_TYPES),
+        help="Override the Spec-Kit script variant used when scaffolding the sandbox: sh or ps.",
     )
     return parser.parse_args()
 
@@ -95,6 +101,24 @@ def default_config_fixture_path() -> Path:
     return Path(__file__).resolve().parent.parent / DEFAULT_CONFIG_FIXTURE
 
 
+def default_script() -> str:
+    return "ps" if os.name == "nt" else "sh"
+
+
+def load_progress_script(project_dir: Path) -> str | None:
+    progress_file = project_dir / PROGRESS_FILE_RELATIVE
+    if not progress_file.is_file():
+        return None
+
+    try:
+        raw = json.loads(progress_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+    script = raw.get("script")
+    return script if script in VALID_SCRIPT_TYPES else None
+
+
 def load_config_fixture(config_fixture: Path) -> dict:
     try:
         raw = json.loads(config_fixture.read_text(encoding="utf-8"))
@@ -116,6 +140,7 @@ def load_config_fixture(config_fixture: Path) -> dict:
 
     project_name = project.get("name")
     canon_root = canon.get("root")
+    base_branch = branching.get("base")
     branch_types = branching.get("types")
     branch_scopes = branching.get("scopes")
     if branch_scopes is None:
@@ -125,6 +150,10 @@ def load_config_fixture(config_fixture: Path) -> dict:
         raise SystemExit("Constitution config fixture project.name must be a non-empty string.")
     if not isinstance(canon_root, str) or not canon_root.strip():
         raise SystemExit("Constitution config fixture canon.root must be a non-empty string.")
+    if base_branch is not None and (not isinstance(base_branch, str) or not base_branch.strip()):
+        raise SystemExit(
+            "Constitution config fixture branching.base must be a non-empty string when provided."
+        )
     if not isinstance(branch_types, list) or not branch_types:
         raise SystemExit("Constitution config fixture branching.types must be a non-empty list.")
     if not isinstance(branch_scopes, list) or not branch_scopes:
@@ -161,7 +190,11 @@ def load_config_fixture(config_fixture: Path) -> dict:
     return {
         "project": {"name": project_name.strip()},
         "canon": {"root": canon_root.strip()},
-        "branching": {"types": normalized_types, "scopes": normalized_scopes},
+        "branching": {
+            "base": base_branch.strip() if isinstance(base_branch, str) else None,
+            "types": normalized_types,
+            "scopes": normalized_scopes,
+        },
     }
 
 
@@ -191,8 +224,7 @@ def run(command: list[str], cwd: Path) -> None:
     )
 
 
-def initialize_test_project(spec_kit_dir: Path, test_project_dir: Path) -> None:
-    script_type = "ps" if os.name == "nt" else "sh"
+def initialize_test_project(spec_kit_dir: Path, test_project_dir: Path, script: str) -> None:
     inline_script = f"""
 import importlib
 import json
@@ -201,7 +233,7 @@ from pathlib import Path
 cli = importlib.import_module("specify_cli.__init__")
 project = Path.cwd()
 
-ok = cli.scaffold_from_core_pack(project, "codex", "{script_type}", True)
+ok = cli.scaffold_from_core_pack(project, "codex", "{script}", True)
 if not ok:
     raise SystemExit("scaffold_from_core_pack failed")
 
@@ -226,7 +258,7 @@ cli.save_init_options(
         "here": True,
         "preset": None,
         "offline": True,
-        "script": "{script_type}",
+        "script": "{script}",
         "speckit_version": cli.get_speckit_version(),
     }},
 )
@@ -262,8 +294,15 @@ def write_canon_config(config_path: Path, config: dict) -> None:
         f'  root: {quote_yaml(config["canon"]["root"])}',
         "",
         "branching:",
-        "  types:",
     ]
+
+    base_branch = config["branching"].get("base")
+    if isinstance(base_branch, str) and base_branch.strip():
+        lines.append(f'  base: {quote_yaml(base_branch.strip())}')
+
+    lines.extend([
+        "  types:",
+    ])
 
     for item in config["branching"]["types"]:
         lines.append(f'    - code: {quote_yaml(item["code"])}')
@@ -294,7 +333,9 @@ def main() -> int:
     else:
         test_project_dir.mkdir(parents=True, exist_ok=True)
 
-    initialize_test_project(spec_kit_dir, test_project_dir)
+    script = args.script or load_progress_script(test_project_dir) or default_script()
+
+    initialize_test_project(spec_kit_dir, test_project_dir, script)
     run(
         ["uv", "run", "--project", "../spec-kit", "specify", "extension", "add", "--dev", "../spec-kit-canon"],
         cwd=test_project_dir,
@@ -325,6 +366,7 @@ def main() -> int:
         "config_fixture": str(config_fixture),
         "canon_config": str(canon_config),
         "applied_config": config,
+        "script": script,
         "constitution_path": str(test_project_dir / ".specify" / "memory" / "constitution.md"),
         "cleared_test_project": args.clear_test_project,
         "status": "ready_for_constitution",

@@ -5,14 +5,14 @@ param(
 )
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$sourcePath = (Resolve-Path (Join-Path $repoRoot "skills\\test-speckit-canon-extension")).Path
+$sourcePath = (Resolve-Path (Join-Path $repoRoot "skills\\testing-spec-kit-canon-extension")).Path
 
 if ([string]::IsNullOrWhiteSpace($CodexHome)) {
     $CodexHome = Join-Path $HOME ".codex"
 }
 
 $skillsDir = Join-Path $CodexHome "skills"
-$targetPath = Join-Path $skillsDir "test-speckit-canon-extension"
+$targetPath = Join-Path $skillsDir "testing-spec-kit-canon-extension"
 
 New-Item -ItemType Directory -Path $skillsDir -Force | Out-Null
 
