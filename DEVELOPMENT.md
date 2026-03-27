@@ -164,6 +164,10 @@ Before reinstalling into a test project, validate bundled scripts locally. Use
 the bash checks as the default documented path and the PowerShell parser check
 when you specifically need the Windows variant.
 
+For repo docs, skills, prompts, and other developer-facing examples, default
+to bash-based script examples. Add PowerShell examples only as an explicit
+alternative or when the Windows-specific variant is the thing being discussed.
+
 ### Bash
 
 ```bash
@@ -192,29 +196,33 @@ All test steps that work with `/speckit.*` commands must not take longer than
 5-10 minutes. If a step trends longer than that, tighten the prompt boundaries or
 reduce scope before treating the workflow as acceptable.
 
-## Shared Agent Skill
+## Shared Agent Skills
 
-The shared skill source for this repo stays in:
+The shared skill sources for this repo stay in:
 
 ```text
 skills/testing-spec-kit-canon-extension
+skills/updating-spec-kit-canon-core-presets
 ```
 
-This skill is not Codex-specific. The shared workflow, prompts, scripts, and
-template assets live under `skills/testing-spec-kit-canon-extension`. Project-local
-entrypoints and shortcuts live in agent-specific repo folders:
+These skills are not Codex-specific. The shared workflows, prompts, scripts,
+references, and template assets live under those shared skill folders.
+Project-local entrypoints and shortcuts live in agent-specific repo folders:
 
 ```text
 .claude/skills/testing-spec-kit-canon-extension/SKILL.md
-.claude/commands/testing-spec-kit-canon-extension.md
+.claude/commands/test-spec-kit-canon-extension.md
 .codex/prompts/testing-spec-kit-canon-extension.md
+.claude/skills/updating-spec-kit-canon-core-presets/SKILL.md
+.claude/commands/update-spec-kit-canon-core-presets.md
+.codex/prompts/updating-spec-kit-canon-core-presets.md
 ```
 
 The agent entrypoints stay thin and should only point at the shared material.
-The Claude command and Codex prompt are only shortcuts that invoke the actual
-skill.
+The Claude commands and Codex prompts are only shortcuts that invoke the actual
+skills.
 
-The shared workflow stores resumable run state in:
+The testing workflow stores resumable run state in:
 
 ```text
 ../spec-kit-canon-test/.specify/tmp/testing-spec-kit-canon-extension-progress.json
@@ -227,21 +235,21 @@ Use `--clear-test-project` there when the next run should fully wipe
 Copilot is intentionally not part of this setup.
 
 Codex uses a global skill registry. Register or unregister the repo-local skill
-source with the scripts in `.codex`. Use the bash helpers by default:
+sources with the scripts in `.codex`. Use the bash helpers by default:
 
 ### Bash
 
 ```bash
-bash .codex/register-skill.sh
-bash .codex/unregister-skill.sh
+bash .codex/register-skills.sh
+bash .codex/unregister-skills.sh
 ```
 
 ### PowerShell Alternative
 
 ```powershell
-pwsh -NoProfile -File .codex/register-skill.ps1
-pwsh -NoProfile -File .codex/unregister-skill.ps1
+pwsh -NoProfile -File .codex/register-skills.ps1
+pwsh -NoProfile -File .codex/unregister-skills.ps1
 ```
 
 These scripts keep the repository as the single source of truth for the shared
-skill source while creating or removing the Codex registry entry.
+skill sources while creating or removing the Codex registry entries.

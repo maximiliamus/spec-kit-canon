@@ -17,16 +17,17 @@ Default behavior:
 Pass any provided flags through to the shared skill and let the skill prepare
 the workflow state before executing the current step.
 
-If the skill is not registered yet, run the bash helper by default:
+If the repo-local skills are not registered yet, run the bash helper by
+default:
 
 ```bash
-bash .codex/register-skill.sh
+bash .codex/register-skills.sh
 ```
 
 PowerShell alternative:
 
 ```powershell
-pwsh -NoProfile -File .codex/register-skill.ps1
+pwsh -NoProfile -File .codex/register-skills.ps1
 ```
 
 After that, use `$testing-spec-kit-canon-extension`.
