@@ -9,8 +9,8 @@ handoffs:
     prompt: Clarify specification requirements
     send: true
 scripts:
-  sh: bash .specify/scripts/bash/create-new-feature.sh --json --short-name
-  ps: pwsh -NoProfile -File .specify/scripts/powershell/create-new-feature.ps1 -Json -ShortName
+  sh: bash .specify/scripts/bash/create-new-feature.sh
+  ps: pwsh -NoProfile -File .specify/scripts/powershell/create-new-feature.ps1
 ---
 
 ## Pre-conditions (execute before any other step)
@@ -85,9 +85,16 @@ Given that feature description, do this:
      - "Create a dashboard for analytics" → "analytics-dashboard"
      - "Fix payment processing timeout bug" → "fix-payment-timeout"
 
-2. **Create the feature branch** by running the script with `--short-name` (and `--json`), and do NOT pass `--number` (the script auto-detects the next globally available number across all branches and spec directories):
+2. **Create the feature branch** by running the script with `--short-name` (and `--json`). In sequential mode, do NOT pass `--number` — the script auto-detects the next available number. In timestamp mode, the script generates a `YYYYMMDD-HHMMSS` prefix automatically:
 
-   - Example: `{SCRIPT} "user-auth" "Add user authentication"`
+   **Branch numbering mode**: Before running the script, check if `.specify/init-options.json` exists and read the `branch_numbering` value.
+   - If `"timestamp"`, add `--timestamp` (Bash) or `-Timestamp` (PowerShell) to the script invocation
+   - If `"sequential"` or absent, do not add any extra flag (default behavior)
+
+   - Bash example: `{SCRIPT} --json --short-name "user-auth" "Add user authentication"`
+   - Bash (timestamp): `{SCRIPT} --json --timestamp --short-name "user-auth" "Add user authentication"`
+   - PowerShell example: `{SCRIPT} -Json -ShortName "user-auth" "Add user authentication"`
+   - PowerShell (timestamp): `{SCRIPT} -Json -Timestamp -ShortName "user-auth" "Add user authentication"`
 
    **IMPORTANT**:
    - Do NOT pass `--number` — the script determines the correct next number automatically
@@ -174,7 +181,7 @@ Given that feature description, do this:
 
    c. **Handle Validation Results**:
 
-      - **If all items pass**: Mark checklist complete and proceed to step 6
+      - **If all items pass**: Mark checklist complete and proceed to step 7
 
       - **If items fail (excluding [NEEDS CLARIFICATION])**:
         1. List the failing items and specific issues
@@ -251,8 +258,6 @@ Given that feature description, do this:
    - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
 **NOTE:** The script creates and checks out the new branch and initializes the spec file before writing.
-
-## General Guidelines
 
 ## Quick Guidelines
 
