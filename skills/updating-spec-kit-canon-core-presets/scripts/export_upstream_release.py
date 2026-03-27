@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Export the latest released upstream spec-kit sources for canon-core sync work."""
+"""Export upstream spec-kit sources for canon-core sync work when a newer release exists."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 
 REGULAR_COMMANDS = [
@@ -24,13 +25,16 @@ REGULAR_COMMANDS = [
 ]
 SPECIAL_COMMANDS = ["constitution"]
 ALL_COMMANDS = REGULAR_COMMANDS + SPECIAL_COMMANDS
+SYNC_WORKSPACE_DIRNAME = "updating-spec-kit-canon-core-presets"
+DEFAULT_METADATA_RELATIVE = "presets/canon-core/spec-kit-release.json"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Resolve the latest released upstream spec-kit tag, fetch it when needed, "
-            "and export the relevant canon-core sync files."
+            "Resolve the latest released upstream spec-kit tag, stop early when it "
+            "already matches the recorded canon-core merge, otherwise fetch it when "
+            "needed and export the relevant sync files."
         )
     )
     parser.add_argument(
@@ -54,6 +58,14 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Output directory. Defaults to "
             ".tmp/updating-spec-kit-canon-core-presets/<resolved-tag> inside canon-dir."
+        ),
+    )
+    parser.add_argument(
+        "--metadata-file",
+        default=None,
+        help=(
+            "JSON file that records the last merged upstream release. Defaults "
+            "to presets/canon-core/spec-kit-release.json."
         ),
     )
     return parser.parse_args()
@@ -124,23 +136,62 @@ def copy_if_exists(source: Path, destination: Path) -> bool:
     return True
 
 
+def load_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def read_recorded_release_tag(metadata_file: Path) -> str | None:
+    if not metadata_file.exists():
+        return None
+
+    try:
+        metadata = load_json(metadata_file)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Invalid JSON in metadata file: {metadata_file}") from exc
+
+    spec_kit_release = metadata.get("spec_kit_release")
+    if not isinstance(spec_kit_release, dict):
+        return None
+
+    resolved_tag = spec_kit_release.get("resolved_tag")
+    if isinstance(resolved_tag, str) and resolved_tag.strip():
+        return resolved_tag.strip()
+
+    return None
+
+
 def main() -> int:
     args = parse_args()
 
     canon_dir = Path(args.canon_dir).resolve()
     spec_kit_dir = Path(args.spec_kit_dir).resolve()
+    metadata_file = (
+        Path(args.metadata_file).resolve()
+        if args.metadata_file
+        else canon_dir / DEFAULT_METADATA_RELATIVE
+    )
 
     if not spec_kit_dir.exists():
         raise SystemExit(f"spec-kit repository not found: {spec_kit_dir}")
 
     requested_tag = args.tag
     resolved_tag = requested_tag if requested_tag != "latest" else resolve_latest_remote_tag(spec_kit_dir)
+    recorded_tag = read_recorded_release_tag(metadata_file)
+    if recorded_tag == resolved_tag:
+        print(f"Resolved release tag: {resolved_tag}")
+        print(
+            "Recorded preset release already matches the latest upstream release: "
+            f"{metadata_file}"
+        )
+        print("Stopping preset sync before export; no update is needed.")
+        return 0
+
     ensure_local_tag(spec_kit_dir, resolved_tag)
 
     output_dir = (
         Path(args.output_dir).resolve()
         if args.output_dir
-        else canon_dir / ".tmp" / "updating-spec-kit-canon-core-presets" / resolved_tag
+        else canon_dir / ".tmp" / SYNC_WORKSPACE_DIRNAME / resolved_tag
     )
     if output_dir.exists():
         shutil.rmtree(output_dir)

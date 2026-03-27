@@ -5,6 +5,9 @@
 - Treat the latest release as the highest semantic-version tag visible on
   `../spec-kit` `origin`.
 - Do not trust the local clone's tag list by itself.
+- If that resolved tag already matches the recorded
+  `presets/canon-core/spec-kit-release.json` `spec_kit_release.resolved_tag`,
+  stop the sync before export. No `.tmp` workspace or finalize step is needed.
 - If the chosen tag is missing locally, fetch that tag before reading source
   files from it.
 

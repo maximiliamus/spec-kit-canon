@@ -13,6 +13,8 @@ Read [references/sync-rules.md](./references/sync-rules.md) before editing
 
 The last merged upstream release is tracked in
 [spec-kit-release.json](../../presets/canon-core/spec-kit-release.json).
+If the newly resolved upstream release tag matches that recorded tag, stop the
+workflow immediately and do not create a new sync workspace.
 Update that file only after the preset rebase is finished and validated.
 
 ## Workflow
@@ -26,6 +28,10 @@ Default behavior:
 
 - Resolve the true latest release tag from `../spec-kit` `origin`, not from the
   local tag list alone.
+- Compare that resolved tag against
+  `presets/canon-core/spec-kit-release.json`.
+- If the resolved tag is already recorded there, stop immediately with no
+  export, rebase, or finalize step.
 - Fetch the release tag locally if the clone does not have it yet.
 - Export the upstream release sources and the current local `canon-core` files
   into `.tmp/updating-spec-kit-canon-core-presets/<tag>/`.
@@ -36,6 +42,9 @@ Recommended command:
 ```bash
 python skills/updating-spec-kit-canon-core-presets/scripts/export_upstream_release.py
 ```
+
+If the script reports that the recorded release already matches the latest
+upstream release, stop here. There is nothing to merge.
 
 Read the generated `manifest.json` before editing so the source and target file
 paths are explicit.
@@ -137,8 +146,9 @@ delete it only after you are done.
 ## Resources
 
 - [scripts/export_upstream_release.py](./scripts/export_upstream_release.py):
-  resolve the latest release tag, fetch it when needed, and export the upstream
-  plus local sync workspace.
+  resolve the latest release tag, stop early when that tag is already recorded
+  in `spec-kit-release.json`, otherwise fetch it when needed and export the
+  upstream plus local sync workspace.
 - [scripts/finalize_preset_sync.py](./scripts/finalize_preset_sync.py):
   record the merged upstream release in JSON and remove the temporary sync
   workspace.
