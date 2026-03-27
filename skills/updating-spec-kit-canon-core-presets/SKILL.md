@@ -11,6 +11,10 @@ upstream `spec-kit` sources without losing the canon-specific overlay.
 Read [references/sync-rules.md](./references/sync-rules.md) before editing
 `presets/canon-core`.
 
+The last merged upstream release is tracked in
+[spec-kit-release.json](../../presets/canon-core/spec-kit-release.json).
+Update that file only after the preset rebase is finished and validated.
+
 ## Workflow
 
 ### 1. Export the upstream release snapshot
@@ -91,7 +95,7 @@ adaptation:
 - `presets/canon-core/templates/canon-toc-template.md`
 - `presets/canon-core/templates/root-gitattributes-template.txt`
 
-### 4. Validate before stopping
+### 4. Validate before finalizing
 
 After editing:
 
@@ -110,10 +114,36 @@ python C:/Users/maxs/.codex/skills/.system/skill-creator/scripts/quick_validate.
 - If the preset behavior changed materially, run the shared extension test skill
   afterward instead of trusting prompt diffs alone.
 
+### 5. Record the merged version and clean up the sync workspace
+
+After validation passes, finalize the sync:
+
+- Update
+  [spec-kit-release.json](../../presets/canon-core/spec-kit-release.json)
+  from the manifest of the workspace you just merged.
+- Remove `.tmp/updating-spec-kit-canon-core-presets/<tag>/`.
+- If that leaves `.tmp/updating-spec-kit-canon-core-presets/` empty, remove it.
+- If that also leaves `.tmp/` empty, remove `.tmp/`.
+
+Recommended command:
+
+```bash
+python skills/updating-spec-kit-canon-core-presets/scripts/finalize_preset_sync.py
+```
+
+If you need to inspect the exported workspace longer, use `--keep-temp` and
+delete it only after you are done.
+
 ## Resources
 
 - [scripts/export_upstream_release.py](./scripts/export_upstream_release.py):
   resolve the latest release tag, fetch it when needed, and export the upstream
   plus local sync workspace.
+- [scripts/finalize_preset_sync.py](./scripts/finalize_preset_sync.py):
+  record the merged upstream release in JSON and remove the temporary sync
+  workspace.
+- [spec-kit-release.json](../../presets/canon-core/spec-kit-release.json):
+  checked-in metadata for the last upstream `spec-kit` release merged into
+  `presets/canon-core`.
 - [references/sync-rules.md](./references/sync-rules.md): file map, allowed
   deltas, and validation rules.

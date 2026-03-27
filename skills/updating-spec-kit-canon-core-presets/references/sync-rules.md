@@ -86,5 +86,30 @@ local frontmatter or prose to preserve that behavior in preset-installed form.
   - `.specify/templates/constitution-template.md`
   - `.specify/presets/canon-core/templates/canon-toc-template.md`
   - `.specify/presets/canon-core/templates/root-gitattributes-template.txt`
+- Update
+  `presets/canon-core/spec-kit-release.json`
+  only after the preset rebase is complete and validated.
+- Remove `.tmp/updating-spec-kit-canon-core-presets/<tag>/` at the end of the
+  workflow unless you intentionally kept it for extra inspection.
 - If the constitution workflow changes materially, re-run the shared extension
   validation workflow after finishing the rebase.
+
+## Merge Metadata
+
+Persist the last completed upstream preset merge in:
+
+```text
+presets/canon-core/spec-kit-release.json
+```
+
+Minimum tracked fields:
+
+- merge timestamp
+- resolved upstream release tag
+- upstream release commit
+
+Do not update that file during the export step. Update it only after:
+
+1. the preset files were actually rebased
+2. validation passed
+3. you are ready to delete the temporary sync workspace

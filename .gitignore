@@ -2,6 +2,11 @@
 *.local.md
 .claude/settings.local.json
 
+# Temporary files
+*.tmp
+*.log
+*.bak
+
 # Python
 __pycache__/
 *.pyc
