@@ -1,12 +1,15 @@
 {
 	"folders": [
 		{
+			"name": "spec-kit-canon",
 			"path": "."
 		},
 		{
+			"name": "spec-kit",
 			"path": "../spec-kit"
 		},
 		{
+			"name": "spec-kit-canon-test",
 			"path": "../spec-kit-canon-test"
 		}
 	],

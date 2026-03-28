@@ -6,7 +6,7 @@
   `../spec-kit` `origin`.
 - Do not trust the local clone's tag list by itself.
 - If that resolved tag already matches the recorded
-  `presets/canon-core/spec-kit-release.json` `spec_kit_release.resolved_tag`,
+  `preset/spec-kit-release.json` `spec_kit_release.resolved_tag`,
   stop the sync before export. No `.tmp` workspace or finalize step is needed.
 - If the chosen tag is missing locally, fetch that tag before reading source
   files from it.
@@ -17,26 +17,26 @@ Regular command overlays:
 
 | Upstream release source | Canon target |
 | --- | --- |
-| `templates/commands/specify.md` | `presets/canon-core/commands/speckit.specify.md` |
-| `templates/commands/clarify.md` | `presets/canon-core/commands/speckit.clarify.md` |
-| `templates/commands/checklist.md` | `presets/canon-core/commands/speckit.checklist.md` |
-| `templates/commands/plan.md` | `presets/canon-core/commands/speckit.plan.md` |
-| `templates/commands/tasks.md` | `presets/canon-core/commands/speckit.tasks.md` |
-| `templates/commands/analyze.md` | `presets/canon-core/commands/speckit.analyze.md` |
-| `templates/commands/implement.md` | `presets/canon-core/commands/speckit.implement.md` |
+| `templates/commands/specify.md` | `preset/commands/speckit.specify.md` |
+| `templates/commands/clarify.md` | `preset/commands/speckit.clarify.md` |
+| `templates/commands/checklist.md` | `preset/commands/speckit.checklist.md` |
+| `templates/commands/plan.md` | `preset/commands/speckit.plan.md` |
+| `templates/commands/tasks.md` | `preset/commands/speckit.tasks.md` |
+| `templates/commands/analyze.md` | `preset/commands/speckit.analyze.md` |
+| `templates/commands/implement.md` | `preset/commands/speckit.implement.md` |
 
 Special-case merges:
 
 | Upstream release source | Canon target |
 | --- | --- |
-| `templates/commands/constitution.md` | `presets/canon-core/commands/speckit.constitution.md` |
-| `templates/constitution-template.md` | `presets/canon-core/templates/constitution-template.md` |
+| `templates/commands/constitution.md` | `preset/commands/speckit.constitution.md` |
+| `templates/constitution-template.md` | `preset/templates/constitution-template.md` |
 
 Canon-owned files:
 
-- `presets/canon-core/templates/canon-toc-template.md`
-- `presets/canon-core/templates/root-gitattributes-template.txt`
-- `presets/canon-core/preset.yml`
+- `preset/templates/canon-toc-template.md`
+- `preset/templates/root-gitattributes-template.txt`
+- `preset/preset.yml`
 
 ## Allowed Deltas
 
@@ -78,7 +78,7 @@ local frontmatter or prose to preserve that behavior in preset-installed form.
 
 ## Validation Checklist
 
-- Review `git diff -- presets/canon-core`.
+- Review `git diff -- preset`.
 - For the seven regular commands, make sure any body delta after the
   preconditions block is either:
   - a direct upstream release change, or
@@ -90,7 +90,7 @@ local frontmatter or prose to preserve that behavior in preset-installed form.
   - `.specify/presets/canon-core/templates/canon-toc-template.md`
   - `.specify/presets/canon-core/templates/root-gitattributes-template.txt`
 - Update
-  `presets/canon-core/spec-kit-release.json`
+  `preset/spec-kit-release.json`
   only after the preset rebase is complete and validated.
 - Remove `.tmp/updating-spec-kit-canon-core-presets/<tag>/` at the end of the
   workflow unless you intentionally kept it for extra inspection.
@@ -102,7 +102,7 @@ local frontmatter or prose to preserve that behavior in preset-installed form.
 Persist the last completed upstream preset merge in:
 
 ```text
-presets/canon-core/spec-kit-release.json
+preset/spec-kit-release.json
 ```
 
 Minimum tracked fields:

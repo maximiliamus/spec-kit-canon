@@ -1,4 +1,4 @@
 interface:
   display_name: "Update Canon Core Presets"
   short_description: "Rebase canon-core onto the latest spec-kit release"
-  default_prompt: "Use $updating-spec-kit-canon-core-presets to refresh presets/canon-core from the latest released upstream spec-kit commands. Verify the newest release tag against origin, fetch it if missing locally, export the upstream source files, rebase canon preconditions and constitution-specific changes onto that release, and validate the resulting preset diffs."
+  default_prompt: "Use $updating-spec-kit-canon-core-presets to refresh preset/ from the latest released upstream spec-kit commands. Verify the newest release tag against origin, fetch it if missing locally, export the upstream source files, rebase canon preconditions and constitution-specific changes onto that release, and validate the resulting preset diffs."

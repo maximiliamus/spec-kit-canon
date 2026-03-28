@@ -26,7 +26,7 @@ REGULAR_COMMANDS = [
 SPECIAL_COMMANDS = ["constitution"]
 ALL_COMMANDS = REGULAR_COMMANDS + SPECIAL_COMMANDS
 SYNC_WORKSPACE_DIRNAME = "updating-spec-kit-canon-core-presets"
-DEFAULT_METADATA_RELATIVE = "presets/canon-core/spec-kit-release.json"
+DEFAULT_METADATA_RELATIVE = "preset/spec-kit-release.json"
 
 
 def parse_args() -> argparse.Namespace:
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "JSON file that records the last merged upstream release. Defaults "
-            "to presets/canon-core/spec-kit-release.json."
+            "to preset/spec-kit-release.json."
         ),
     )
     return parser.parse_args()
@@ -207,7 +207,7 @@ def main() -> int:
         upstream_destination = upstream_root / "templates" / "commands" / f"{command}.md"
         git_show_to_file(spec_kit_dir, resolved_tag, upstream_path, upstream_destination)
 
-        canon_path = canon_dir / "presets" / "canon-core" / "commands" / f"speckit.{command}.md"
+        canon_path = canon_dir / "preset" / "commands" / f"speckit.{command}.md"
         current_destination = current_root / "commands" / f"speckit.{command}.md"
         copy_if_exists(canon_path, current_destination)
 
@@ -230,15 +230,15 @@ def main() -> int:
         {
             "kind": "template",
             "upstream": upstream_template_path,
-            "canon_target": "presets/canon-core/templates/constitution-template.md",
+            "canon_target": "preset/templates/constitution-template.md",
         }
     )
 
     local_files = [
-        "presets/canon-core/templates/constitution-template.md",
-        "presets/canon-core/templates/canon-toc-template.md",
-        "presets/canon-core/templates/root-gitattributes-template.txt",
-        "presets/canon-core/preset.yml",
+        "preset/templates/constitution-template.md",
+        "preset/templates/canon-toc-template.md",
+        "preset/templates/root-gitattributes-template.txt",
+        "preset/preset.yml",
     ]
     for relative_path in local_files:
         source = canon_dir / relative_path
@@ -256,9 +256,9 @@ def main() -> int:
         "regular_commands": REGULAR_COMMANDS,
         "special_commands": SPECIAL_COMMANDS,
         "canon_owned_files": [
-            "presets/canon-core/templates/canon-toc-template.md",
-            "presets/canon-core/templates/root-gitattributes-template.txt",
-            "presets/canon-core/preset.yml",
+            "preset/templates/canon-toc-template.md",
+            "preset/templates/root-gitattributes-template.txt",
+            "preset/preset.yml",
         ],
         "file_map": file_map,
     }

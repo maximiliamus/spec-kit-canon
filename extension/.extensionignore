@@ -1,0 +1,3 @@
+# Package-local exclusions
+# The extension now lives in its own package root, so there are currently no
+# extra repo-level directories to exclude here.

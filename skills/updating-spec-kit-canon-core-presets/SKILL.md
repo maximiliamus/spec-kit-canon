@@ -1,18 +1,18 @@
 ---
 name: updating-spec-kit-canon-core-presets
-description: Sync `presets/canon-core` with the latest released upstream `spec-kit` core command sources. Use when rebasing `presets/canon-core/commands/*.md` or `presets/canon-core/templates/constitution-template.md` onto the newest upstream release tag, verifying the real latest release against `../spec-kit` `origin`, fetching a missing release tag locally, exporting upstream source snapshots, preserving canon-only preconditions for the regular core commands, and handling the larger `speckit.constitution` merge.
+description: Sync `preset/` with the latest released upstream `spec-kit` core command sources. Use when rebasing `preset/commands/*.md` or `preset/templates/constitution-template.md` onto the newest upstream release tag, verifying the real latest release against `../spec-kit` `origin`, fetching a missing release tag locally, exporting upstream source snapshots, preserving canon-only preconditions for the regular core commands, and handling the larger `speckit.constitution` merge.
 ---
 
 # Updating Spec-Kit Canon Core Presets
 
-Use this skill to refresh `presets/canon-core` from the latest released
+Use this skill to refresh `preset/` from the latest released
 upstream `spec-kit` sources without losing the canon-specific overlay.
 
 Read [references/sync-rules.md](./references/sync-rules.md) before editing
-`presets/canon-core`.
+`preset/`.
 
 The last merged upstream release is tracked in
-[spec-kit-release.json](../../presets/canon-core/spec-kit-release.json).
+[spec-kit-release.json](../../preset/spec-kit-release.json).
 If the newly resolved upstream release tag matches that recorded tag, stop the
 workflow immediately and do not create a new sync workspace.
 Update that file only after the preset rebase is finished and validated.
@@ -29,7 +29,7 @@ Default behavior:
 - Resolve the true latest release tag from `../spec-kit` `origin`, not from the
   local tag list alone.
 - Compare that resolved tag against
-  `presets/canon-core/spec-kit-release.json`.
+  `preset/spec-kit-release.json`.
 - If the resolved tag is already recorded there, stop immediately with no
   export, rebase, or finalize step.
 - Fetch the release tag locally if the clone does not have it yet.
@@ -53,13 +53,13 @@ paths are explicit.
 
 Treat these files as the regular command set:
 
-- `presets/canon-core/commands/speckit.specify.md`
-- `presets/canon-core/commands/speckit.clarify.md`
-- `presets/canon-core/commands/speckit.checklist.md`
-- `presets/canon-core/commands/speckit.plan.md`
-- `presets/canon-core/commands/speckit.tasks.md`
-- `presets/canon-core/commands/speckit.analyze.md`
-- `presets/canon-core/commands/speckit.implement.md`
+- `preset/commands/speckit.specify.md`
+- `preset/commands/speckit.clarify.md`
+- `preset/commands/speckit.checklist.md`
+- `preset/commands/speckit.plan.md`
+- `preset/commands/speckit.tasks.md`
+- `preset/commands/speckit.analyze.md`
+- `preset/commands/speckit.implement.md`
 
 For each regular command:
 
@@ -84,8 +84,8 @@ layout.
 
 Treat these files as the special-case manual merge:
 
-- `presets/canon-core/commands/speckit.constitution.md`
-- `presets/canon-core/templates/constitution-template.md`
+- `preset/commands/speckit.constitution.md`
+- `preset/templates/constitution-template.md`
 
 Do not treat these like the regular precondition-only overlays.
 
@@ -101,14 +101,14 @@ behavior:
 Keep these files canon-owned unless upstream changes clearly require
 adaptation:
 
-- `presets/canon-core/templates/canon-toc-template.md`
-- `presets/canon-core/templates/root-gitattributes-template.txt`
+- `preset/templates/canon-toc-template.md`
+- `preset/templates/root-gitattributes-template.txt`
 
 ### 4. Validate before finalizing
 
 After editing:
 
-- Review `git diff -- presets/canon-core`.
+- Review `git diff -- preset`.
 - Confirm every regular command still contains exactly one leading
   `## Pre-conditions` block.
 - Confirm non-precondition diffs in the regular commands are limited to the
@@ -128,7 +128,7 @@ python C:/Users/maxs/.codex/skills/.system/skill-creator/scripts/quick_validate.
 After validation passes, finalize the sync:
 
 - Update
-  [spec-kit-release.json](../../presets/canon-core/spec-kit-release.json)
+  [spec-kit-release.json](../../preset/spec-kit-release.json)
   from the manifest of the workspace you just merged.
 - Remove `.tmp/updating-spec-kit-canon-core-presets/<tag>/`.
 - If that leaves `.tmp/updating-spec-kit-canon-core-presets/` empty, remove it.
@@ -152,8 +152,8 @@ delete it only after you are done.
 - [scripts/finalize_preset_sync.py](./scripts/finalize_preset_sync.py):
   record the merged upstream release in JSON and remove the temporary sync
   workspace.
-- [spec-kit-release.json](../../presets/canon-core/spec-kit-release.json):
+- [spec-kit-release.json](../../preset/spec-kit-release.json):
   checked-in metadata for the last upstream `spec-kit` release merged into
-  `presets/canon-core`.
+  `preset/`.
 - [references/sync-rules.md](./references/sync-rules.md): file map, allowed
   deltas, and validation rules.

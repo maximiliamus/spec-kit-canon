@@ -13,7 +13,7 @@ from typing import Any
 
 SYNC_WORKSPACE_DIRNAME = "updating-spec-kit-canon-core-presets"
 DEFAULT_METADATA_RELATIVE = (
-    "presets/canon-core/spec-kit-release.json"
+    "preset/spec-kit-release.json"
 )
 
 
@@ -42,7 +42,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "JSON file to update with the last merged upstream release. Defaults "
-            "to presets/canon-core/spec-kit-release.json."
+            "to preset/spec-kit-release.json."
         ),
     )
     parser.add_argument(
@@ -99,7 +99,7 @@ def ensure_within(path: Path, root: Path, *, label: str) -> None:
 def build_metadata(manifest: dict[str, Any]) -> dict[str, Any]:
     return {
         "updated_at_utc": now_iso(),
-        "preset_target": "presets/canon-core",
+        "preset_target": "preset",
         "spec_kit_release": {
             "requested_tag": manifest["requested_tag"],
             "resolved_tag": manifest["resolved_tag"],

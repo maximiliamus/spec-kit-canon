@@ -7,7 +7,7 @@ Default behavior:
 
 - verify the latest upstream release tag against `../spec-kit` `origin`
 - fetch the release tag locally if it is missing
-- export the upstream release snapshot before editing `presets/canon-core`
+- export the upstream release snapshot before editing `preset/`
 - rebase the seven regular command overlays and manually merge the constitution
   files
 

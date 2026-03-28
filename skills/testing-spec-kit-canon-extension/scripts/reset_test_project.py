@@ -320,7 +320,9 @@ def main() -> int:
     args = parse_args()
     workspace_root = find_workspace_root(args.workspace_root)
     spec_kit_dir = workspace_root / "spec-kit"
-    extension_dir = workspace_root / "spec-kit-canon"
+    canon_repo_dir = workspace_root / "spec-kit-canon"
+    extension_dir = canon_repo_dir / "extension"
+    preset_dir = canon_repo_dir / "preset"
     test_project_dir = workspace_root / "spec-kit-canon-test"
     config_fixture = args.config_fixture.resolve() if args.config_fixture else default_config_fixture_path()
     config = load_config_fixture(config_fixture)
@@ -337,7 +339,17 @@ def main() -> int:
 
     initialize_test_project(spec_kit_dir, test_project_dir, script)
     run(
-        ["uv", "run", "--project", "../spec-kit", "specify", "extension", "add", "--dev", "../spec-kit-canon"],
+        [
+            "uv",
+            "run",
+            "--project",
+            "../spec-kit",
+            "specify",
+            "extension",
+            "add",
+            "--dev",
+            "../spec-kit-canon/extension",
+        ],
         cwd=test_project_dir,
     )
     run(
@@ -350,7 +362,7 @@ def main() -> int:
             "preset",
             "add",
             "--dev",
-            "../spec-kit-canon/presets/canon-core",
+            "../spec-kit-canon/preset",
         ],
         cwd=test_project_dir,
     )
@@ -361,7 +373,9 @@ def main() -> int:
     summary = {
         "workspace_root": str(workspace_root),
         "spec_kit_dir": str(spec_kit_dir),
+        "canon_repo_dir": str(canon_repo_dir),
         "extension_dir": str(extension_dir),
+        "preset_dir": str(preset_dir),
         "test_project_dir": str(test_project_dir),
         "config_fixture": str(config_fixture),
         "canon_config": str(canon_config),

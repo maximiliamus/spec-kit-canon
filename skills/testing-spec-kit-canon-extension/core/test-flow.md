@@ -6,6 +6,8 @@
 - Use the sibling layout from `DEVELOPMENT.md`:
   - `../spec-kit`
   - `../spec-kit-canon`
+  - `../spec-kit-canon/extension`
+  - `../spec-kit-canon/preset`
   - `../spec-kit-canon-test`
 - Track workflow state in `spec-kit-canon-test/.specify/tmp/testing-spec-kit-canon-extension-progress.json`.
 - Write the final report to `spec-kit-canon-test/.specify/tmp/testing-spec-kit-canon-extension-report.md`.

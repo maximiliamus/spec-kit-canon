@@ -1,6 +1,6 @@
 {
   "updated_at_utc": "2026-03-27T19:22:03.542720+00:00",
-  "preset_target": "presets/canon-core",
+  "preset_target": "preset",
   "spec_kit_release": {
     "requested_tag": "latest",
     "resolved_tag": "v0.4.3",
@@ -21,9 +21,9 @@
       "constitution"
     ],
     "canon_owned_files": [
-      "presets/canon-core/templates/canon-toc-template.md",
-      "presets/canon-core/templates/root-gitattributes-template.txt",
-      "presets/canon-core/preset.yml"
+      "preset/templates/canon-toc-template.md",
+      "preset/templates/root-gitattributes-template.txt",
+      "preset/preset.yml"
     ]
   }
 }
