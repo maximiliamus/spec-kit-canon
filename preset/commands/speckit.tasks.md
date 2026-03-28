@@ -14,15 +14,17 @@ scripts:
   ps: pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Json
 ---
 
+<!-- spec-kit-canon:start preconditions -->
 ## Pre-conditions (execute before any other step)
 
 Before producing any output:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 3 — Separation of Abstraction Levels**: tasks.md contains granular executable steps and independently verifiable work units only; never mix in WHAT/WHY (spec) or architectural decisions (plan)
-   - **Section 7 — Workflow Enforcement**: do not produce tasks before a plan exists; tasks must be derived from and consistent with plan.md
-   - **Section 9 — Definition of Done**: every task must be traceable to an acceptance criterion in spec.md
+   - **Section 3 — Separation of Abstraction Levels**: `tasks.md` contains granular executable steps and independently verifiable work units only; never mix in WHAT/WHY (spec) or architectural decisions (plan)
+   - **Section 7 — Workflow Enforcement**: do not produce tasks before a plan exists; tasks must be derived from and consistent with `plan.md`
+   - **Section 9 — Definition of Done**: every task must be traceable to an acceptance criterion in `spec.md`
+<!-- spec-kit-canon:end preconditions -->
 
 ## User Input
 
@@ -98,6 +100,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Dependencies section showing story completion order
    - Parallel execution examples per story
    - Implementation strategy section (MVP first, incremental delivery)
+   <!-- spec-kit-canon:start post-implementation-canon-drift-note -->
+   - A visible note in the final notes or implementation strategy that the
+     constitution-mandated post-implementation canon drift workflow still
+     happens after coding and is outside the implementation checklist for this
+     command
+   <!-- spec-kit-canon:end post-implementation-canon-drift-note -->
 
 5. **Report**: Output path to generated tasks.md and summary:
    - Total task count
@@ -211,3 +219,8 @@ Every task MUST strictly follow this format:
   - Within each story: Tests (if requested) → Models → Services → Endpoints → Integration
   - Each phase should be a complete, independently testable increment
 - **Final Phase**: Polish & Cross-Cutting Concerns
+<!-- spec-kit-canon:start post-implementation-canon-drift-guideline -->
+- Keep `tasks.md` focused on implementation work, but explicitly note when
+  constitution-required follow-up workflow such as `/speckit.canon.drift`
+  remains required after implementation before the feature is truly done.
+<!-- spec-kit-canon:end post-implementation-canon-drift-guideline -->

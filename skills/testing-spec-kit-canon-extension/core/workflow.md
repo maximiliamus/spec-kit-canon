@@ -64,7 +64,7 @@ python skills/testing-spec-kit-canon-extension/scripts/manage_progress.py init -
 
 That flag resets the progress file to step 1 and records that the sandbox
 should be fully cleared when `reset_test_project.py` is run for the first
-step. `--script sh|ps` records which Spec-Kit script column the sandbox
+step. `--script sh|ps` records which Spec Kit script column the sandbox
 must scaffold with. If it is omitted, the workflow still uses the host default:
 `ps` on Windows and `sh` elsewhere. The examples in this workflow set `sh`
 explicitly so the documented flow stays bash-first across platforms. If the

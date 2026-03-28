@@ -5,15 +5,17 @@ scripts:
   ps: pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Json
 ---
 
+<!-- spec-kit-canon:start preconditions -->
 ## Pre-conditions (execute before any other step)
 
 Before evaluating or producing any output:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 3 — Separation of Abstraction Levels**: verify that spec.md contains only WHAT/WHY — flag any HOW, architecture decisions, or code structure as violations
+   - **Section 3 — Separation of Abstraction Levels**: verify that `spec.md` contains only WHAT/WHY — flag any HOW, architecture decisions, or code structure as violations
    - **Section 4 — Mandatory Change Declaration**: verify that every spec includes canon references, change type, impact analysis, acceptance criteria, and migration notes if applicable
    - **Section 5 — Change Classification**: verify that exactly one primary change type is declared per the allowed list
+<!-- spec-kit-canon:end preconditions -->
 
 ## Checklist Purpose: "Unit Tests for English"
 

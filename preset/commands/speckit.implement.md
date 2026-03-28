@@ -5,6 +5,7 @@ scripts:
   ps: pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
 ---
 
+<!-- spec-kit-canon:start preconditions -->
 ## Pre-conditions (execute before any other step)
 
 Before writing any code or making any changes:
@@ -13,9 +14,10 @@ Before writing any code or making any changes:
 2. Apply the following from the constitution to all subsequent steps:
    - **Section 1.2 — Rules for Canon**: do not compress, duplicate, or modify canon files unless the spec explicitly requires it; always reference canon sections by exact file path
    - **Section 7 — Workflow Enforcement**: do not implement before /speckit.analyze has passed; confirm the full workflow chain (specify → clarify → checklist → plan → tasks → analyze) is complete
-   - **Section 8 — No Hallucinated Requirements**: implement only what is stated in spec.md and tasks.md; if canon is silent on a detail, mark it as an explicit assumption before proceeding
+   - **Section 8 — No Hallucinated Requirements**: implement only what is stated in `spec.md` and `tasks.md`; if canon is silent on a detail, mark it as an explicit assumption before proceeding
    - **Section 9 — Definition of Done**: implementation is complete only when tests validate acceptance criteria and canon is updated if required
    - **Section 10 — Terminology**: all code, comments, and documentation must use Canon terminology exactly
+<!-- spec-kit-canon:end preconditions -->
 
 ## User Input
 

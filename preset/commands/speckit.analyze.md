@@ -5,14 +5,16 @@ scripts:
   ps: pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
 ---
 
+<!-- spec-kit-canon:start preconditions -->
 ## Pre-conditions (execute before any other step)
 
 Before producing any output:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 7 — Workflow Enforcement**: analyze must confirm that spec.md, plan.md, and tasks.md are all present and mutually consistent before implementation is allowed; block /speckit.implement if inconsistencies are found
-   - **Section 9 — Definition of Done**: verify that spec, plan, and tasks together satisfy all acceptance criteria and DoD requirements
+   - **Section 7 — Workflow Enforcement**: analyze must confirm that `spec.md`, `plan.md`, and `tasks.md` are all present and mutually consistent before implementation is allowed; block /speckit.implement if inconsistencies are found
+   - **Section 9 — Definition of Done**: verify that `spec.md`, `plan.md`, and `tasks.md` together satisfy all acceptance criteria and DoD requirements
+<!-- spec-kit-canon:end preconditions -->
 
 ## User Input
 
@@ -31,6 +33,16 @@ Identify inconsistencies, duplications, ambiguities, and underspecified items ac
 **STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
 
 **Constitution Authority**: The project constitution (`/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/speckit.analyze`.
+
+<!-- spec-kit-canon:start canon-bootstrap-exception -->
+**Canon bootstrap exception**: If the constitution explicitly allows bootstrap
+delivery of canon-defined baseline behavior into an otherwise empty or
+non-runnable codebase, do not flag that bootstrap increment as duplication
+solely because canon already defines the behavior. In that case, only flag
+duplication when `spec.md` copies canon prose or redefines canon facts instead of
+referencing canon as the source of truth and focusing on delivery scope plus
+canon-silent assumptions.
+<!-- spec-kit-canon:end canon-bootstrap-exception -->
 
 ## Execution Steps
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-[PROJECT_NAME] is a trivial Todo service used to validate the Spec-Kit Canon workflow from initialization through canon drift updates.
+[PROJECT_NAME] is a trivial Todo service used to validate the Spec Kit Canon workflow from initialization through canon drift updates.
 
 ## Scope
 

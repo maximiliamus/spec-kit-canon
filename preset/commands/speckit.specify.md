@@ -13,17 +13,19 @@ scripts:
   ps: pwsh -NoProfile -File .specify/scripts/powershell/create-new-feature.ps1
 ---
 
+<!-- spec-kit-canon:start preconditions -->
 ## Pre-conditions (execute before any other step)
 
 Before generating the branch name or writing any content:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 6 — Git Branching Strategy**: use the `<type>-<scope>-<short-description>` template with the exact type and scope codes defined in the tables; the numeric prefix `###-` is prepended by Spec-Kit tooling
+   - **Section 6 — Git Branching Strategy**: use the `<type>-<scope>-<short-description>` template with the exact type and scope codes defined in the tables; the numeric prefix `###-` is prepended by Spec Kit tooling
    - **Section 5 — Change Classification**: declare exactly one primary change type per the allowed list
    - **Section 4 — Mandatory Change Declaration**: every spec must include canon references, change type, impact analysis, acceptance criteria, and migration notes if applicable
-   - **Section 3 — Separation of Abstraction Levels**: spec.md describes WHAT/WHY only; never include HOW, architecture decisions, or code structure
+   - **Section 3 — Separation of Abstraction Levels**: `spec.md` describes WHAT/WHY only; never include HOW, architecture decisions, or code structure
 3. If `.specify/extensions/canon/canon-config.yml` was changed since the last constitution update, stop and instruct the user to rerun `/speckit.constitution` first so project name and Section 6 branch strategy stay aligned with canon config.
+<!-- spec-kit-canon:end preconditions -->
 
 ## User Input
 
@@ -112,6 +114,16 @@ Given that feature description, do this:
        If empty: ERROR "No feature description provided"
     2. Extract key concepts from description
        Identify: actors, actions, data, constraints
+    <!-- spec-kit-canon:start bootstrap-delta-framing -->
+    2.5. If the requested work is implementation or delivery of behavior that
+         is already defined in canon, frame the spec as the incremental delivery
+         delta against canon rather than restating canon as if it were new
+         product behavior.
+         - Reference existing canon files directly instead of duplicating their
+           entity definitions, baseline API semantics, or system facts.
+         - Keep the spec focused on the change boundary, delivery scope,
+           acceptance criteria, and exclusions for this increment.
+    <!-- spec-kit-canon:end bootstrap-delta-framing -->
     3. For unclear aspects:
        - Make informed guesses based on context and industry standards
        - Only mark with [NEEDS CLARIFICATION: specific question] if:
@@ -264,6 +276,11 @@ Given that feature description, do this:
 - Focus on **WHAT** users need and **WHY**.
 - Avoid HOW to implement (no tech stack, APIs, code structure).
 - Written for business stakeholders, not developers.
+<!-- spec-kit-canon:start bootstrap-delta-guideline -->
+- When canon already defines baseline behavior, describe only the incremental
+  delivery scope and acceptance boundary for this feature. Do not duplicate
+  canon content into `spec.md`.
+<!-- spec-kit-canon:end bootstrap-delta-guideline -->
 - DO NOT create any checklists that are embedded in the spec. That will be a separate command.
 
 ### Section Requirements

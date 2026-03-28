@@ -20,7 +20,7 @@ Before doing anything:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 6 — Git Branching Strategy**: the numeric prefix `###-` is prepended by Spec-Kit tooling; the suffix is the slug
+   - **Section 6 — Git Branching Strategy**: the numeric prefix `###-` is prepended by Spec Kit tooling; the suffix is the slug
    - **Section 3 — Separation of Abstraction Levels**: vibecode.md captures intent at WHAT level — no implementation details beyond what the user provided
 
 ## User Input

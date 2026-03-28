@@ -16,15 +16,17 @@ agent_scripts:
   ps: pwsh -NoProfile -File .specify/scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
 ---
 
+<!-- spec-kit-canon:start preconditions -->
 ## Pre-conditions (execute before any other step)
 
 Before producing any output:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 3 — Separation of Abstraction Levels**: plan.md describes HOW only — architectural decisions and tradeoffs; never include WHAT/WHY content (that belongs in spec.md)
-   - **Section 7 — Workflow Enforcement**: do not produce a plan if the checklist has not passed; confirm spec.md is complete and valid before proceeding
-   - **Section 9 — Definition of Done**: plan must be consistent with the spec and set the foundation for tasks that satisfy acceptance criteria
+   - **Section 3 — Separation of Abstraction Levels**: `plan.md` describes HOW only — architectural decisions and tradeoffs; never include WHAT/WHY content (that belongs in `spec.md`)
+   - **Section 7 — Workflow Enforcement**: do not produce a plan if the checklist has not passed; confirm `spec.md` is complete and valid before proceeding
+   - **Section 9 — Definition of Done**: `plan.md` must be consistent with the spec and set the foundation for tasks that satisfy acceptance criteria
+<!-- spec-kit-canon:end preconditions -->
 
 ## User Input
 
@@ -166,4 +168,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Key rules
 
 - Use absolute paths
+<!-- spec-kit-canon:start canon-visible-assumptions -->
+- Keep plan decisions downstream of `spec.md` and canon. Do not introduce new
+  externally observable assumptions such as identifier typing, error response
+  semantics, or user-visible data constraints unless they already appear in
+  `spec.md`/canon or are first added to `spec.md` as explicit assumptions.
+- Do not invent vague performance goals. If the user or spec does not define a
+  measurable target, omit that goal or state that no additional performance
+  target is defined for this increment.
+<!-- spec-kit-canon:end canon-visible-assumptions -->
 - ERROR on gate failures or unresolved clarifications

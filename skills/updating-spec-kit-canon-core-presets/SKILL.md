@@ -3,7 +3,7 @@ name: updating-spec-kit-canon-core-presets
 description: Sync `preset/` with the latest released upstream `spec-kit` core command sources. Use when rebasing `preset/commands/*.md` or `preset/templates/constitution-template.md` onto the newest upstream release tag, verifying the real latest release against `../spec-kit` `origin`, fetching a missing release tag locally, exporting upstream source snapshots, preserving canon-only preconditions for the regular core commands, and handling the larger `speckit.constitution` merge.
 ---
 
-# Updating Spec-Kit Canon Core Presets
+# Updating Spec Kit Canon Core Presets
 
 Use this skill to refresh `preset/` from the latest released
 upstream `spec-kit` sources without losing the canon-specific overlay.

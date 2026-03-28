@@ -173,6 +173,46 @@ For these, inspect and test against `../spec-kit` directly, especially under:
 - `../spec-kit/templates/`
 - `../spec-kit/scripts/`
 
+## Marked Local Overlays
+
+For regular preset core command overrides that still track upstream `spec-kit`
+command bodies, wrap local overlay blocks in named HTML comment markers:
+
+```md
+<!-- spec-kit-canon:start <name> -->
+...
+<!-- spec-kit-canon:end <name> -->
+```
+
+Use these markers only for the regular upstream-tracking preset command
+overlays in `preset/commands/` when the underlying command body still comes
+primarily from the upstream `spec-kit` repository and this repo adds local
+overlay behavior on top of it.
+
+Mark coherent local overlay blocks such as:
+
+- inserted `## Pre-conditions` sections
+- canon-specific guidance blocks
+- local workflow constraints or exceptions that do not exist upstream
+
+Do not try to mark routine preset normalization line by line. Leave these
+unmarked unless they are part of a larger coherent overlay block:
+
+- `.specify/...` path rewrites
+- preset script-path normalization in frontmatter
+- `$ARGUMENTS` placeholder normalization
+
+Do not use these markers in:
+
+- `extension/commands/`
+- canon-owned preset files
+- `preset/templates/`
+- special-case manual merges such as `preset/commands/speckit.constitution.md`
+  and `preset/templates/constitution-template.md`
+
+Those files are owned directly by this repo and should be edited directly
+without overlay markers.
+
 ## Script Validation
 
 Before reinstalling into a test project, validate bundled scripts locally. Use

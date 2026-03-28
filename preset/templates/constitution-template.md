@@ -21,9 +21,9 @@ The canonical system specification baseline is located at:
 
 This structure represents the full system definition.
 
-Spec-Kit must treat `CANON_TOC` as the root of the system specification graph.
+Spec Kit must treat `CANON_TOC` as the root of the system specification graph.
 
-Let's name and reference this canonical system specification in this document and Spec-Kit's artefacts as "Canon" or "the canon".
+Let's name and reference this canonical system specification in this document and Spec Kit's artefacts as "Canon" or "the canon".
 
 ---
 
@@ -38,11 +38,11 @@ Canon is the "System Bible".
 
 ---
 
-## 2. Roles of Spec-Kit
+## 2. Roles of Spec Kit
 
 ### Evolution of the system
 
-Spec-Kit is used ONLY for:
+Spec Kit is used ONLY for:
 
 - incremental features
 - modifications
@@ -59,18 +59,33 @@ These correspond to the change classifications defined in §5, with
 performance, security, and operational work typically classified as
 Non-Functional.
 
+### Bootstrap delivery of the canon baseline
+
+If a project has canon but does not yet have a runnable implementation for that
+canon-defined baseline, Spec Kit MAY be used to deliver that baseline into the
+codebase as a one-time bootstrap increment.
+
+For that bootstrap path:
+
+- canon remains the source of truth for the behavior being delivered
+- spec.md MUST describe the delivery increment, scope boundary, and exclusions
+  for the bootstrap rather than copying canon prose into feature artifacts
+- any transport, route, protocol, or error-format choice that canon does not
+  define MUST be recorded as an explicit assumption or incremental requirement
+  before implementation
+
 ### Support of the canon integrity
 
-- Spec-Kit does NOT replace the canon.
+- Spec Kit does NOT replace the canon.
 - Canon defines the system.
-- Spec-Kit defines system evolution.
-- Spec-Kit updates the canon if specification drift is determined.
+- Spec Kit defines system evolution.
+- Spec Kit updates the canon if specification drift is determined.
 
 ### Support of spec-first and code-first development workflows
 
-Spec-Kit workflow could be of two types:
+Spec Kit workflow could be of two types:
 
-- Standard workflow. Full spec-first workflow with standard Spec-Kit commands for the incremental spec development.
+- Standard workflow. Full spec-first workflow with standard Spec Kit commands for the incremental spec development.
 - Vibecoding workflow. Simplified code-first workflow with few additional vibecoding-related commands for making quick changes into the codebase and reflecting them into the canon.
 
 Note: Each workflow must be performed only in a separate branch. Any workflow (i.e. any command execution) is NOT allowed in the base branch configured in `.specify/extensions/canon/canon-config.yml` under `branching.base`. Exceptions are /speckit.specify and /speckit.canon.vibecode-specify, which start the corresponding workflows from that configured base branch.
@@ -228,7 +243,7 @@ Template for branch name:
 ```
 
 IMPORTANT:
-This template does not discard Spec-Kit numbering of branches in kind of "###-"!
+This template does not discard Spec Kit numbering of branches in kind of "###-"!
 Template only defines what goes after numeric prefix!
 
 `<type>` MUST be one of the project-configured branch type codes. The type

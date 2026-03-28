@@ -400,6 +400,10 @@ Formatting & Style Requirements:
   that do not exist yet.
 - Wrap long lines for readability where practical, but do not introduce awkward
   formatting.
+- Preserve the bundled code-fence shape exactly for all code blocks copied from
+  the baseline. If a bundled baseline example or template block uses plain
+  triple backticks, keep plain triple backticks and do not add a language info
+  string unless the baseline block already includes one.
 - Keep a single blank line between sections.
 - Avoid trailing whitespace.
 - Use ASCII only.

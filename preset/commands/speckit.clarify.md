@@ -9,6 +9,7 @@ scripts:
    ps: pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
 ---
 
+<!-- spec-kit-canon:start preconditions -->
 ## Pre-conditions (execute before any other step)
 
 Before asking clarifying questions or producing any output:
@@ -18,6 +19,7 @@ Before asking clarifying questions or producing any output:
    - **Section 3 — Separation of Abstraction Levels**: clarifications must stay at the WHAT/WHY level; never introduce HOW, architecture decisions, or code structure
    - **Section 8 — No Hallucinated Requirements**: if Canon is silent on a point, mark it as an explicit assumption — never invent implicit system behavior
    - **Section 10 — Terminology**: all questions and answers must use Canon terminology exactly; no synonyms that create semantic drift
+<!-- spec-kit-canon:end preconditions -->
 
 ## User Input
 

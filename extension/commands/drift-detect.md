@@ -101,6 +101,14 @@ For each D-XXX item found, assign exactly one status before writing spec.drift.m
 **Classification rules**:
 
 - `REJECTED` is for things invisible at the spec/canon abstraction level (internal helpers, compat shims, implementation patterns). If in doubt between `REJECTED` and asking the operator, ask the operator — it is safer.
+- When autonomous execution or prior workflow context forces best-judgment
+  classification without an operator answer, prefer `SPEC-REJECTED` for a
+  coherent, user-visible capability that appears intentionally added on the
+  current branch and is supported by surrounding implementation evidence such as
+  tests, shared model updates, or plan/research notes that leave room for the
+  enhancement. Reserve `IMPL-REJECTED` for clear mistakes, regressions, or
+  behavior that remains obviously accidental or incompatible with the feature's
+  intended direction.
 - When spec and implementation diverge without documented justification: present the discrepancy and ask the operator: _"D-XXX ([title]): spec says [X], implementation does [Y]. Which should be authoritative? **I** = implementation must be fixed (IMPL-REJECTED) / **S** = spec must be corrected (SPEC-REJECTED)"_ — accept `i`/`I` or `s`/`S`.
 - **Process each ambiguous item one at a time. Never ask about multiple items at once.**
 - Do NOT assign `ACCEPTED` to a behavioral deviation that directly contradicts a spec acceptance criterion unless plan.md or spec.md provides documented rationale.
@@ -133,4 +141,3 @@ Do NOT modify spec.md, canon files, tasks.md, tasks.drift.md, or any other file.
 - Do NOT include a `## Resolution` section in the output.
 - Only report spec items with actual drift — exclude items where implementation matches spec.
 - Every finding must trace back to a task drift item (TD-XXX) in tasks.drift.md.
-
