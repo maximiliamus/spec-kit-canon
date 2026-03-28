@@ -287,12 +287,20 @@ def get_step(state: dict, step_id: str) -> dict:
     raise SystemExit(f"Unknown step id: {step_id}")
 
 
-def append_history(state: dict, event: str, step_id: str | None = None, note: str | None = None) -> None:
+def append_history(
+    state: dict,
+    event: str,
+    step_id: str | None = None,
+    note: str | None = None,
+    extra_fields: dict[str, object] | None = None,
+) -> None:
     entry: dict[str, object] = {"event": event, "timestamp": now_iso()}
     if step_id is not None:
         entry["step_id"] = step_id
     if note:
         entry["note"] = note
+    if extra_fields:
+        entry.update(extra_fields)
     state["history"].append(entry)
 
 
@@ -329,6 +337,28 @@ def handle_init(args: argparse.Namespace, workspace_root: Path, project_dir: Pat
 
 def handle_show(progress_file: Path) -> dict:
     return load_state(progress_file)
+
+
+def handle_resume(progress_file: Path, note: str | None = None) -> dict:
+    state = load_state(progress_file)
+    current_step = state.get("current_step")
+    if current_step is None or state.get("status") != "in_progress":
+        return state
+
+    previous_updated_at = state.get("updated_at")
+    extra_fields: dict[str, object] = {}
+    if isinstance(previous_updated_at, str) and previous_updated_at.strip():
+        extra_fields["previous_updated_at"] = previous_updated_at
+
+    append_history(
+        state,
+        "resumed",
+        step_id=current_step,
+        note=note,
+        extra_fields=extra_fields,
+    )
+    write_state(progress_file, state)
+    return state
 
 
 def handle_start(progress_file: Path, step_id: str, note: str | None) -> dict:

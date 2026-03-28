@@ -19,7 +19,8 @@ import manage_progress
 REPORT_FILE_NAME = "testing-spec-kit-canon-extension-report.md"
 REPORT_STEP_ID = "generate_test_report"
 DEFAULT_HISTORY_DIR = Path("tests") / "history"
-LATEST_REPORT_FILE_NAME = f"latest-{REPORT_FILE_NAME}"
+MAX_HISTORY_REPORTS = 10
+TIMESTAMPED_REPORT_PATTERN = re.compile(r"^\d{8}T\d{4}Z-testing-spec-kit-canon-extension-report\.md$")
 CHECK_STARTERS = {
     "added",
     "canonized",
@@ -183,18 +184,36 @@ def select_timestamp(values: list[str], *, latest: bool) -> str | None:
     return selected[1]
 
 
-def archive_paths(history_dir: Path, workflow_end: str | None) -> tuple[Path, Path]:
+def archive_path(history_dir: Path, workflow_end: str | None) -> Path:
     stamp = report_timestamp(workflow_end)
-    return (
-        history_dir / f"{stamp}-{REPORT_FILE_NAME}",
-        history_dir / LATEST_REPORT_FILE_NAME,
+    return history_dir / f"{stamp}-{REPORT_FILE_NAME}"
+
+
+def list_timestamped_history_reports(history_dir: Path) -> list[Path]:
+    if not history_dir.exists():
+        return []
+    return sorted(
+        [
+            path
+            for path in history_dir.iterdir()
+            if path.is_file() and TIMESTAMPED_REPORT_PATTERN.fullmatch(path.name)
+        ],
+        key=lambda path: path.name,
     )
 
 
-def copy_report_to_history(output_path: Path, archived_path: Path, latest_path: Path) -> None:
+def prune_history_reports(history_dir: Path, keep: int = MAX_HISTORY_REPORTS) -> None:
+    reports = list_timestamped_history_reports(history_dir)
+    if len(reports) <= keep:
+        return
+    for stale_report in reports[: len(reports) - keep]:
+        stale_report.unlink(missing_ok=True)
+
+
+def copy_report_to_history(output_path: Path, archived_path: Path) -> None:
     archived_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(output_path, archived_path)
-    shutil.copy2(output_path, latest_path)
+    prune_history_reports(archived_path.parent)
 
 
 def auto_open_report(path: Path) -> str | None:
@@ -243,6 +262,25 @@ def collect_step_history(state: dict) -> dict[str, dict[str, object]]:
                 step_history["first_started_at"] = timestamp
             step_history["open_attempt_started_at"] = timestamp
             step_history["start_note"] = note
+        elif event == "resumed":
+            open_attempt_started_at = step_history.get("open_attempt_started_at")
+            previous_updated_at = (
+                entry.get("previous_updated_at")
+                if isinstance(entry.get("previous_updated_at"), str)
+                else None
+            )
+            if (
+                isinstance(attempts, list)
+                and isinstance(open_attempt_started_at, str)
+                and previous_updated_at is not None
+            ):
+                attempts.append(
+                    {
+                        "started_at": open_attempt_started_at,
+                        "ended_at": previous_updated_at,
+                    }
+                )
+            step_history["open_attempt_started_at"] = timestamp
         elif event == "error":
             open_attempt_started_at = step_history.get("open_attempt_started_at")
             if (
@@ -328,6 +366,35 @@ def step_elapsed_seconds(step_history: dict[str, object], fallback_end: str | No
 
 def count_step_errors(step_history: dict[str, object]) -> int:
     return len(error_entries(step_history))
+
+
+def workflow_resume_gap_seconds(state: dict) -> int:
+    total_seconds = 0
+    for entry in state.get("history", []):
+        if not isinstance(entry, dict) or entry.get("event") != "resumed":
+            continue
+        resumed_at = entry.get("timestamp") if isinstance(entry.get("timestamp"), str) else None
+        previous_updated_at = (
+            entry.get("previous_updated_at")
+            if isinstance(entry.get("previous_updated_at"), str)
+            else None
+        )
+        gap_seconds = duration_seconds(previous_updated_at, resumed_at)
+        if gap_seconds is None:
+            continue
+        total_seconds += gap_seconds
+    return total_seconds
+
+
+def workflow_active_elapsed_seconds(
+    state: dict,
+    workflow_start: str | None,
+    workflow_end: str | None,
+) -> int | None:
+    wall_clock_seconds = duration_seconds(workflow_start, workflow_end)
+    if wall_clock_seconds is None:
+        return None
+    return max(0, wall_clock_seconds - workflow_resume_gap_seconds(state))
 
 
 def latest_step_timestamp(state: dict, history_by_step: dict[str, dict[str, object]]) -> str | None:
@@ -500,7 +567,6 @@ def build_report(
     progress_file: Path,
     output_path: Path,
     archived_path: Path,
-    latest_path: Path,
 ) -> str:
     history_by_step = collect_step_history(state)
     steps = state["steps"]
@@ -509,7 +575,6 @@ def build_report(
     relative_progress_file = relative_path(progress_file, project_dir)
     relative_output_path = relative_path(output_path, project_dir)
     relative_archived_path = relative_path(archived_path, project_dir)
-    relative_latest_path = relative_path(latest_path, project_dir)
 
     completed_count = sum(1 for step in steps if step["status"] == "completed")
     in_progress_count = sum(1 for step in steps if step["status"] == "in_progress")
@@ -520,7 +585,10 @@ def build_report(
     current_step_title = manage_progress.STEP_TITLES.get(current_step, current_step) if current_step else "None"
     workflow_start = workflow_start_timestamp(history_by_step)
     workflow_end = latest_step_timestamp(state, history_by_step)
-    workflow_elapsed = format_elapsed(workflow_start, workflow_end)
+    workflow_wall_clock = format_elapsed(workflow_start, workflow_end)
+    workflow_active_elapsed = format_elapsed_seconds(
+        workflow_active_elapsed_seconds(state, workflow_start, workflow_end)
+    )
 
     lines = [
         "# Testing Spec-Kit Canon Extension Report",
@@ -529,15 +597,17 @@ def build_report(
         f"Start time: `{format_timestamp(workflow_start)}`",
         f"End time: `{format_timestamp(workflow_end)}`",
         "",
-        "| Workflow | Script | Status | Completed | In Progress | Pending | Current Step | Elapsed |",
+        "| Workflow | Script | Status | Completed | In Progress | Pending | Current Step | Active Elapsed |",
         "| --- | --- | --- | --- | --- | --- | --- | --- |",
         (
             f"| `{state['workflow']}` | `{script}` | `{state['status']}` | {completed_count}/{total_steps} | "
             f"{in_progress_count} | {pending_count} | {escape_cell(current_step_title)} | "
-            f"{workflow_elapsed} |"
+            f"{workflow_active_elapsed} |"
         ),
         "",
         build_assessment(state, error_count),
+        "",
+        "Elapsed metrics count workflow wall-clock time minus explicit idle gaps recorded when a run is resumed.",
         "",
         "## Test Run Metrics",
         "",
@@ -548,7 +618,8 @@ def build_report(
         f"| Pass rate | {format_percentage(completed_count, total_steps)} |",
         f"| Recorded errors | {error_count} |",
         f"| Steps with errors | {steps_with_errors} |",
-        f"| Total elapsed | {workflow_elapsed} |",
+        f"| Total active elapsed | {workflow_active_elapsed} |",
+        f"| Wall-clock span | {workflow_wall_clock} |",
         "",
         "## Step Summary",
         "",
@@ -617,7 +688,7 @@ def build_report(
             "",
             f"The rendered Markdown report is stored at `{relative_output_path}`.",
             f"A developer-history copy is stored at `{relative_archived_path}`.",
-            f"The latest archived copy is refreshed at `{relative_latest_path}`.",
+            f"History keeps up to the newest {MAX_HISTORY_REPORTS} timestamped archived copies.",
             "",
         ]
     )
@@ -637,12 +708,12 @@ def main() -> int:
 
     history_by_step = collect_step_history(state)
     workflow_end = latest_step_timestamp(state, history_by_step)
-    archived_path, latest_path = archive_paths(history_dir, workflow_end)
-    report = build_report(state, project_dir, progress_file, output_path, archived_path, latest_path)
+    archived_path = archive_path(history_dir, workflow_end)
+    report = build_report(state, project_dir, progress_file, output_path, archived_path)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report + "\n", encoding="utf-8")
-    copy_report_to_history(output_path, archived_path, latest_path)
+    copy_report_to_history(output_path, archived_path)
 
     print(f"Wrote report to {output_path}")
     print(f"Archived report to {archived_path}")

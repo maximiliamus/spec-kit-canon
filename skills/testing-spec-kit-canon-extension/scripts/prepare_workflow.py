@@ -12,6 +12,8 @@ import manage_progress
 
 
 DOCUMENTED_DEFAULT_SCRIPT = "sh"
+REPORT_FILE_NAME = "testing-spec-kit-canon-extension-report.md"
+COMPLETED_REPORT_MARKER = "The workflow is fully completed and the report reflects the full validation run."
 
 
 def parse_args() -> argparse.Namespace:
@@ -87,10 +89,34 @@ def build_resume_args(args: argparse.Namespace) -> SimpleNamespace:
     )
 
 
+def report_path_for_project(project_dir: Path) -> Path:
+    return project_dir / ".specify" / "tmp" / REPORT_FILE_NAME
+
+
+def newer_completed_report_exists(project_dir: Path, progress_file: Path) -> bool:
+    report_file = report_path_for_project(project_dir)
+    if not report_file.is_file() or not progress_file.is_file():
+        return False
+
+    try:
+        if report_file.stat().st_mtime <= progress_file.stat().st_mtime:
+            return False
+        report_text = report_file.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    return COMPLETED_REPORT_MARKER in report_text
+
+
 def main() -> int:
     args = parse_args()
     workspace_root, project_dir, progress_file = manage_progress.resolve_paths(args)
     existing_state = manage_progress.load_state(progress_file) if progress_file.exists() else None
+    stale_completed_report = (
+        existing_state is not None
+        and existing_state.get("status") != "completed"
+        and newer_completed_report_exists(project_dir, progress_file)
+    )
 
     if args.restart:
         state = manage_progress.handle_init(
@@ -116,6 +142,21 @@ def main() -> int:
             "reason": "No progress file existed, so the workflow was initialized from scratch.",
             "state": state,
         }
+    elif stale_completed_report:
+        state = manage_progress.handle_init(
+            build_init_args(pick_fresh_script(args, existing_state), from_scratch=True),
+            workspace_root,
+            project_dir,
+            progress_file,
+        )
+        result = {
+            "action": "restarted_stale_run",
+            "reason": (
+                "A newer completed report exists for this workflow, so the unfinished progress file "
+                "was treated as stale and a fresh run was initialized."
+            ),
+            "state": state,
+        }
     elif existing_state.get("status") == "completed":
         state = manage_progress.handle_init(
             build_init_args(pick_fresh_script(args, existing_state), from_scratch=True),
@@ -129,6 +170,11 @@ def main() -> int:
             "state": state,
         }
     else:
+        if existing_state.get("status") == "in_progress":
+            manage_progress.handle_resume(
+                progress_file,
+                note="Recorded a resumed workflow session so elapsed-time reporting excludes the prior idle gap.",
+            )
         state = manage_progress.handle_init(
             build_resume_args(args),
             workspace_root,

@@ -250,6 +250,15 @@ Initialize or reset that state with
 Use `--clear-test-project` there when the next run should fully wipe
 `spec-kit-canon-test` before reinstalling the extension and preset.
 
+For any agent that has these repo-local skills available, the normal way to
+start the shared extension test workflow is simply to ask:
+`Let's test the extension`.
+
+After the repo-local skills are available, that prompt is enough to start the
+dedicated testing workflow and wait for it to complete. Use explicit flags only
+when needed, for example when you want to force a fresh run or validate the
+PowerShell script column.
+
 Codex uses a global skill registry. Register or unregister the repo-local skill
 sources with the scripts in `.codex`.
 

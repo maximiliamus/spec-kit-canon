@@ -12,6 +12,7 @@
 - Track workflow state in `spec-kit-canon-test/.specify/tmp/testing-spec-kit-canon-extension-progress.json`.
 - Write the final report to `spec-kit-canon-test/.specify/tmp/testing-spec-kit-canon-extension-report.md`.
 - Archive developer-history copies under `spec-kit-canon/tests/history/`.
+- Keep only the newest 10 timestamped archived reports in that history folder.
 - Use `manage_progress.py init --script sh --clear-test-project` as the
   default documented setup, especially on Windows. Use `--script ps` only when
   you intentionally want to validate the PowerShell column.
@@ -154,7 +155,7 @@ The report must include:
 
 - an overall summary table with the selected script, workflow status,
   current step, and completed, in-progress, and pending counts
-- a test run metrics table with pass rate, recorded errors, and total elapsed time
+- a test run metrics table with pass rate, recorded errors, total active elapsed time, and wall-clock span
 - a step summary table with one row per workflow step, a short result note, and the recorded error count
 - a per-step result section that explains the outcome or evidence recorded for
   each step
@@ -164,5 +165,5 @@ The report must include:
   `<YYYYMMDDTHHMMZ>-testing-spec-kit-canon-extension-report.md`
 
 The report generator should automatically copy the rendered report into the
-extension-repo history folder and open the archived copy unless `--no-open` is
-used explicitly.
+extension-repo history folder, prune the timestamped history to the newest 10
+files, and open the archived copy unless `--no-open` is used explicitly.

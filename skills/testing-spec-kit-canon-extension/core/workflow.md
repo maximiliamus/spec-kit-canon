@@ -29,6 +29,10 @@ Archive developer-history copies in the extension repo:
 spec-kit-canon/tests/history/
 ```
 
+Keep only the newest 10 timestamped report files in that folder. When a new
+archived report is written and the count would exceed 10, remove the oldest
+timestamped file.
+
 If the workflow is started through an agent command wrapper, prepare the
 workflow state with the shared helper first. That helper resumes in-progress
 work by default, restarts automatically when the previous run already
@@ -340,7 +344,7 @@ includes:
 - an overall summary table with the selected script plus workflow status
   and completed, in-progress, and pending step counts
 - a test run metrics table with total steps, passed steps, pass rate,
-  recorded errors, and total elapsed time
+  recorded errors, total active elapsed time, and wall-clock span
 - a step summary table with every workflow step, status, elapsed timing, and
   result note, plus the recorded error count for each step
 - a per-step results section that explains the outcome of each step
@@ -350,8 +354,9 @@ includes:
   `<YYYYMMDDTHHMMZ>-testing-spec-kit-canon-extension-report.md`
 
 The report generator automatically copies the rendered Markdown report into the
-extension-repo history folder and opens the archived copy for review. Use
-`--no-open` only when you intentionally want to skip that behavior.
+extension-repo history folder, prunes the timestamped history to the newest 10
+files, and opens the archived copy for review. Use `--no-open` only when you
+intentionally want to skip that behavior.
 
 ## Shared Rules
 
