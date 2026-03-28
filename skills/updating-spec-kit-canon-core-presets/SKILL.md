@@ -1,15 +1,28 @@
 ---
 name: updating-spec-kit-canon-core-presets
-description: Sync `preset/` with the latest released upstream `spec-kit` core command sources. Use when rebasing `preset/commands/*.md` or `preset/templates/constitution-template.md` onto the newest upstream release tag, verifying the real latest release against `../spec-kit` `origin`, fetching a missing release tag locally, exporting upstream source snapshots, preserving canon-only preconditions for the regular core commands, and handling the larger `speckit.constitution` merge.
+description: Sync `preset/` with the latest released upstream `spec-kit` core command sources. Use when rebasing `preset/commands/*.md` or `preset/templates/constitution-template.md` onto the newest upstream release tag, verifying the real latest release against `../spec-kit` `origin`, fetching a missing release tag locally, exporting upstream source snapshots, preserving or intentionally retiring canon-owned HTML comment overlay blocks in the regular upstream-tracking commands, and handling the larger `speckit.constitution` merge.
 ---
 
 # Updating Spec Kit Canon Core Presets
 
 Use this skill to refresh `preset/` from the latest released
-upstream `spec-kit` sources without losing the canon-specific overlay.
+upstream `spec-kit` sources without losing the canon-specific overlays or the
+small preset-only normalizations.
 
 Read [references/sync-rules.md](./references/sync-rules.md) before editing
 `preset/`.
+Also read the `Marked Local Overlays` section in
+[`DEVELOPMENT.md`](../../DEVELOPMENT.md) before touching the regular command
+files, because that section defines when the
+`<!-- spec-kit-canon:start ... -->` / `<!-- spec-kit-canon:end ... -->`
+markup should exist and what it is allowed to wrap.
+
+For the seven regular upstream-tracking commands, treat the named HTML comment
+blocks in the current local file as the primary canon-owned delta. Those
+markers exist specifically to make upstream rebases easier: rebuild the file
+from the exported upstream release, restore the still-needed marked overlay
+blocks, and then reapply only the routine preset normalization that stays
+unmarked.
 
 The last merged upstream release is tracked in
 [spec-kit-release.json](../../preset/spec-kit-release.json).
@@ -51,7 +64,7 @@ paths are explicit.
 
 ### 2. Rebase the regular core commands
 
-Treat these files as the regular command set:
+Treat these files as the regular upstream-tracking command set:
 
 - `preset/commands/speckit.specify.md`
 - `preset/commands/speckit.clarify.md`
@@ -65,14 +78,26 @@ For each regular command:
 
 - Start from the exported upstream release file named in
   [references/sync-rules.md](./references/sync-rules.md).
-- Keep the canon `## Pre-conditions (execute before any other step)` block at
-  the top of the body.
+- Inventory the named local overlay blocks from the current canon file before
+  you rewrite it. Use the current file as the source of truth for which
+  `spec-kit-canon` blocks exist today.
+- Rebuild the target file from the upstream release text first.
+- Restore each named overlay block that still belongs in the file, keeping the
+  marker names and block contents intact when the overlay is still needed.
+- If the upstream release absorbed, superseded, or invalidated a marked local
+  overlay, remove that overlay instead of blindly re-inserting it. Keep that
+  choice explicit in the diff and review notes.
+- If upstream section movement makes the old insertion point invalid, relocate
+  the retained overlay to the nearest coherent section while keeping the block
+  itself clearly bounded by the same markers.
 - Keep only preset-specific path and placeholder normalization needed for
   installed preset commands:
   - `.specify/templates/...` instead of raw upstream `templates/...`
   - `.specify/scripts/...` command paths instead of raw upstream repo-relative
     script paths
   - `$ARGUMENTS` placeholder style in markdown command content
+- Do not add markers around routine preset normalization, and do not preserve
+  any other stale local drift outside the retained marker blocks.
 - Remove any other drift unless the new upstream release makes the local delta
   necessary.
 
@@ -109,11 +134,16 @@ adaptation:
 After editing:
 
 - Review `git diff -- preset`.
-- Confirm every regular command still contains exactly one leading
-  `## Pre-conditions` block.
-- Confirm non-precondition diffs in the regular commands are limited to the
-  preset normalization described in
+- For each regular command, compare the final named overlay-block inventory
+  against the pre-merge local file. Every retained block must still have a
+  matching start/end marker pair.
+- Confirm any removed marker block was intentionally retired because the new
+  upstream release now covers it or because the canon-only behavior changed.
+- Confirm non-marker diffs in the regular commands are limited to the preset
+  normalization described in
   [references/sync-rules.md](./references/sync-rules.md).
+- Confirm the regular commands still keep the expected canon-specific overlay
+  behavior, especially the leading `preconditions` block where applicable.
 - Run the skill validator:
 
 ```bash
@@ -156,4 +186,4 @@ delete it only after you are done.
   checked-in metadata for the last upstream `spec-kit` release merged into
   `preset/`.
 - [references/sync-rules.md](./references/sync-rules.md): file map, allowed
-  deltas, and validation rules.
+  deltas, marker-aware rebase rules, and validation rules.

@@ -13,7 +13,7 @@
 
 ## Source Map
 
-Regular command overlays:
+Regular upstream-tracking commands:
 
 | Upstream release source | Canon target |
 | --- | --- |
@@ -42,15 +42,51 @@ Canon-owned files:
 
 Regular commands:
 
-- Keep the canon `## Pre-conditions (execute before any other step)` block.
+- Preserve or intentionally retire the named
+  `<!-- spec-kit-canon:start <name> --> ... <!-- spec-kit-canon:end <name> -->`
+  overlay blocks from the current local file.
 - Keep preset-ready path normalization:
   - `.specify/templates/...`
   - `.specify/scripts/...`
 - Keep markdown argument placeholder normalization as `$ARGUMENTS`.
 - Keep the existing `speckit.<name>.md` filenames.
 
-Everything else in the regular command bodies should track the upstream release
-as closely as possible.
+Outside those marker blocks and the routine preset normalization, the regular
+command bodies should track the upstream release as closely as possible.
+
+## Marker-Aware Rebase Workflow
+
+For the seven regular commands:
+
+1. Inventory the named `spec-kit-canon` overlay blocks from the current local
+   canon file.
+2. Start from the exported upstream release text for that command.
+3. Restore each local overlay block that still belongs in the command, keeping
+   the marker names and block contents intact when retained.
+4. If the upstream release absorbed or invalidated an overlay, remove that
+   overlay instead of re-inserting it.
+5. If the upstream release moved the surrounding section, relocate the retained
+   overlay to the nearest coherent section rather than preserving stale
+   placement mechanically.
+6. Reapply only the routine preset normalization for installed preset paths and
+   `$ARGUMENTS`.
+7. Do not add markers around routine path or placeholder normalization.
+
+Current regular-command overlay inventory:
+
+| Canon target | Named overlay blocks |
+| --- | --- |
+| `preset/commands/speckit.specify.md` | `preconditions`, `bootstrap-delta-framing`, `bootstrap-delta-guideline` |
+| `preset/commands/speckit.clarify.md` | `preconditions` |
+| `preset/commands/speckit.checklist.md` | `preconditions` |
+| `preset/commands/speckit.plan.md` | `preconditions`, `canon-visible-assumptions` |
+| `preset/commands/speckit.tasks.md` | `preconditions`, `post-implementation-canon-drift-note`, `post-implementation-canon-drift-guideline` |
+| `preset/commands/speckit.analyze.md` | `preconditions`, `canon-bootstrap-exception` |
+| `preset/commands/speckit.implement.md` | `preconditions` |
+
+If a future local command contains an additional named overlay block, treat it
+the same way as long as it still satisfies the overlay rules in
+`DEVELOPMENT.md`.
 
 Constitution files:
 
@@ -79,10 +115,18 @@ local frontmatter or prose to preserve that behavior in preset-installed form.
 ## Validation Checklist
 
 - Review `git diff -- preset`.
-- For the seven regular commands, make sure any body delta after the
-  preconditions block is either:
+- For the seven regular commands, compare the final marker inventory against
+  the pre-merge local file. Each retained marker block must have a matching
+  start/end pair, and there must be no orphan markers.
+- If a previously existing marker block was removed, confirm the removal was
+  intentional because upstream now covers that behavior or the local overlay is
+  no longer valid.
+- For the seven regular commands, make sure any body delta outside the retained
+  marker blocks is either:
   - a direct upstream release change, or
   - a required preset normalization described above.
+- Confirm the leading `preconditions` overlay still exists in every regular
+  command where it existed before unless you intentionally retired it.
 - For `speckit.constitution.md` and `constitution-template.md`, verify that the
   canon-specific workflow still references:
   - `.specify/extensions/canon/canon-config.yml`
