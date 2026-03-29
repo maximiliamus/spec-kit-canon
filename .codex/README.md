@@ -9,7 +9,7 @@ The registration scripts manage every repo-local skill under `skills/`.
 Current shared skill sources:
 
 - `skills/testing-spec-kit-canon-extension`
-- `skills/updating-spec-kit-canon-core-presets`
+- `skills/syncing-spec-kit-canon-core-preset`
 
 They link each repo skill source into the Codex skill registry under:
 
@@ -82,7 +82,7 @@ The Codex prompt entrypoints for this repo are:
 
 ```text
 .codex/prompts/testing-spec-kit-canon-extension.md
-.codex/prompts/updating-spec-kit-canon-core-presets.md
+.codex/prompts/syncing-spec-kit-canon-core-preset.md
 ```
 
 Those prompts should stay thin and point back to the shared skills instead of

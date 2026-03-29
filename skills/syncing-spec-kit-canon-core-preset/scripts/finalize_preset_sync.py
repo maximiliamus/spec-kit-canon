@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 
-SYNC_WORKSPACE_DIRNAME = "updating-spec-kit-canon-core-presets"
+SYNC_WORKSPACE_DIRNAME = "syncing-spec-kit-canon-core-preset"
 DEFAULT_METADATA_RELATIVE = (
     "preset/spec-kit-release.json"
 )
@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "Explicit manifest.json path to finalize. Defaults to the newest "
-            "manifest under .tmp/updating-spec-kit-canon-core-presets/."
+            "manifest under .tmp/syncing-spec-kit-canon-core-preset/."
         ),
     )
     parser.add_argument(

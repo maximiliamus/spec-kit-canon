@@ -25,7 +25,7 @@ REGULAR_COMMANDS = [
 ]
 SPECIAL_COMMANDS = ["constitution"]
 ALL_COMMANDS = REGULAR_COMMANDS + SPECIAL_COMMANDS
-SYNC_WORKSPACE_DIRNAME = "updating-spec-kit-canon-core-presets"
+SYNC_WORKSPACE_DIRNAME = "syncing-spec-kit-canon-core-preset"
 DEFAULT_METADATA_RELATIVE = "preset/spec-kit-release.json"
 
 
@@ -57,7 +57,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "Output directory. Defaults to "
-            ".tmp/updating-spec-kit-canon-core-presets/<resolved-tag> inside canon-dir."
+            ".tmp/syncing-spec-kit-canon-core-preset/<resolved-tag> inside canon-dir."
         ),
     )
     parser.add_argument(

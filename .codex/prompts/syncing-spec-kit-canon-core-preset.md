@@ -1,6 +1,6 @@
-# Update Spec-Kit Canon Core Presets
+# Sync Spec-Kit Canon Core Preset
 
-Use `$updating-spec-kit-canon-core-presets`.
+Use `$syncing-spec-kit-canon-core-preset`.
 
 Default behavior:
 
@@ -24,6 +24,6 @@ PowerShell alternative:
 pwsh -NoProfile -File .codex/register-skills.ps1
 ```
 
-After that, use `$updating-spec-kit-canon-core-presets`.
+After that, use `$syncing-spec-kit-canon-core-preset`.
 
 Do not duplicate the workflow in this prompt file.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync Canon Core Preset"
+  short_description: "Rebase canon-core onto the latest spec-kit release with marker-aware overlays"
+  default_prompt: "Use $syncing-spec-kit-canon-core-preset to refresh preset/ from the latest released upstream spec-kit commands. Verify the newest release tag against origin, fetch it if missing locally, export the upstream source files, rebuild the regular preset commands from upstream while preserving or intentionally retiring named spec-kit-canon overlay blocks plus required preset normalization, manually merge the constitution-specific files, and validate the resulting preset diffs."

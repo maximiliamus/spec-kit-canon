@@ -1,7 +1,7 @@
-# Update Spec-Kit Canon Core Presets
+# Sync Spec-Kit Canon Core Preset
 
 Use the Claude skill at
-`.claude/skills/updating-spec-kit-canon-core-presets`.
+`.claude/skills/syncing-spec-kit-canon-core-preset`.
 
 Default behavior:
 

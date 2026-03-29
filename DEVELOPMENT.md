@@ -263,7 +263,7 @@ The shared skill sources for this repo stay in:
 
 ```text
 skills/testing-spec-kit-canon-extension
-skills/updating-spec-kit-canon-core-presets
+skills/syncing-spec-kit-canon-core-preset
 ```
 
 These skills are not Codex-specific. The shared workflows, prompts, scripts,
@@ -274,9 +274,9 @@ Project-local entrypoints and shortcuts live in agent-specific repo folders:
 .claude/skills/testing-spec-kit-canon-extension/SKILL.md
 .claude/commands/test-spec-kit-canon-extension.md
 .codex/prompts/testing-spec-kit-canon-extension.md
-.claude/skills/updating-spec-kit-canon-core-presets/SKILL.md
-.claude/commands/update-spec-kit-canon-core-presets.md
-.codex/prompts/updating-spec-kit-canon-core-presets.md
+.claude/skills/syncing-spec-kit-canon-core-preset/SKILL.md
+.claude/commands/sync-spec-kit-canon-core-preset.md
+.codex/prompts/syncing-spec-kit-canon-core-preset.md
 ```
 
 The testing workflow stores resumable run state in:

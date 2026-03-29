@@ -136,7 +136,7 @@ local frontmatter or prose to preserve that behavior in preset-installed form.
 - Update
   `preset/spec-kit-release.json`
   only after the preset rebase is complete and validated.
-- Remove `.tmp/updating-spec-kit-canon-core-presets/<tag>/` at the end of the
+- Remove `.tmp/syncing-spec-kit-canon-core-preset/<tag>/` at the end of the
   workflow unless you intentionally kept it for extra inspection.
 - If the constitution workflow changes materially, re-run the shared extension
   validation workflow after finishing the rebase.

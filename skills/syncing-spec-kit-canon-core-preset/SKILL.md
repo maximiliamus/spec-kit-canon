@@ -1,9 +1,9 @@
 ---
-name: updating-spec-kit-canon-core-presets
+name: syncing-spec-kit-canon-core-preset
 description: Sync `preset/` with the latest released upstream `spec-kit` core command sources. Use when rebasing `preset/commands/*.md` or `preset/templates/constitution-template.md` onto the newest upstream release tag, verifying the real latest release against `../spec-kit` `origin`, fetching a missing release tag locally, exporting upstream source snapshots, preserving or intentionally retiring canon-owned HTML comment overlay blocks in the regular upstream-tracking commands, and handling the larger `speckit.constitution` merge.
 ---
 
-# Updating Spec Kit Canon Core Presets
+# Syncing Spec Kit Canon Core Preset
 
 Use this skill to refresh `preset/` from the latest released
 upstream `spec-kit` sources without losing the canon-specific overlays or the
@@ -47,13 +47,13 @@ Default behavior:
   export, rebase, or finalize step.
 - Fetch the release tag locally if the clone does not have it yet.
 - Export the upstream release sources and the current local `canon-core` files
-  into `.tmp/updating-spec-kit-canon-core-presets/<tag>/`.
+  into `.tmp/syncing-spec-kit-canon-core-preset/<tag>/`.
 - Write `manifest.json` with the resolved tag, commit, and file map.
 
 Recommended command:
 
 ```bash
-python skills/updating-spec-kit-canon-core-presets/scripts/export_upstream_release.py
+python skills/syncing-spec-kit-canon-core-preset/scripts/export_upstream_release.py
 ```
 
 If the script reports that the recorded release already matches the latest
@@ -147,7 +147,7 @@ After editing:
 - Run the skill validator:
 
 ```bash
-python C:/Users/maxs/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/updating-spec-kit-canon-core-presets
+python C:/Users/maxs/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/syncing-spec-kit-canon-core-preset
 ```
 
 - If the preset behavior changed materially, run the shared extension test skill
@@ -160,14 +160,14 @@ After validation passes, finalize the sync:
 - Update
   [spec-kit-release.json](../../preset/spec-kit-release.json)
   from the manifest of the workspace you just merged.
-- Remove `.tmp/updating-spec-kit-canon-core-presets/<tag>/`.
-- If that leaves `.tmp/updating-spec-kit-canon-core-presets/` empty, remove it.
+- Remove `.tmp/syncing-spec-kit-canon-core-preset/<tag>/`.
+- If that leaves `.tmp/syncing-spec-kit-canon-core-preset/` empty, remove it.
 - If that also leaves `.tmp/` empty, remove `.tmp/`.
 
 Recommended command:
 
 ```bash
-python skills/updating-spec-kit-canon-core-presets/scripts/finalize_preset_sync.py
+python skills/syncing-spec-kit-canon-core-preset/scripts/finalize_preset_sync.py
 ```
 
 If you need to inspect the exported workspace longer, use `--keep-temp` and
