@@ -8,6 +8,7 @@ The registration scripts manage every repo-local skill under `skills/`.
 
 Current shared skill sources:
 
+- `skills/bumping-spec-kit-canon-version`
 - `skills/testing-spec-kit-canon-extension`
 - `skills/syncing-spec-kit-canon-core-preset`
 
@@ -81,6 +82,7 @@ pwsh -NoProfile -File .codex/unregister-skills.ps1 -Force
 The Codex prompt entrypoints for this repo are:
 
 ```text
+.codex/prompts/bumping-spec-kit-canon-version.md
 .codex/prompts/testing-spec-kit-canon-extension.md
 .codex/prompts/syncing-spec-kit-canon-core-preset.md
 ```

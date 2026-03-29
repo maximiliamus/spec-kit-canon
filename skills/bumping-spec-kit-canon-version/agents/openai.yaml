@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bump Spec-Kit Canon Version"
+  short_description: "Update both canon manifest versions"
+  default_prompt: "Use $bumping-spec-kit-canon-version to bump the next minor release version in extension/extension.yml and preset/preset.yml, or bump major or patch only when explicitly requested."

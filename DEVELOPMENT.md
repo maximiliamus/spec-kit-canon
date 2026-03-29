@@ -262,6 +262,7 @@ That is the shape required by the upstream Spec Kit installers for
 The shared skill sources for this repo stay in:
 
 ```text
+skills/bumping-spec-kit-canon-version
 skills/testing-spec-kit-canon-extension
 skills/syncing-spec-kit-canon-core-preset
 ```
@@ -271,6 +272,9 @@ references, and template assets live under those shared skill folders.
 Project-local entrypoints and shortcuts live in agent-specific repo folders:
 
 ```text
+.claude/skills/bumping-spec-kit-canon-version/SKILL.md
+.claude/commands/bump-spec-kit-canon-version.md
+.codex/prompts/bumping-spec-kit-canon-version.md
 .claude/skills/testing-spec-kit-canon-extension/SKILL.md
 .claude/commands/test-spec-kit-canon-extension.md
 .codex/prompts/testing-spec-kit-canon-extension.md
@@ -291,13 +295,18 @@ Use `--clear-test-project` there when the next run should fully wipe
 `spec-kit-canon-test` before reinstalling the extension and preset.
 
 For any agent that has these repo-local skills available, the normal way to
-start the shared extension test workflow is simply to ask:
-`Let's test the extension`.
+start the shared workflows is simply to ask:
 
-After the repo-local skills are available, that prompt is enough to start the
-dedicated testing workflow and wait for it to complete. Use explicit flags only
-when needed, for example when you want to force a fresh run or validate the
-PowerShell script column.
+- `Let's test the extension`
+- `Let's bump extension version`
+- `Let's sync preset`
+
+After the repo-local skills are available, those prompts are enough to start
+the corresponding workflows. For the version bump workflow, the default bump is
+the next minor version. Ask for `major` or `patch` only when that exact bump is
+intended, and provide an exact version only when you explicitly want to pin it.
+Use explicit flags only when needed, for example when you want to force a
+fresh test run or validate the PowerShell script column.
 
 Codex uses a global skill registry. Register or unregister the repo-local skill
 sources with the scripts in `.codex`.
