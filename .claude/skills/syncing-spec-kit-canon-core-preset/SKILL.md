@@ -3,7 +3,7 @@ name: syncing-spec-kit-canon-core-preset
 description: Claude skill entrypoint for syncing `preset/` with the latest released upstream `spec-kit` core commands. Use when Claude needs to verify the real latest release tag against `../spec-kit` `origin`, export the upstream release snapshot, rebase the regular upstream-tracking commands by preserving or intentionally retiring named `spec-kit-canon` overlay blocks, and manually merge the `speckit.constitution` and constitution template files.
 ---
 
-# Syncing Spec-Kit Canon Core Preset
+# Syncing Spec Kit Canon Core Preset
 
 This is the Claude skill entrypoint for the shared skill source in
 `skills/syncing-spec-kit-canon-core-preset`.

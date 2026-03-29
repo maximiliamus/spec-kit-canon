@@ -1,4 +1,4 @@
-# Sync Spec-Kit Canon Core Preset
+# Sync Spec Kit Canon Core Preset
 
 Use the Claude skill at
 `.claude/skills/syncing-spec-kit-canon-core-preset`.

@@ -45,7 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--script",
         choices=sorted(manage_progress.VALID_SCRIPT_TYPES),
-        help="Persist or restart with the requested Spec-Kit script variant: sh or ps.",
+        help="Persist or restart with the requested Spec Kit script variant: sh or ps.",
     )
     parser.add_argument(
         "--restart",

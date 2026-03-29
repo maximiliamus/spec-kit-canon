@@ -1,4 +1,4 @@
-# Bump Spec-Kit Canon Version
+# Bump Spec Kit Canon Version
 
 Use `$bumping-spec-kit-canon-version`.
 

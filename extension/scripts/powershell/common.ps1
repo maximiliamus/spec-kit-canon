@@ -2,7 +2,7 @@
 # Common PowerShell functions analogous to common.sh
 
 # Find repository root by searching upward for .specify directory
-# This is the primary marker for spec-kit projects
+# This is the primary marker for Spec Kit projects
 function Find-SpecifyRoot {
     param([string]$StartDir = (Get-Location).Path)
 
@@ -25,9 +25,9 @@ function Find-SpecifyRoot {
 }
 
 # Get repository root, prioritizing .specify directory over git
-# This prevents using a parent git repo when spec-kit is initialized in a subdirectory
+# This prevents using a parent git repo when Spec Kit is initialized in a subdirectory
 function Get-RepoRoot {
-    # First, look for .specify directory (spec-kit's own marker)
+    # First, look for .specify directory (Spec Kit's own marker)
     $specifyRoot = Find-SpecifyRoot
     if ($specifyRoot) {
         return $specifyRoot
@@ -54,7 +54,7 @@ function Get-CurrentBranch {
         return $env:SPECIFY_FEATURE
     }
 
-    # Then check git if available at the spec-kit root (not parent)
+    # Then check git if available at the Spec Kit root (not parent)
     $repoRoot = Get-RepoRoot
     if (Test-HasGit) {
         try {
@@ -104,7 +104,7 @@ function Get-CurrentBranch {
     return "main"
 }
 
-# Check if we have git available at the spec-kit root level
+# Check if we have git available at the Spec Kit root level
 # Returns true only if git is installed and the repo root is inside a git work tree
 # Handles both regular repos (.git directory) and worktrees/submodules (.git file)
 function Test-HasGit {

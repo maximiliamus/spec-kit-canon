@@ -1,4 +1,4 @@
-# Sync Spec-Kit Canon Core Preset
+# Sync Spec Kit Canon Core Preset
 
 Use `$syncing-spec-kit-canon-core-preset`.
 

@@ -206,7 +206,7 @@ Compared with stock Spec Kit:
   planning, task generation, analysis, and implementation
 - drift workflows compare against the configured `branching.base` branch
 
-## Workflow 2: Standard Spec Kit Canon Drift Recovery
+## Workflow 2: Standard Spec Kit Canon Drift Recovery / Spec-Drift
 
 Use this when implementation already changed on a feature branch and you want
 to bring canon back in sync.
@@ -267,7 +267,7 @@ This command:
 
 After running this command, start implementing whatever you need on the newly created feature branch.
 
-## Workflow 4: Vibecoding Canon Drift Recovery
+## Workflow 4: Vibecoding Canon Drift Recovery / Spec-Drift
 
 After a vibecoding session, use one of these paths to bring canon back in sync
 with the code on your feature branch.

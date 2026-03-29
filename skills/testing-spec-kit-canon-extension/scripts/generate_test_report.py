@@ -591,7 +591,7 @@ def build_report(
     )
 
     lines = [
-        "# Testing Spec-Kit Canon Extension Report",
+        "# Testing Spec Kit Canon Extension Report",
         "",
         f"Generated from `{relative_progress_file}`.",
         f"Start time: `{format_timestamp(workflow_start)}`",

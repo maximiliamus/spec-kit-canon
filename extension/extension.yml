@@ -2,9 +2,9 @@ schema_version: "1.0"
 
 extension:
   id: "canon"
-  name: "Spec-Kit Canon"
+  name: "Canon"
   version: "0.1.0"
-  description: "Canon-driven drift and vibecode workflows packaged as a Spec-Kit extension."
+  description: "Canon-driven workflows (spec-first, code-first, spec-drift) packaged as a Spec Kit extension."
   author: "Maxim Stupakov"
   repository: "https://github.com/maximiliamus/spec-kit-canon"
   license: "MIT"

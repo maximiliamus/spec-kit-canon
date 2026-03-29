@@ -2,7 +2,7 @@
 # Common functions and variables for all scripts
 
 # Find repository root by searching upward for .specify directory
-# This is the primary marker for spec-kit projects
+# This is the primary marker for Spec Kit projects
 find_specify_root() {
     local dir="${1:-$(pwd)}"
     # Normalize to absolute path to prevent infinite loop with relative paths
@@ -25,9 +25,9 @@ find_specify_root() {
 }
 
 # Get repository root, prioritizing .specify directory over git
-# This prevents using a parent git repo when spec-kit is initialized in a subdirectory
+# This prevents using a parent git repo when Spec Kit is initialized in a subdirectory
 get_repo_root() {
-    # First, look for .specify directory (spec-kit's own marker)
+    # First, look for .specify directory (Spec Kit's own marker)
     local specify_root
     if specify_root=$(find_specify_root); then
         echo "$specify_root"
@@ -53,7 +53,7 @@ get_current_branch() {
         return
     fi
 
-    # Then check git if available at the spec-kit root (not parent)
+    # Then check git if available at the Spec Kit root (not parent)
     local repo_root=$(get_repo_root)
     if has_git; then
         git -C "$repo_root" rev-parse --abbrev-ref HEAD
@@ -101,7 +101,7 @@ get_current_branch() {
     echo "main"  # Final fallback
 }
 
-# Check if we have git available at the spec-kit root level
+# Check if we have git available at the Spec Kit root level
 # Returns true only if git is installed and the repo root is inside a git work tree
 # Handles both regular repos (.git directory) and worktrees/submodules (.git file)
 has_git() {

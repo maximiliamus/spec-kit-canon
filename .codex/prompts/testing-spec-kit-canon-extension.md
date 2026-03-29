@@ -1,4 +1,4 @@
-# Testing Spec-Kit Canon Extension
+# Testing Spec Kit Canon Extension
 
 Use `$testing-spec-kit-canon-extension`.
 

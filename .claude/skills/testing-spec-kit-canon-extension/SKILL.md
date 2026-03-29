@@ -1,9 +1,9 @@
 ---
 name: testing-spec-kit-canon-extension
-description: Claude skill entrypoint for the shared Spec-Kit Canon extension test workflow. Use when Claude needs to start or resume the local extension validation run against the real sibling workspace layout (`spec-kit`, `spec-kit-canon`, `spec-kit-canon-test`), optionally clear `spec-kit-canon-test` before step 1, seed the trivial canon baseline, run the standard `/speckit.specify` to `/speckit.implement` workflow, exercise `/speckit.canon.drift` and `/speckit.canon.vibecode-drift`, verify canon updates, and generate the final validation report.
+description: Claude skill entrypoint for the shared Spec Kit Canon extension test workflow. Use when Claude needs to start or resume the local extension validation run against the real sibling workspace layout (`spec-kit`, `spec-kit-canon`, `spec-kit-canon-test`), optionally clear `spec-kit-canon-test` before step 1, seed the trivial canon baseline, run the standard `/speckit.specify` to `/speckit.implement` workflow, exercise `/speckit.canon.drift` and `/speckit.canon.vibecode-drift`, verify canon updates, and generate the final validation report.
 ---
 
-# Testing Spec-Kit Canon Extension
+# Testing Spec Kit Canon Extension
 
 This is the Claude skill entrypoint for the shared skill source in
 `skills/testing-spec-kit-canon-extension`.

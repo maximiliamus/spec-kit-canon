@@ -1,4 +1,4 @@
-# Testing Spec-Kit Canon Extension
+# Testing Spec Kit Canon Extension
 
 Use the Claude skill at `.claude/skills/testing-spec-kit-canon-extension`.
 

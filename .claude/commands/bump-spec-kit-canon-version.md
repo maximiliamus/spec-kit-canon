@@ -1,4 +1,4 @@
-# Bump Spec-Kit Canon Version
+# Bump Spec Kit Canon Version
 
 Use the Claude skill at `.claude/skills/bumping-spec-kit-canon-version`.
 

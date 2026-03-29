@@ -1,4 +1,4 @@
 interface:
-  display_name: "Testing Spec-Kit Canon"
+  display_name: "Testing Spec Kit Canon"
   short_description: "Run or resume the canon extension test flow"
   default_prompt: "Use $testing-spec-kit-canon-extension to start or resume the full extension validation workflow. Accept optional --script sh|ps and --restart flags, prepare the workflow first, continue incomplete progress by default, and restart from scratch automatically when the saved workflow is already complete."

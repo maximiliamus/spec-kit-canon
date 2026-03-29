@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reset and reinstall the Spec-Kit Canon test sandbox."""
+"""Reset and reinstall the Spec Kit Canon test sandbox."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--script",
         choices=sorted(VALID_SCRIPT_TYPES),
-        help="Override the Spec-Kit script variant used when scaffolding the sandbox: sh or ps.",
+        help="Override the Spec Kit script variant used when scaffolding the sandbox: sh or ps.",
     )
     return parser.parse_args()
 

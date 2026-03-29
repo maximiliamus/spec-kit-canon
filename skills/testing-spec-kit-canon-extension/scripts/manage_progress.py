@@ -67,7 +67,7 @@ def parse_args() -> argparse.Namespace:
     init_parser.add_argument(
         "--script",
         choices=sorted(VALID_SCRIPT_TYPES),
-        help="Persist which Spec-Kit script variant the sandbox should use: sh or ps.",
+        help="Persist which Spec Kit script variant the sandbox should use: sh or ps.",
     )
 
     subparsers.add_parser("show", help="Print the current workflow progress state.")
