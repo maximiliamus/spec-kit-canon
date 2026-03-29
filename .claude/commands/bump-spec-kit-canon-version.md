@@ -8,10 +8,13 @@ Default behavior:
 - bump `major` or `patch` only when explicitly requested
 - accept an exact `0.1.1` or `v0.1.1` only when explicitly requested
 - update only `extension/extension.yml` and `preset/preset.yml`
+- update `CHANGELOG.md` automatically from local git history
+- update `CHANGELOG.md` automatically from Conventional Commit subjects
 - use `--kind patch|minor|major` for explicit relative bumps
 - reset less significant components when bumping a more significant one
 - write manifests without the `v` prefix when an exact tag-style version is provided
-- verify the two manifest versions match after the edit
+- allow `--skip-changelog` only when explicitly requested
+- verify the manifests and changelog after the edit
 
 Pass the requested bump intent through to the shared skill and follow that
 skill exactly.

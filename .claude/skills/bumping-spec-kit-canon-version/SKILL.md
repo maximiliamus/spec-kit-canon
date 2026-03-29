@@ -1,6 +1,6 @@
 ---
 name: bumping-spec-kit-canon-version
-description: Claude skill entrypoint for the shared Spec Kit Canon version bump workflow. Use when Claude needs to default to the next minor version in `extension/extension.yml` and `preset/preset.yml`, bump only patch or major when that scope is explicitly requested, or apply an exact version only when the user explicitly provides one.
+description: Claude skill entrypoint for the shared Spec Kit Canon version bump workflow. Use when Claude needs to default to the next minor version in `extension/extension.yml` and `preset/preset.yml`, update `CHANGELOG.md` automatically from Conventional Commit subjects, bump only patch or major when that scope is explicitly requested, or apply an exact version only when the user explicitly provides one.
 ---
 
 # Bumping Spec-Kit Canon Version
@@ -16,6 +16,7 @@ Before doing any work:
    version only when the prompt explicitly asks for that behavior. Accept both
    `bump extension version patch` and `bump extension patch version` style
    phrasing for explicit bump kinds.
+4. Update `CHANGELOG.md` unless the prompt explicitly asks to skip it.
 
 ## Wrapper Rules
 
@@ -25,5 +26,7 @@ Before doing any work:
   `skills/bumping-spec-kit-canon-version/scripts/set_manifest_versions.py`.
 - Preserve the exact bump intent from the prompt instead of upgrading or
   downgrading it implicitly.
+- Treat changelog generation as part of the default workflow, not an optional
+  follow-up step.
 - Do not duplicate or fork the workflow in this entrypoint.
 - Keep Claude-specific behavior limited to skill invocation concerns.

@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and publish (for example v0.1.0)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -15,13 +21,33 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${{ github.event.inputs.tag }}"
+          if [[ -z "${tag}" ]]; then
+            tag="${GITHUB_REF_NAME}"
+          fi
+
+          if [[ -z "${tag}" ]]; then
+            echo "Could not determine release tag" >&2
+            exit 1
+          fi
+
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
 
       - name: Validate package versions against the tag
         shell: bash
         run: |
           set -euo pipefail
 
-          tag="${GITHUB_REF_NAME}"
+          tag="${{ steps.release_tag.outputs.tag }}"
           version="${tag#v}"
 
           extension_version="$(sed -n 's/^  version: "\(.*\)"/\1/p' extension/extension.yml | head -n 1)"
@@ -47,7 +73,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          tag="${GITHUB_REF_NAME}"
+          tag="${{ steps.release_tag.outputs.tag }}"
 
           (
             cd extension
@@ -62,8 +88,9 @@ jobs:
       - name: Publish GitHub release assets
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
           files: |
-            spec-kit-canon-${{ github.ref_name }}.zip
-            spec-kit-canon-core-${{ github.ref_name }}.zip
+            spec-kit-canon-${{ steps.release_tag.outputs.tag }}.zip
+            spec-kit-canon-core-${{ steps.release_tag.outputs.tag }}.zip
           fail_on_unmatched_files: true
           generate_release_notes: true

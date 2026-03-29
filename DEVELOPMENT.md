@@ -305,8 +305,10 @@ After the repo-local skills are available, those prompts are enough to start
 the corresponding workflows. For the version bump workflow, the default bump is
 the next minor version. Ask for `major` or `patch` only when that exact bump is
 intended, and provide an exact version only when you explicitly want to pin it.
-Use explicit flags only when needed, for example when you want to force a
-fresh test run or validate the PowerShell script column.
+That workflow also updates `CHANGELOG.md` automatically from local git history
+unless you explicitly ask to skip it. Use explicit flags only when needed, for
+example when you want to force a fresh test run or validate the PowerShell
+script column.
 
 Codex uses a global skill registry. Register or unregister the repo-local skill
 sources with the scripts in `.codex`.

@@ -1,19 +1,60 @@
 #!/usr/bin/env python3
-"""Bump or set the same normalized version in both Spec Kit Canon manifests."""
+"""Bump package versions and update the repo changelog."""
 
 from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
+from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 
 SEMVER_RE = re.compile(
     r"^v?(?P<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$"
 )
+TAG_RE = re.compile(r"^v(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$")
 VERSION_LINE_RE = re.compile(r'^(?P<indent>\s*)version: "(?P<version>[^"]+)"\s*$')
 BUMP_KINDS = ("major", "minor", "patch")
+CONVENTIONAL_RE = re.compile(
+    r"^(?P<type>[a-z]+)(?:\([^\)]*\))?(?P<breaking>!)?: (?P<description>.+)$"
+)
+CONVENTIONAL_SECTIONS = {
+    "feat": "Features",
+    "fix": "Bug Fixes",
+    "docs": "Documentation",
+    "chore": "Chores",
+    "refactor": "Refactors",
+    "perf": "Performance",
+    "test": "Testing",
+    "ci": "CI/CD",
+    "build": "Build",
+}
+SECTION_ORDER = [
+    "Features",
+    "Bug Fixes",
+    "Documentation",
+    "Performance",
+    "Refactors",
+    "Testing",
+    "CI/CD",
+    "Build",
+    "Chores",
+    "Miscellaneous",
+]
+
+
+@dataclass
+class ChangelogPlan:
+    path: Path
+    previous_tag: str | None
+    entries_by_section: dict[str, list[str]]
+    commit_count: int
+    original_text: str
+    updated_text: str
+    line_ending: str
 
 
 def normalize_version(raw_value: str) -> str:
@@ -32,6 +73,17 @@ def parse_semver_parts(version: str) -> tuple[int, int, int]:
     return int(major_text), int(minor_text), int(patch_text)
 
 
+def parse_release_tag(tag: str) -> tuple[int, int, int] | None:
+    match = TAG_RE.fullmatch(tag.strip())
+    if match is None:
+        return None
+    return (
+        int(match.group("major")),
+        int(match.group("minor")),
+        int(match.group("patch")),
+    )
+
+
 def bump_version(version: str, kind: str) -> str:
     major, minor, patch = parse_semver_parts(version)
 
@@ -45,6 +97,19 @@ def bump_version(version: str, kind: str) -> str:
         return f"{major}.{minor}.{patch + 1}"
 
     raise ValueError(f"Unsupported bump kind '{kind}'.")
+
+
+def run_git(repo_root: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", *args],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise OSError(completed.stderr.strip() or f"git {' '.join(args)} failed.")
+    return completed.stdout
 
 
 def format_path(path: Path, repo_root: Path) -> str:
@@ -127,9 +192,181 @@ def replace_manifest_version(
     return current_version, changed
 
 
+def resolve_previous_release_tag(repo_root: Path, target_version: str) -> str | None:
+    target_parts = parse_semver_parts(target_version)
+    output = run_git(repo_root, "tag", "--merged", "HEAD", "--list", "v*")
+    candidates: list[tuple[tuple[int, int, int], str]] = []
+
+    for line in output.splitlines():
+        tag = line.strip()
+        if not tag:
+            continue
+        tag_parts = parse_release_tag(tag)
+        if tag_parts is None:
+            continue
+        if tag_parts < target_parts:
+            candidates.append((tag_parts, tag))
+
+    if not candidates:
+        return None
+
+    candidates.sort()
+    return candidates[-1][1]
+
+
+def collect_conventional_commits(
+    repo_root: Path,
+    previous_tag: str | None,
+) -> tuple[dict[str, list[str]], int]:
+    revision = f"{previous_tag}..HEAD" if previous_tag is not None else "HEAD"
+    output = run_git(repo_root, "log", "--no-merges", "--pretty=%s", revision)
+    sections: dict[str, list[str]] = {}
+    subjects = [line.strip() for line in output.splitlines() if line.strip()]
+
+    for subject in subjects:
+        match = CONVENTIONAL_RE.match(subject)
+        if match:
+            commit_type = match.group("type")
+            section_title = CONVENTIONAL_SECTIONS.get(commit_type, "Miscellaneous")
+            entry = match.group("description")
+            if match.group("breaking"):
+                entry = entry + " ⚠️ Breaking change"
+        else:
+            section_title = "Miscellaneous"
+            entry = subject
+
+        sections.setdefault(section_title, []).append(entry)
+
+    return sections, len(subjects)
+
+
+def load_changelog_text(path: Path) -> tuple[str, str]:
+    if not path.exists():
+        return "# Changelog\n", "\n"
+
+    text = path.read_text(encoding="utf-8")
+    if text and not text.lstrip().startswith("# Changelog"):
+        raise ValueError(
+            f"{path} exists but does not start with '# Changelog'. "
+            "Refusing to rewrite it automatically."
+        )
+
+    line_ending = "\r\n" if "\r\n" in text else "\n"
+    return text or "# Changelog\n", line_ending
+
+
+def strip_existing_version_section(text: str, target_version: str) -> str:
+    lines = text.splitlines()
+    if not lines:
+        return "# Changelog"
+
+    header_lines: list[str] = []
+    sections: list[list[str]] = []
+    current_section: list[str] | None = None
+
+    for line in lines:
+        if line.startswith("## "):
+            if current_section is not None:
+                sections.append(current_section)
+            current_section = [line]
+            continue
+
+        if current_section is None:
+            header_lines.append(line)
+        else:
+            current_section.append(line)
+
+    if current_section is not None:
+        sections.append(current_section)
+
+    if not header_lines:
+        header_lines = ["# Changelog"]
+
+    filtered_sections = [
+        section
+        for section in sections
+        if not section[0].startswith(f"## v{target_version}")
+    ]
+
+    chunks = ["\n".join(header_lines).strip()]
+    chunks.extend("\n".join(section).rstrip() for section in filtered_sections if section)
+    return "\n\n".join(chunk for chunk in chunks if chunk).rstrip()
+
+
+def build_changelog_entry(
+    target_version: str,
+    previous_tag: str | None,
+    entries_by_section: dict[str, list[str]],
+    commit_count: int,
+) -> str:
+    lines = [f"## v{target_version} - {date.today().isoformat()}", ""]
+    added_section = False
+
+    for section in SECTION_ORDER:
+        entries = entries_by_section.get(section)
+        if not entries:
+            continue
+
+        if added_section:
+            lines.append("")
+        lines.append(f"### {section}")
+        lines.extend(f"- {entry}" for entry in entries)
+        added_section = True
+
+    if not added_section:
+        if previous_tag is not None:
+            lines.append(f"- No recorded changes since {previous_tag}.")
+        else:
+            lines.append("- No recorded changes available from git history.")
+    else:
+        lines.append("")
+        lines.append(f"*Total: {commit_count} commit(s)*")
+
+    return "\n".join(lines).rstrip()
+
+
+def plan_changelog_update(
+    repo_root: Path,
+    changelog_path: Path,
+    target_version: str,
+) -> ChangelogPlan:
+    previous_tag = resolve_previous_release_tag(repo_root, target_version)
+    entries_by_section, commit_count = collect_conventional_commits(
+        repo_root,
+        previous_tag,
+    )
+    original_text, line_ending = load_changelog_text(changelog_path)
+    stripped_text = strip_existing_version_section(original_text, target_version)
+    entry_text = build_changelog_entry(
+        target_version,
+        previous_tag,
+        entries_by_section,
+        commit_count,
+    )
+    updated_text = f"{stripped_text}\n\n{entry_text}\n"
+
+    return ChangelogPlan(
+        path=changelog_path,
+        previous_tag=previous_tag,
+        entries_by_section=entries_by_section,
+        commit_count=commit_count,
+        original_text=original_text,
+        updated_text=updated_text,
+        line_ending=line_ending,
+    )
+
+
+def write_changelog(plan: ChangelogPlan, dry_run: bool) -> bool:
+    changed = plan.updated_text != plan.original_text
+    if changed and not dry_run:
+        normalized_text = plan.updated_text.replace("\n", plan.line_ending)
+        plan.path.write_text(normalized_text, encoding="utf-8")
+    return changed
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Bump or set the same normalized version in both package manifests."
+        description="Bump package versions and update the repo changelog."
     )
     target_group = parser.add_mutually_exclusive_group()
     target_group.add_argument(
@@ -153,6 +390,16 @@ def parse_args() -> argparse.Namespace:
         help="Override the preset manifest path.",
     )
     parser.add_argument(
+        "--changelog-path",
+        type=Path,
+        help="Override the changelog path. Defaults to <repo>/CHANGELOG.md.",
+    )
+    parser.add_argument(
+        "--skip-changelog",
+        action="store_true",
+        help="Skip automatic CHANGELOG.md generation.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Report the changes without writing the files.",
@@ -173,6 +420,11 @@ def main() -> int:
         if args.preset_manifest is not None
         else repo_root / "preset" / "preset.yml"
     )
+    changelog_path = (
+        args.changelog_path.resolve()
+        if args.changelog_path is not None
+        else repo_root / "CHANGELOG.md"
+    )
 
     try:
         extension_current = read_manifest_version(extension_manifest, "extension")
@@ -192,6 +444,14 @@ def main() -> int:
             normalized_version = bump_version(extension_current, bump_kind)
             resolution_label = f"{bump_kind} bump from {extension_current}"
 
+        changelog_plan = None
+        if not args.skip_changelog:
+            changelog_plan = plan_changelog_update(
+                repo_root,
+                changelog_path,
+                normalized_version,
+            )
+
         extension_previous, extension_changed = replace_manifest_version(
             extension_manifest,
             "extension",
@@ -204,6 +464,10 @@ def main() -> int:
             normalized_version,
             args.dry_run,
         )
+
+        changelog_changed = False
+        if changelog_plan is not None:
+            changelog_changed = write_changelog(changelog_plan, args.dry_run)
     except (OSError, ValueError) as error:
         print(error, file=sys.stderr)
         return 1
@@ -231,6 +495,21 @@ def main() -> int:
         )
     else:
         print(f"{already} {preset_label}: {normalized_version}")
+
+    if args.skip_changelog:
+        print("Skipped CHANGELOG.md generation.")
+    else:
+        changelog_label = format_path(changelog_path, repo_root)
+        commit_count = len(changelog_plan.commit_subjects)
+        if changelog_changed:
+            print(
+                f"{action} {changelog_label}: "
+                f"entry for v{normalized_version} from "
+                f"{changelog_plan.previous_tag or 'full history'} "
+                f"with {commit_count} commit(s)"
+            )
+        else:
+            print(f"{already} {changelog_label}: entry for v{normalized_version}")
 
     return 0
 
