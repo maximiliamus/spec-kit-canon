@@ -89,8 +89,11 @@ def parse_semver_tag(tag: str) -> tuple[int, int, int] | None:
     return tuple(int(part) for part in match.groups())
 
 
-def resolve_latest_remote_tag(spec_kit_dir: Path) -> str:
-    output = run_git(spec_kit_dir, "ls-remote", "--tags", "--refs", "origin", "v*")
+def select_highest_semver_tag(tags: list[str]) -> str:
+    return max(tags, key=lambda value: parse_semver_tag(value) or (-1, -1, -1))
+
+
+def parse_semver_tags_from_refs(output: str) -> list[str]:
     tags: list[str] = []
     for line in output.splitlines():
         line = line.strip()
@@ -101,10 +104,41 @@ def resolve_latest_remote_tag(spec_kit_dir: Path) -> str:
         if parse_semver_tag(tag) is not None:
             tags.append(tag)
 
-    if not tags:
-        raise RuntimeError("No semantic-version release tags were found on origin.")
+    return tags
 
-    return max(tags, key=lambda value: parse_semver_tag(value) or (-1, -1, -1))
+
+def list_local_semver_tags(spec_kit_dir: Path) -> list[str]:
+    output = run_git(spec_kit_dir, "tag", "--list", "v*")
+    tags: list[str] = []
+    for line in output.splitlines():
+        tag = line.strip()
+        if parse_semver_tag(tag) is not None:
+            tags.append(tag)
+
+    return tags
+
+
+def resolve_latest_remote_tag(spec_kit_dir: Path) -> tuple[str, str, str | None]:
+    output = run_git(spec_kit_dir, "ls-remote", "--tags", "--refs", "origin", "v*")
+    tags = parse_semver_tags_from_refs(output)
+
+    if tags:
+        return select_highest_semver_tag(tags), "origin", None
+
+    run_git(spec_kit_dir, "fetch", "--tags", "origin")
+    local_tags = list_local_semver_tags(spec_kit_dir)
+    if local_tags:
+        return (
+            select_highest_semver_tag(local_tags),
+            "local-fallback",
+            "Origin did not advertise semantic-version tags; falling back to the "
+            "highest local semver tag after `git fetch --tags origin`.",
+        )
+
+    raise RuntimeError(
+        "No semantic-version release tags were found on origin, and no local "
+        "semantic-version tags are available after `git fetch --tags origin`."
+    )
 
 
 def ensure_local_tag(spec_kit_dir: Path, tag: str) -> None:
@@ -175,10 +209,20 @@ def main() -> int:
         raise SystemExit(f"spec-kit repository not found: {spec_kit_dir}")
 
     requested_tag = args.tag
-    resolved_tag = requested_tag if requested_tag != "latest" else resolve_latest_remote_tag(spec_kit_dir)
+    resolved_tag_source = "explicit"
+    resolution_warning: str | None = None
+    if requested_tag == "latest":
+        resolved_tag, resolved_tag_source, resolution_warning = resolve_latest_remote_tag(spec_kit_dir)
+    else:
+        resolved_tag = requested_tag
+
+    if resolution_warning:
+        print(f"Warning: {resolution_warning}", file=sys.stderr)
+
     recorded_tag = read_recorded_release_tag(metadata_file)
     if recorded_tag == resolved_tag:
         print(f"Resolved release tag: {resolved_tag}")
+        print(f"Resolved release source: {resolved_tag_source}")
         print(
             "Recorded preset release already matches the latest upstream release: "
             f"{metadata_file}"
@@ -251,6 +295,8 @@ def main() -> int:
         "canon_dir": str(canon_dir),
         "requested_tag": requested_tag,
         "resolved_tag": resolved_tag,
+        "resolved_tag_source": resolved_tag_source,
+        "resolution_warning": resolution_warning,
         "release_commit": run_git(spec_kit_dir, "rev-parse", resolved_tag).strip(),
         "output_dir": str(output_dir),
         "regular_commands": REGULAR_COMMANDS,
@@ -267,6 +313,7 @@ def main() -> int:
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
     print(f"Resolved release tag: {resolved_tag}")
+    print(f"Resolved release source: {resolved_tag_source}")
     print(f"Exported sync workspace: {output_dir}")
     print(f"Manifest: {manifest_path}")
     return 0

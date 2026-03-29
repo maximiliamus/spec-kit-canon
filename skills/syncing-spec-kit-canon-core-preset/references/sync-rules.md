@@ -4,7 +4,11 @@
 
 - Treat the latest release as the highest semantic-version tag visible on
   `../spec-kit` `origin`.
-- Do not trust the local clone's tag list by itself.
+- Do not trust the local clone's tag list by itself while `origin` is
+  advertising semantic-version tags normally.
+- If `origin` advertises no semantic-version tags at all, run
+  `git fetch --tags origin`, fall back to the highest local semantic-version
+  tag, and record that fallback explicitly in the sync output.
 - If that resolved tag already matches the recorded
   `preset/spec-kit-release.json` `spec_kit_release.resolved_tag`,
   stop the sync before export. No `.tmp` workspace or finalize step is needed.

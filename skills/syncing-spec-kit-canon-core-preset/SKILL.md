@@ -40,7 +40,10 @@ first.
 Default behavior:
 
 - Resolve the true latest release tag from `../spec-kit` `origin`, not from the
-  local tag list alone.
+  local tag list alone when `origin` advertises semver tags.
+- If `origin` advertises no semantic-version tags at all, fetch tags from
+  `origin`, fall back to the highest local semantic-version tag, and report
+  that fallback explicitly.
 - Compare that resolved tag against
   `preset/spec-kit-release.json`.
 - If the resolved tag is already recorded there, stop immediately with no
