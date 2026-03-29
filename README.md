@@ -6,11 +6,18 @@ Use it when you want canon files to remain the long-lived source of truth even
 when the team moves between spec-first work, post-implementation drift repair,
 and low-ceremony vibecoding.
 
+Canon is the canonical system specification for your project: a set of
+Markdown files that fully describes your system. The canon is not meant to be
+a single file. It can be organized into nested areas or folders, each with its
+own `_toc.md` table-of-contents index, and it can include additional domain,
+business, architecture, terminology, workflow, or other project-specific
+details that define how the system is supposed to work.
+
 This repository publishes two packages that are meant to be installed together:
 
-- `canon` extension: adds `/speckit.canon.*` namespaced commands for canon drift management in spec-first and code-first (vibecoding) workflows
-- `canon-core` preset: overrides selected core `/speckit.*` commands with
-  canon-driven behavior (adds preconditions to original commands and constitution/bootstrap override)
+- `canon` extension: adds `/speckit.canon.*` namespaced commands for canon drift management in spec-first (original Spec Kit) and code-first (new vibecoding) workflows
+- `canon-core` preset: overrides core `/speckit.*` commands with
+  canon-driven variants and replaces the default constitution/bootstrap behavior
 
 ## Install
 
@@ -108,6 +115,35 @@ branching:
       description: Web application
 ```
 
+`branching.types` defines the allowed branch type codes for the project. A
+branch type describes what kind of change the branch represents, such as a
+feature, bug fix, refactor, breaking change, or non-functional work.
+
+`branching.scopes` defines the allowed branch scope codes for the project. A
+branch scope describes which system area, domain area, or application surface
+the change is focused on, such as the API, worker layer, or web app.
+
+After you run `/speckit.constitution`, these definitions are rendered into
+the project constitution and both `/speckit.specify` and
+`/speckit.canon.vibecode-specify` will use that branch strategy when they create
+branch suffix automatically.
+
+Branch suffix format:
+
+```text
+<type>-<scope>-<short-description>
+```
+
+With the default Spec Kit sequential numbering, actual branch names become:
+
+```text
+(###|YYYYMMDD-HHMMSS)-<type>-<scope>-<short-description>
+```
+
+`<type>` must come from `branching.types`, `<scope>` must come from
+`branching.scopes`, and `<short-description>` is the generated slug for the
+requested change.
+
 Then run:
 
 ```text
@@ -118,7 +154,12 @@ That initializes or repairs the canon-driven project baseline:
 
 - `.specify/memory/constitution.md`
 - `.specify/templates/constitution-template.md`
-- `<canon.root>/_toc.md`
+- `<canon.root>/_toc.md` and any nested canon area structure that hangs off it
+
+After generation, read `.specify/memory/constitution.md` in full. It contains
+the detailed project-specific rules, branch strategy, canon structure, and
+workflow expectations that make the canon-driven process easier to understand
+and follow.
 
 ## Which Workflow To Use
 
@@ -140,7 +181,7 @@ That initializes or repairs the canon-driven project baseline:
 - `/speckit.canon.vibecode-drift-express` is the shorter all-in-one path for
   smaller codebase changes.
 
-## Workflow 1: Canon-Driven Standard Spec Kit / Spec-First Start
+## Workflow 1: Canon-Driven Standard Spec Kit / Spec-First
 
 Use the normal Spec Kit flow to evolve canon alongside implementation.
 Run the familiar core commands in order:
@@ -157,13 +198,15 @@ Run the familiar core commands in order:
 
 Compared with stock Spec Kit:
 
-- branch rules and examples come from `canon-config.yml`
+- branch rules, allowed type/scope codes, and examples come from
+  `canon-config.yml`, so generated branch names stay aligned with project
+  conventions
 - the constitution and canon TOC are initialized from canon-specific templates
 - prompts treat canon as a first-class reference during specification,
   planning, task generation, analysis, and implementation
 - drift workflows compare against the configured `branching.base` branch
 
-## Workflow 2: Standard Canon Drift Recovery
+## Workflow 2: Standard Spec Kit Canon Drift Recovery
 
 Use this when implementation already changed on a feature branch and you want
 to bring canon back in sync.
@@ -193,7 +236,7 @@ Manual phases:
 - `/speckit.canon.drift-analyze`
 - `/speckit.canon.drift-repair`
 
-## Workflow 3: Canon-Driven Vibecoding / Code-First Start
+## Workflow 3: Canon-Driven Vibecoding / Code-First
 
 Start this workflow from the configured `branching.base` branch.
 
@@ -217,9 +260,12 @@ Intent-driven session:
 
 This command:
 
-- creates a Git feature branch and Spec Kit feature directory
+- creates a Git feature branch and Spec Kit feature directory using the
+  project's sequential or timestamp prefix mode
 - writes `vibecode.md` to capture intent and notes
 - skips `spec.md`, `plan.md`, and `tasks.md` at the start
+
+After running this command, start implementing whatever you need on the newly created feature branch.
 
 ## Workflow 4: Vibecoding Canon Drift Recovery
 
@@ -256,7 +302,8 @@ The main files introduced by these packages are:
 
 - `.specify/extensions/canon/canon-config.yml`: project canon settings
 - `.specify/memory/constitution.md`: active constitution used by Spec Kit
-- `<canon.root>/_toc.md`: canon entry point
+- `<canon.root>/_toc.md`: root canon entry point and top-level table of
+  contents
 - `<feature>/vibecode.md`: lightweight intent file for code-first sessions
 - `<feature>/tasks.drift.md`: reverse-engineered implementation tasks
 - `<feature>/spec.drift.md`: spec-level drift findings

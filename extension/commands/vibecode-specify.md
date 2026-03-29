@@ -10,8 +10,8 @@ handoffs:
     prompt: Reverse-engineer tasks from implementation.
     send: false
 scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/create-new-feature.sh --json --short-name
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/create-new-feature.ps1 -Json -ShortName
+  sh: bash .specify/extensions/canon/scripts/bash/create-new-feature.sh
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/create-new-feature.ps1
 ---
 
 ## Pre-conditions (execute before any other step)
@@ -20,7 +20,7 @@ Before doing anything:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 6 — Git Branching Strategy**: the numeric prefix `###-` is prepended by Spec Kit tooling; the suffix is the slug
+   - **Section 6 — Git Branching Strategy**: the branch prefix follows the project's Spec Kit numbering mode (`###-` by default or `YYYYMMDD-HHMMSS-` in timestamp mode); the suffix for this vibecode workflow is the slug
    - **Section 3 — Separation of Abstraction Levels**: vibecode.md captures intent at WHAT level — no implementation details beyond what the user provided
 
 ## User Input
@@ -60,9 +60,16 @@ Anything that contains spaces or reads as natural language (e.g., `"Add retry lo
 
 Run the create-new-feature helper to create the branch and feature directory. Use the slug from Step 1 as `--short-name`. Pass the slug itself as the feature description argument (the script requires a non-empty description).
 
-```bash
-{SCRIPT} "<SLUG>" "<SLUG>"
-```
+**Branch numbering mode**: Before running the script, check if `.specify/init-options.json` exists and read the `branch_numbering` value.
+- If `"timestamp"`, add `--timestamp` (Bash) or `-Timestamp` (PowerShell) to the script invocation
+- If `"sequential"` or absent, do not add any extra flag (default behavior)
+
+Examples:
+
+- Bash example: `{SCRIPT} --json --short-name "api-cleanup" "api-cleanup"`
+- Bash (timestamp): `{SCRIPT} --json --timestamp --short-name "api-cleanup" "api-cleanup"`
+- PowerShell example: `{SCRIPT} -Json -ShortName "api-cleanup" "api-cleanup"`
+- PowerShell (timestamp): `{SCRIPT} -Json -Timestamp -ShortName "api-cleanup" "api-cleanup"`
 
 **IMPORTANT**:
 - Do NOT pass `--number` — the script determines the correct next number automatically
@@ -152,6 +159,5 @@ After the report: _"Ready for vibecoding. Make your changes, then run /speckit.c
 - This command MUST be run from the base branch configured in `.specify/extensions/canon/canon-config.yml` under `branching.base`.
 - Do NOT create spec.md, plan.md, tasks.md, or any other standard spec artifacts. The only artifact is vibecode.md.
 - Do NOT run the full specify/clarify/plan/tasks pipeline. This is the vibecoding entry point — minimal ceremony by design.
-- The branch and feature directory are created the same way as `/speckit.specify` — the only difference is what goes inside.
+- The branch and feature directory are created the same way as `/speckit.specify`, including honoring the project's sequential or timestamp prefix mode — the only difference is what goes inside.
 - For category C: after creating the branch and vibecode.md, proceed directly to implementation. Do not ask for confirmation or additional requirements gathering.
-
