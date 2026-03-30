@@ -14,16 +14,17 @@ If any document conflicts with this constitution, this constitution prevails.
 
 ### Source of Truth
 
-The canonical system specification baseline is located at:
+The canonical system specification baseline consists of:
 
 - `CANON_TOC` (entry point)
-- and all documents linked under `CANON_ROOT/**`
+- all documents linked under `CANON_ROOT/**`
 
 This structure represents the full system definition.
 
 Spec Kit must treat `CANON_TOC` as the root of the system specification graph.
 
-Let's name and reference this canonical system specification in this document and Spec Kit's artefacts as "Canon" or "the canon".
+In this document and in Spec Kit artifacts, refer to this canonical system
+specification as "Canon" or "the canon".
 
 ---
 
@@ -74,21 +75,28 @@ For that bootstrap path:
   define MUST be recorded as an explicit assumption or incremental requirement
   before implementation
 
-### Support of the canon integrity
+### Support for canon integrity
 
 - Spec Kit does NOT replace the canon.
 - Canon defines the system.
-- Spec Kit defines system evolution.
+- Spec Kit defines the system's evolution.
 - Spec Kit updates the canon if specification drift is determined.
 
-### Support of spec-first and code-first development workflows
+### Support for spec-first and code-first workflows
 
-Spec Kit workflow could be of two types:
+Spec Kit workflows can follow one of two patterns:
 
-- Standard workflow. Full spec-first workflow with standard Spec Kit commands for the incremental spec development.
-- Vibecoding workflow. Simplified code-first workflow with few additional vibecoding-related commands for making quick changes into the codebase and reflecting them into the canon.
+- Standard workflow. A full spec-first workflow using standard Spec Kit
+  commands for incremental spec development.
+- Vibecoding workflow. A simplified code-first workflow with a few additional
+  vibecoding-related commands for making quick changes in the codebase and
+  reflecting them in the canon.
 
-Note: Each workflow must be performed only in a separate branch. Any workflow (i.e. any command execution) is NOT allowed in the base branch configured in `.specify/extensions/canon/canon-config.yml` under `branching.base`. Exceptions are /speckit.specify and /speckit.canon.vibecode-specify, which start the corresponding workflows from that configured base branch.
+Note: Each workflow must be performed on a separate branch. No workflow
+command may be run on the base branch configured in
+`.specify/extensions/canon/canon-config.yml` under `branching.base`. The
+exceptions are `/speckit.specify` and `/speckit.canon.vibecode-specify`, which
+start the corresponding workflows from that configured base branch.
 
 ---
 
@@ -103,7 +111,7 @@ Strict separation must be maintained in each workflow.
 Describes:
 
 - WHAT changes
-- WHY changes
+- WHY the change is needed
 - Acceptance criteria
 - Impacted canon sections
 
@@ -117,7 +125,7 @@ Must NOT include:
 
 Describes:
 
-- HOW change will be implemented
+- HOW the change will be implemented
 - architectural decisions
 - tradeoffs
 
@@ -128,68 +136,91 @@ Describes:
 - granular executable steps
 - independently verifiable work units
 
-#### drift.md
+#### tasks.drift.md
 
 Describes:
 
-- discrepancies between what was specified and what was actually implemented
-- observable deviations only; never invented or inferred behavior
-- input for /speckit.canon.drift-reconcile to identify canon gaps
+- reverse-engineered implementation tasks derived from actual implementation
+  changes
+- HOW-level drift grouped into granular, independently reviewable work units
+- input for /speckit.canon.drift-detect
+
+#### spec.drift.md
+
+Describes:
+
+- discrepancies between specified and implemented behavior
+- WHAT-level observable deviations only; never invented or inferred behavior
+- input for /speckit.canon.drift-resolve and, once resolved,
+  /speckit.canon.drift-reconcile to identify canon gaps
 
 #### canon.drift.md
 
 Describes:
 
 - canon gaps between the incremental spec and the canon
-- proposed canon text to be applied to canon
+- proposed canon text to be applied to the canon
 - input for /speckit.canon.drift-canonize to update canon accurately
+
+#### canon.repair.md
+
+Describes:
+
+- an optional post-canon repair plan and trace artifact created only when
+  `/speckit.canon.drift-analyze` finds canon issues after canon apply
+- targeted WHAT-level corrections to canon content, placement,
+  cross-references, or contradictions
+- input for /speckit.canon.drift-repair
 
 If abstraction levels are mixed, fix structure before proceeding.
 
 ### Vibecoding Workflow
 
-#### spec.md
+#### vibecode.md
 
 Describes:
 
-- WHAT changes
-- WHY changes
-- Acceptance criteria
-- Impacted canon sections
+- the session intent
+- high-level notes and constraints captured at the start
+- lightweight context for the code-first session
 
-Must NOT include:
-
-- implementation details
-- low-level architecture
-- code design
-
-Spec is reverse engineered from tasks.
-
-#### plan.md
-
-Not required because in vibecoding workflow no plan is reverse-engineered.
-Spec is directly reverse-engineered from tasks.
-
-#### tasks.md
+#### tasks.drift.md
 
 Describes:
 
-- granular executable steps
-- independently verifiable work units
+- reverse-engineered implementation tasks derived from actual implementation
+  changes
+- HOW-level groupings of the work actually performed
+- input for /speckit.canon.vibecode-drift-detect
 
-Tasks are reverse engineered from actual implementation.
+#### spec.drift.md
 
-#### drift.md
+Describes:
 
-Not required because in vibecoding workflow implementation always prevails over the spec.
+- reverse-engineered WHAT-level behavior and drift relevant to canon
+- observable deviations only; never invented or inferred behavior
+- input for /speckit.canon.vibecode-drift-reconcile
+
+All findings are auto-ACCEPTED in the vibecoding workflow.
 
 #### canon.drift.md
 
 Describes:
 
 - canon gaps between the incremental spec and the canon
-- proposed canon text to be applied to canon
+- proposed canon text to be applied to the canon
 - input for /speckit.canon.vibecode-drift-canonize to update canon accurately
+
+#### canon.repair.md
+
+Describes:
+
+- an optional post-canon repair plan and trace artifact created only when
+  `/speckit.canon.drift-analyze` finds canon issues after canon apply in the
+  vibecoding flow
+- targeted WHAT-level corrections to canon content, placement,
+  cross-references, or contradictions
+- input for /speckit.canon.drift-repair
 
 If abstraction levels are mixed, fix structure before proceeding.
 
@@ -200,17 +231,18 @@ If abstraction levels are mixed, fix structure before proceeding.
 Every incremental spec must include:
 
 - Canon references (exact canon paths)
-- Primary change type
+- Primary change classification
 - Impact analysis
 - Acceptance criteria
 - Migration notes (required for Breaking Change; recommended for Behavioral Change; not required otherwise)
-- Explicit Assumptions section (for any behavior not covered by Canon — see §8)
+- Explicit Assumptions section (for any behavior not covered by Canon; see §8)
 
 ---
 
 ## 5. Change Classification (Required)
 
-Each spec must declare exactly one primary change type:
+Each spec must declare exactly one primary change classification from the
+project-configured taxonomy. The default classification set is:
 
 - Feature
 - Behavioral Change
@@ -218,17 +250,18 @@ Each spec must declare exactly one primary change type:
 - Bug Fix
 - Refactor
 - Deprecation
-- Non-Functional
-- Documentation Only
+- Non-Functional: Performance
+- Non-Functional: Security
+- Non-Functional: DevOps
+- Non-Functional: Documentation
+- Non-Functional: Other
 
-Performance, Security, and Operations branch types may all map to
-Non-Functional when the project branch taxonomy needs more specific branch
-codes than the classification taxonomy. The broader `nonfunc` branch type may
-still be used for non-functional work that does not fit one of those narrower
-codes cleanly.
+Section 6 defines the allowed branch type codes that map to these
+classifications. The spec declares the classification; the branch name uses the
+configured branch type code.
 
-If compatibility is reduced → Breaking.
-If runtime behavior changes → Behavioral.
+If compatibility is reduced → Breaking Change.
+If runtime behavior changes without reducing compatibility → Behavioral Change.
 
 ---
 
@@ -236,15 +269,16 @@ If runtime behavior changes → Behavioral.
 
 ### Branch Name
 
-Template for branch name:
+Branch name template:
 
 ```
 <type>-<scope>-<short-description>
 ```
 
 IMPORTANT:
-This template does not discard Spec Kit numbering of branches in kind of "###-"!
-Template only defines what goes after numeric prefix!
+This template does not replace the Spec Kit branch prefix, whether it is a
+numeric prefix such as `###-` or a timestamp prefix such as
+`YYYYMMDD-HHMMSS-`. It defines only the portion that comes after that prefix.
 
 `<type>` MUST be one of the project-configured branch type codes. The type
 table below is the source of truth for allowed values and change-classification
@@ -253,7 +287,7 @@ mapping.
 `<scope>` MUST be one of the project-configured branch scope codes. The scope
 table below is the source of truth for allowed values.
 
-| Type       | Map to Change Classification  |
+| Type       | Maps to Change Classification |
 | ---------- | ----------------------------- |
 | `feature`  | Feature                       |
 | `behavior` | Behavioral Change             |
@@ -290,9 +324,9 @@ nonfunc-web-improve-accessibility-baseline
 
 ## 7. Workflow Enforcement
 
-### Standard Workflow
+### Standard Workflow / Spec-First + Spec-Drift
 
-Command order:
+Spec-First command order:
 
 1. /speckit.specify
 2. /speckit.clarify (repeated as needed, zero or more times)
@@ -301,6 +335,9 @@ Command order:
 5. /speckit.tasks
 6. /speckit.analyze
 7. /speckit.implement
+
+Spec-Drift command order:
+
 8. /speckit.canon.drift (optional orchestrator for steps 9-15)
 9. /speckit.canon.drift-reverse
 10. /speckit.canon.drift-detect
@@ -326,21 +363,34 @@ No /speckit.canon.drift-analyze before /speckit.canon.drift-canonize is complete
 No /speckit.canon.drift-repair before /speckit.canon.drift-analyze identifies repair candidates.
 No Canon edits before /speckit.canon.drift-canonize is complete.
 
-Note: The /speckit.canon.drift-reverse → /speckit.canon.drift-detect → /speckit.canon.drift-resolve → /speckit.canon.drift-reconcile chain is the step-by-step flow. /speckit.canon.drift runs that pipeline for you. If reverse, detection, and resolution are skipped, undocumented implementation changes may not be reflected in canon.
+Note: The `/speckit.canon.drift-reverse` → `/speckit.canon.drift-detect` →
+`/speckit.canon.drift-resolve` → `/speckit.canon.drift-reconcile` chain is the
+step-by-step flow. `/speckit.canon.drift` runs that pipeline for you. If
+reverse engineering, detection, and resolution are skipped, undocumented
+implementation changes may not be reflected in canon.
 
-### Vibecoding Workflow
+### Vibecoding Workflow / Code-First + Spec-Drift
 
-Command order:
+Code-First command order:
 
 1. /speckit.canon.vibecode-specify
+
+Spec-Drift command order:
+
 2. /speckit.canon.vibecode-drift (optional orchestrator for steps 4-7)
 3. /speckit.canon.vibecode-drift-express (optional express shortcut for steps 4-7)
 4. /speckit.canon.vibecode-drift-reverse
 5. /speckit.canon.vibecode-drift-detect
 6. /speckit.canon.vibecode-drift-reconcile
 7. /speckit.canon.vibecode-drift-canonize
+8. /speckit.canon.drift-analyze
+9. /speckit.canon.drift-repair (only when analysis reports repair candidates)
 
-Required vibecoding path after implementation changes: steps 4-7. Use step 2 instead when you want the extension to orchestrate the full vibecode drift pipeline automatically. Use step 3 when you want the express single-invocation variant.
+Required vibecoding path after implementation changes: steps 4-7. Step 2 is
+the full orchestrated vibecode drift pipeline. Step 3 is the express path for
+small, narrowly scoped codebase changes where only a few aspects changed and
+the full workflow would be too long and time-consuming; it provides a faster
+way to sync those small changes back into the canon.
 
 A step is **successful** when it produces zero violations or blocking issues. Warnings may be noted but do not block progression.
 
@@ -358,7 +408,7 @@ Note: /speckit.canon.vibecode-drift-reverse → /speckit.canon.vibecode-drift-de
 If Canon is silent:
 
 - mark as explicit assumption
-- OR create separate Canon clarification spec
+- OR create a separate Canon clarification spec
 
 Never invent implicit system behavior.
 
@@ -380,16 +430,16 @@ A change is complete only when:
 - Spec, Plan, and Tasks are consistent
 - Implementation matches spec
 - Tests validate acceptance criteria
-- /speckit.canon.drift-detect and /speckit.canon.drift-resolve have been run and drift.md reviewed for unintended deviations
-- Canon `CANON_ROOT/**` is updated via /speckit.canon.drift-reconcile and /speckit.canon.drift-canonize when the change introduces new behavior, modifies existing behavior, or deprecates a component described in canon
+- /speckit.canon.drift-reverse, /speckit.canon.drift-detect, and /speckit.canon.drift-resolve have been run, and tasks.drift.md and spec.drift.md have been reviewed for unintended deviations
+- Canon `CANON_ROOT/**` is updated via /speckit.canon.drift-reconcile and /speckit.canon.drift-canonize when the change introduces new behavior, modifies existing behavior, or deprecates a component described in the canon
 - Migration steps documented (if breaking)
 
 ### Vibecoding flow
 
 A change is complete only when:
 
-- /speckit.canon.vibecode-drift-detect has been run and tasks.md and spec.md reviewed for unintended deviations
-- Canon `CANON_ROOT/**` is updated via /speckit.canon.vibecode-drift-reconcile and /speckit.canon.vibecode-drift-canonize when the change introduces new behavior, modifies existing behavior, or deprecates a component described in canon
+- /speckit.canon.vibecode-drift-reverse and /speckit.canon.vibecode-drift-detect have been run, and tasks.drift.md and spec.drift.md have been reviewed for unintended deviations
+- Canon `CANON_ROOT/**` is updated via /speckit.canon.vibecode-drift-reconcile and /speckit.canon.vibecode-drift-canonize when the change introduces new behavior, modifies existing behavior, or deprecates a component described in the canon
 - Migration steps documented (if breaking)
 
 ---
