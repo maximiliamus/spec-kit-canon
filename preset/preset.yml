@@ -6,11 +6,11 @@ preset:
   version: "0.1.0"
   description: "Adapts original Spec Kit workflow to work together with Canon extension."
   author: "Maxim Stupakov"
-  repository: "https://github.com/maximiliamus/spec-kit-canon"
+  repository: "https://github.com/maximiliamus/spec-kit-canon/tree/master/preset"
   license: "MIT"
 
 requires:
-  speckit_version: ">=0.1.0"
+  speckit_version: ">=0.4.3"
 
 provides:
   templates:

@@ -6,7 +6,7 @@ extension:
   version: "0.1.0"
   description: "Adds canon-driven (baseline-driven) workflows: spec-first, code-first, spec-drift. Requires Canon Core preset installation."
   author: "Maxim Stupakov"
-  repository: "https://github.com/maximiliamus/spec-kit-canon"
+  repository: "https://github.com/maximiliamus/spec-kit-canon/tree/master/extension"
   license: "MIT"
 
 config:
@@ -49,11 +49,7 @@ config:
           description: "Web application"
 
 requires:
-  speckit_version: ">=0.1.0"
-  commands:
-    - "speckit.implement"
-    - "speckit.specify"
-    - "speckit.tasks"
+  speckit_version: ">=0.4.3"
 
 provides:
   commands:
