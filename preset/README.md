@@ -11,7 +11,7 @@ extension package.
 Install from a release asset:
 
 ```bash
-specify preset add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
 ```
 
 Install from a local checkout:
@@ -23,8 +23,8 @@ specify preset add --dev /path/to/spec-kit-canon/preset
 For the full canon workflow, install this preset together with the extension:
 
 ```bash
-specify extension add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-<tag>.zip
-specify preset add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-<tag>.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
 ```
 
 ## Included Overrides

@@ -2,9 +2,9 @@ schema_version: "1.0"
 
 preset:
   id: "canon-core"
-  name: "Canon Core Overrides"
+  name: "Canon Core"
   version: "0.1.0"
-  description: "Canon-driven overrides for core Spec Kit commands."
+  description: "Adapts original Spec Kit workflow to work together with Canon extension."
   author: "Maxim Stupakov"
   repository: "https://github.com/maximiliamus/spec-kit-canon"
   license: "MIT"

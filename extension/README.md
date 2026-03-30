@@ -11,7 +11,7 @@ companion `canon-core` preset from the same repository.
 Install from a release asset:
 
 ```bash
-specify extension add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-<tag>.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-<tag>.zip
 ```
 
 Install from a local checkout:
@@ -23,7 +23,7 @@ specify extension add --dev /path/to/spec-kit-canon/extension
 Install the companion preset for the full workflow:
 
 ```bash
-specify preset add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
 ```
 
 ## Commands

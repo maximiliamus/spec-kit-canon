@@ -24,15 +24,15 @@ This repository publishes two packages that are meant to be installed together:
 Install both packages from a release:
 
 ```bash
-specify extension add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-<tag>.zip
-specify preset add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-<tag>.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
 ```
 
 Example for `v0.1.0`:
 
 ```bash
-specify extension add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-v0.1.0.zip
-specify preset add --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-core-v0.1.0.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-v0.1.0.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-core-v0.1.0.zip
 ```
 
 Install both packages from a local checkout:
@@ -144,7 +144,7 @@ With the default Spec Kit sequential numbering, actual branch names become:
 `branching.scopes`, and `<short-description>` is the generated slug for the
 requested change.
 
-Then run:
+After updating the configuration, run:
 
 ```text
 /speckit.constitution
