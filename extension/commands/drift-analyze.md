@@ -1,13 +1,9 @@
 ---
-description: Post-canon analysis — verify that canon changes were applied correctly, check for contradictions and missing cross-references, and produce structured repair candidates for /speckit.canon.drift-repair.
-handoffs:
-  - label: Repair Canon
-    agent: speckit.canon.drift-repair
-    prompt: Read the repair candidates from the analysis and apply corrections to canon files.
-    send: true
+description: Pre-canon analysis — verify draft `canon.drift.md` against the full drift state and current canon before canonize, and emit concrete remediation items without modifying files.
+handoffs: []
 scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-canon-drift --canon
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json -RequireCanonDrift -Canon
+  sh: bash .specify/extensions/canon/scripts/bash/check-prerequisites.sh --json --require-tasks-drift --require-spec-drift --require-canon-drift --canon
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasksDrift -RequireSpecDrift -RequireCanonDrift -Canon
 ---
 
 ## Pre-conditions (execute before any other step)
@@ -18,8 +14,8 @@ Before producing any output:
 2. Apply the following from the constitution to all subsequent steps:
    - **Section 1.2 — Rules for Canon**: do not compress, duplicate, or invent content; always reference canon sections by exact file path
    - **Section 3 — Separation of Abstraction Levels**: canon operates at WHAT level only
-   - **Section 8 — No Hallucinated Requirements**: only report issues that are directly observable; never infer undocumented behavior
-   - **Section 10 — Terminology**: use Canon terminology when describing issues; flag terminology drift as its own category
+   - **Section 8 — No Hallucinated Requirements**: only report issues that are directly observable in the drift artifacts, implementation evidence, or current canon; never infer undocumented behavior
+   - **Section 10 — Terminology**: use Canon terminology exactly and flag terminology drift as its own issue category
 
 ## User Input
 
@@ -33,112 +29,122 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Goal
 
-Verify the integrity of canon after `/speckit.canon.drift-canonize` (or `/speckit.canon.vibecode-drift-canonize`) has applied changes. Produce a structured analysis report with actionable repair candidates that can be consumed by `/speckit.canon.drift-repair`.
+Analyze draft `canon.drift.md` after `/speckit.canon.drift-reconcile` (or `/speckit.canon.vibecode-drift-reconcile`) and before canonize. Review the entire drift chain — `tasks.drift.md`, `spec.drift.md`, draft `canon.drift.md`, current canon files, and `CANON_TOC` — and identify every actionable issue in `canon.drift.md` before canon is modified.
 
-**STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report only.
+**STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report with concrete remediation items, but do not apply edits automatically and do not re-run the analysis in the same command.
 
 ---
 
 ## Setup
 
-**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANON_DRIFT`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
+**Before doing anything else**, run `{SCRIPT}` from repo root and parse JSON for `REPO_ROOT`, `BRANCH`, `FEATURE_DIR`, `TASKS_DRIFT`, `FEATURE_SPEC`, `SPEC_DRIFT`, `CANON_DRIFT`, `CANON_ROOT`, and `CANON_TOC`. All paths must be absolute.
 
 Check `CANON_DRIFT`:
 
-- If `Status` is not `applied` → stop: _"canon.drift.md has not been applied. Run /speckit.canon.drift-canonize first, then re-run /speckit.canon.drift-analyze."_
+- If `Status` is `applied` → stop: _"`canon.drift.md` is already applied. `/speckit.canon.drift-analyze` only analyzes draft canon plans before canonize. Re-run `/speckit.canon.drift-reconcile` to generate a new draft plan if further analysis is needed."_
+- If `Status` is not `draft` → stop: _"`canon.drift.md` must be in `draft` status before `/speckit.canon.drift-analyze` can run."_
+
+Check `SPEC_DRIFT`:
+
+- If `Resolution Status` is not `resolved` → stop: _"`spec.drift.md` is not fully resolved. Run `/speckit.canon.drift-resolve` first."_
 
 ---
 
 ## Step 1 — Load context
 
-- Read `CANON_DRIFT` — the applied canon plan with all entries
-- Read `SPEC_DRIFT` — resolved spec drift items with task drift references
-- Read `FEATURE_SPEC` (spec.md) if it exists
-- Read `CANON_TOC` and all canon files targeted by ACCEPTED canon entries
-- Read any additional canon files in `CANON_ROOT` that are adjacent to or cross-referenced by modified sections
-- Read `.specify/memory/constitution.md` for principle validation
+- **REQUIRED**: Read `TASKS_DRIFT` for the implementation-task evidence and TD-XXX references behind the spec drift findings
+- **REQUIRED**: Read `SPEC_DRIFT` for the resolved SD-XXX outcomes and the authoritative drift state used to justify canon updates
+- **REQUIRED**: Read `CANON_DRIFT` for the draft canon plan, all CD-XXX entries, entry statuses, target files/sections, and proposed canon text
+- **IF EXISTS**: Read `FEATURE_SPEC` (`spec.md`) only when needed to interpret a resolved drift decision or confirm the original feature boundary
+- **REQUIRED**: Read `CANON_TOC` for canon structure and TOC coverage checks
+- **REQUIRED**: Read every canon file targeted by an `ACCEPTED` entry in `CANON_DRIFT`
+- **IF NEEDED**: Read adjacent or cross-referenced canon files in `CANON_ROOT` to verify cross-reference integrity, duplication risk, and contradiction risk
 
 ---
 
-## Step 2 — Canon Entry Verification
+## Step 2 — Verify the canon plan
 
-For each ACCEPTED entry in `CANON_DRIFT`:
+For each `ACCEPTED` entry in `CANON_DRIFT`, verify all of the following:
 
-### A. Application verification
+### A. Traceability and scope
 
-- Verify the proposed canon text was actually applied to the target canon file and section
-- Check for partial application (text was added but incomplete or truncated)
-- Check for incorrect placement (text applied to wrong section or file)
+- The CD-XXX entry traces to a valid resolved SD-XXX item
+- The cited SD-XXX item traces to the relevant TD-XXX evidence
+- The proposed canon change is still within the resolved drift scope and does not introduce unrelated canon edits
 
-### B. Content accuracy
+### B. Canon target correctness
 
-- Verify the applied canon text accurately reflects the spec.drift.md source
-- Check for field name mismatches, incorrect terminology, or distorted phrasing
-- Verify authoritative present-tense language (no proposal language remaining)
+- The target canon file and section are correct for the concept being updated
+- The entry does not target a wrong or overly low-level section
+- The entry does not duplicate existing canon already present at the correct abstraction level
 
-### C. Cross-reference integrity
+### C. Content accuracy
 
-- Check for missing cross-references between newly canonized sections and pre-existing canon
-- Verify that related canon sections (e.g., data model references from API sections) are consistent
-- Check that `CANON_TOC` was updated if new sections or files were added
+- The proposed canon text accurately reflects the authoritative state from `SPEC_DRIFT` and supporting `TASKS_DRIFT`
+- Field names, behaviors, entities, constraints, and terminology match the authoritative drift state
+- The text is authoritative present-tense canon, not proposal language
+- The text stays at the WHAT level and does not leak HOW-level implementation details
 
-### D. Contradiction detection
+### D. Cross-reference and TOC integrity
 
-- Check for contradictions between newly applied canon sections and pre-existing canon from other features
-- Check for contradictions between updated canon and the current `spec.md`
-- Flag any canon sections where the same concept is now defined differently in two places
+- Required cross-references to related canon sections are present or explicitly noted
+- `CANON_TOC` updates are included when new files or sections are introduced
+- Related canon sections stay internally consistent with the proposed change
 
-### E. REJECTED entry review
-
-- For each REJECTED entry in `CANON_DRIFT`: verify the rejection rationale still holds given the final canon state
-- Flag any REJECTED entries that may need revisiting (e.g., if a related ACCEPTED entry introduced a dependency on the rejected content)
+For each `REJECTED` entry in `CANON_DRIFT`, verify the rejection rationale still holds given the final draft plan and current canon state.
 
 ---
 
-## Step 3 — Constitution Alignment
+## Step 3 — Constitution alignment
 
-- Verify all applied canon changes comply with constitution principles
-- Check that Canon terminology is used exactly (constitution Section 10)
-- Verify no HOW-level details leaked into canon (constitution Section 3)
-
----
-
-## Step 4 — Generate Repair Candidates
-
-For every actionable issue found in Steps 2–3, generate a structured repair candidate entry. Classify each into one of:
-
-- `CANON-FIX`: Canon text needs correction — wrong content was applied, field name mismatch, incorrect phrasing
-- `CANON-GAP`: Missing cross-reference or section that should have been added during canon apply
-- `CANON-CONFLICT`: Contradiction between a newly canonized section and a pre-existing canon section
-
-Issues that are informational only (e.g., style suggestions, minor wording preferences) should NOT be included as repair candidates.
-
-Each repair candidate must specify:
-
-- **ID**: R-XXX (globally incrementing)
-- **Category**: CANON-FIX | CANON-GAP | CANON-CONFLICT
-- **Canon Target**: exact file path and section heading (e.g., `CANON_ROOT/api.md § Endpoints`)
-- **Action**: add | modify | remove
-- **Description**: concise explanation of what is wrong and what the correction should be
-- **Canon ref**: C-XXX from canon.drift.md (if traceable to a specific entry)
+- Verify every proposed canon change complies with constitution principles
+- Check that Canon terminology is used exactly
+- Verify no HOW-level details leaked into `canon.drift.md`
+- Verify no proposed canon text invents requirements not supported by resolved drift evidence
 
 ---
 
-## Step 5 — Produce Analysis Report
+## Step 4 — Generate findings and remediation items
+
+For every actionable issue found in Steps 2–3, generate a remediation item. Include **all actionable issues**; do not stop at a top subset.
+
+Classify each remediation item into one of:
+
+- `CANON-TRACE`: incorrect or missing SD-XXX / TD-XXX / scope traceability in `canon.drift.md`
+- `CANON-FIX`: proposed canon text or classification needs correction
+- `CANON-GAP`: a required canon entry, cross-reference, TOC note, or supporting detail is missing from `canon.drift.md`
+- `CANON-CONFLICT`: the proposed canon change conflicts with current canon and the conflict must be resolved in `canon.drift.md`
+
+Each remediation item must specify:
+
+- **ID**: CR-XXX (globally incrementing, zero-padded)
+- **Category**: `CANON-TRACE` | `CANON-FIX` | `CANON-GAP` | `CANON-CONFLICT`
+- **Severity**: `CRITICAL` | `HIGH` | `MEDIUM` | `LOW`
+- **Canon Drift Target**: exact location in `CANON_DRIFT` to change (header, Accepted Entries, Rejected Entries, or specific CD-XXX entry)
+- **Canon Target**: exact canon file path and section heading affected, if applicable
+- **Action**: add | modify | remove | reclassify
+- **Description**: concise explanation of what is wrong and what `canon.drift.md` must say instead
+- **Refs**: relevant CD-XXX, SD-XXX, and TD-XXX references
+
+Issues that are informational only should not be included as remediation items.
+
+---
+
+## Step 5 — Produce analysis report
 
 Output a Markdown report (no file writes) with the following structure:
 
 ### Drift Canon Analysis Report
 
 **Branch**: `BRANCH`
-**Canon**: `CANON_DRIFT` (Status: applied)
+**Canon Drift**: `CANON_DRIFT` (`Status`: `draft`)
 **Canon files analyzed**: [list of files]
 
 #### Verification Summary
 
-| C-XXX | Target | Status | Verified | Issues |
-|-------|--------|--------|----------|--------|
-| C-001 | CANON_ROOT/api.md § Endpoints | ACCEPTED | Yes/No | [brief issue or "OK"] |
+| CD-XXX | Target | Status | Reviewed | Issues |
+|--------|--------|--------|----------|--------|
+| CD-001 | `CANON_ROOT/api.md § Endpoints` | `ACCEPTED` | Yes/No | [brief issue or "OK"] |
 
 #### Findings
 
@@ -146,45 +152,43 @@ Output a Markdown report (no file writes) with the following structure:
 |----|----------|----------|-------------|---------|----------------|
 
 Severity levels:
-- **CRITICAL**: Canon contradiction, missing required section, constitution violation
-- **HIGH**: Incorrect content applied, missing cross-reference affecting other features
-- **MEDIUM**: Minor content inaccuracy, missing optional cross-reference
-- **LOW**: Style/wording that doesn't affect correctness
+- **CRITICAL**: wrong canon section, canon contradiction, missing required canon entry, constitution violation
+- **HIGH**: incorrect proposed canon text, bad classification, missing required cross-reference or TOC change
+- **MEDIUM**: minor content inaccuracy, terminology drift, incomplete notes needed for correct canonize
+- **LOW**: wording cleanup that does not affect canon correctness
 
-#### Repair Candidates
+#### Remediation Items
 
-If any repair candidates were generated in Step 4, include this table:
+If any remediation items were generated in Step 4, include this table:
 
-| ID  | Category       | Canon Target                   | Action | Canon Ref | Description                         |
-|-----|----------------|--------------------------------|--------|-----------|-------------------------------------|
-| R-1 | CANON-FIX      | CANON_ROOT/api.md § Endpoints | modify | C-003     | Wrong field name; should be ...     |
-| R-2 | CANON-GAP      | CANON_ROOT/data.md § Models    | add    | —         | Missing cross-ref to new entity ... |
+| ID | Category | Severity | Canon Drift Target | Canon Target | Action | Refs | Description |
+|----|----------|----------|--------------------|--------------|--------|------|-------------|
+| CR-001 | `CANON-FIX` | HIGH | `CANON_DRIFT § Accepted Entries / CD-003` | `CANON_ROOT/api.md § Endpoints` | modify | CD-003, SD-004, TD-002 | Wrong field name in proposed canon text; update to authoritative name. |
 
-If zero repair candidates: _"Canon verified — no repairs needed."_
+If zero remediation items: _"Canon drift plan review found no actionable issues."_
 
 #### Metrics
 
-- Total canon entries: N (ACCEPTED: N, REJECTED: N)
-- Entries verified OK: N
+- Total canon entries: N (`ACCEPTED`: N, `REJECTED`: N)
+- Entries checked OK: N
 - Entries with issues: N
-- Repair candidates generated: N
+- Remediation items generated: N
 - Constitution violations: N
 
 ---
 
-## Step 6 — Next Actions
+## Step 6 — Next actions
 
-- If zero repair candidates: _"Canon is consistent. No further action needed."_
-- If repair candidates exist: _"Run /speckit.canon.drift-repair with the above candidates to apply corrections."_
-- If CRITICAL issues: _"CRITICAL issues found — resolve before proceeding with further development."_
+- If zero remediation items: _"`canon.drift.md` can be canonized as-is."_
+- If remediation items exist: recommend revising `canon.drift.md` according to the `Remediation Items` table before canonize, then re-running `/speckit.canon.drift-analyze`, and then running `/speckit.canon.drift-canonize` when the verification pass is clean.
+- If this analysis was invoked from `/speckit.canon.drift` or `/speckit.canon.vibecode-drift`, the orchestrator owns the next decision after this report. In manual mode it may ask whether to remediate, continue, or stop. In automatic mode it may apply the reported remediation items to `canon.drift.md` and re-run analyze once.
 
 ---
 
 ## Rules
 
-- **STRICTLY READ-ONLY** — do NOT modify any files
-- This command analyzes canon state after canon apply. It does NOT re-run drift detection or reconciliation.
-- Only report issues that are directly observable by comparing `CANON_DRIFT` entries against actual canon file contents.
-- Do NOT propose new canon content beyond what was in the original canon plan or spec.drift.md.
-- This command works for both the full pipeline and the vibecode pipeline — it operates after canon apply regardless of which pipeline produced the canon plan.
-
+- **NEVER modify files.** This command is always read-only.
+- Include **all actionable issues** in the report. Do not limit remediation to a top subset.
+- The `Remediation Items` table is the authoritative remediation output for both direct user review and orchestrator follow-up.
+- This command analyzes the full drift chain before canonize. It does **not** apply canon changes and does not by itself block later canonize.
+- This command works for both the standard drift and vibecoding drift workflows, but only on draft `canon.drift.md`.

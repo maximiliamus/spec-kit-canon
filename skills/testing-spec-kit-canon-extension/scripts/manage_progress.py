@@ -22,7 +22,7 @@ STEP_DEFINITIONS = (
     ("standard_feature_workflow", "Run the standard feature workflow"),
     ("api_drift", "Add update todo and run standard drift"),
     ("merge_to_master", "Merge the first branch back to master"),
-    ("web_ui_vibecode", "Run the vibecode web UI pass"),
+    ("web_ui_vibecode", "Run the vibecoding web UI pass"),
     ("verify_final_canon", "Verify the final canon"),
     ("generate_test_report", "Generate the final test report"),
 )

@@ -55,11 +55,11 @@ provides:
   commands:
     - name: "speckit.canon.drift"
       file: "commands/drift.md"
-      description: "Run the standard canon drift orchestration pipeline."
+      description: "Run the standard drift orchestration pipeline with direct resolve and analyze review gates."
 
     - name: "speckit.canon.drift-analyze"
       file: "commands/drift-analyze.md"
-      description: "Analyze canon after canon apply and produce repair candidates."
+      description: "Analyze draft canon.drift.md before canonize and optionally suggest remediation."
       
     - name: "speckit.canon.drift-canonize"
       file: "commands/drift-canonize.md"
@@ -69,17 +69,17 @@ provides:
       file: "commands/drift-detect.md"
       description: "Detect spec-level drift from tasks.drift.md."
 
+    - name: "speckit.canon.drift-implement"
+      file: "commands/drift-implement.md"
+      description: "Implement deferred alignment tasks from tasks.alignment.md."
+
     - name: "speckit.canon.drift-reconcile"
       file: "commands/drift-reconcile.md"
       description: "Infer canon gaps and write canon.drift.md."
 
-    - name: "speckit.canon.drift-repair"
-      file: "commands/drift-repair.md"
-      description: "Repair canon after post-canon analysis."
-
     - name: "speckit.canon.drift-resolve"
       file: "commands/drift-resolve.md"
-      description: "Resolve outstanding IMPL-REJECTED and SPEC-REJECTED drift items."
+      description: "Resolve outstanding UNRESOLVED and IMPL-REJECTED drift items."
 
     - name: "speckit.canon.drift-reverse"
       file: "commands/drift-reverse.md"
@@ -87,27 +87,31 @@ provides:
 
     - name: "speckit.canon.vibecode-drift"
       file: "commands/vibecode-drift.md"
-      description: "Run the fully autonomous vibecode drift orchestration pipeline."
+      description: "Run the vibecoding drift orchestration pipeline with direct analyze review gate."
+
+    - name: "speckit.canon.vibecode-drift-analyze"
+      file: "commands/vibecode-drift-analyze.md"
+      description: "Vibecoding entrypoint alias for the shared draft canon analysis workflow."
 
     - name: "speckit.canon.vibecode-drift-canonize"
       file: "commands/vibecode-drift-canonize.md"
-      description: "Apply a fully accepted vibecode canon plan."
+      description: "Apply a fully accepted vibecoding canon plan."
 
     - name: "speckit.canon.vibecode-drift-detect"
       file: "commands/vibecode-drift-detect.md"
-      description: "Detect spec-level drift for vibecode workflows."
+      description: "Detect spec-level drift for vibecoding workflows."
 
     - name: "speckit.canon.vibecode-drift-express"
       file: "commands/vibecode-drift-express.md"
-      description: "Run the express vibecode drift-to-canon pipeline."
+      description: "Run the express vibecoding drift-to-canon pipeline."
 
     - name: "speckit.canon.vibecode-drift-reconcile"
       file: "commands/vibecode-drift-reconcile.md"
-      description: "Infer canon gaps for vibecode workflows."
+      description: "Infer canon gaps for vibecoding workflows."
 
     - name: "speckit.canon.vibecode-drift-reverse"
       file: "commands/vibecode-drift-reverse.md"
-      description: "Reverse-engineer vibecode task drift from implementation changes."
+      description: "Reverse-engineer vibecoding task drift from implementation changes."
       
     - name: "speckit.canon.vibecode-specify"
       file: "commands/vibecode-specify.md"

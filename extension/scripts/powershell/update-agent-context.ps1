@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+[CmdletBinding(SupportsShouldProcess)]
 <#!
 .SYNOPSIS
 Update agent context files with information from plan.md (PowerShell version)
@@ -76,39 +77,39 @@ $script:NEW_FRAMEWORK = ''
 $script:NEW_DB = ''
 $script:NEW_PROJECT_TYPE = ''
 
-function Write-Info { 
+function Write-Info {
     param(
         [Parameter(Mandatory=$true)]
         [string]$Message
     )
-    Write-Host "INFO: $Message" 
+    Write-Information "INFO: $Message" -InformationAction Continue
 }
 
-function Write-Success { 
+function Write-Success {
     param(
         [Parameter(Mandatory=$true)]
         [string]$Message
     )
-    Write-Host "$([char]0x2713) $Message" 
+    Write-Information "$([char]0x2713) $Message" -InformationAction Continue
 }
 
-function Write-WarningMsg { 
+function Write-WarningMsg {
     param(
         [Parameter(Mandatory=$true)]
         [string]$Message
     )
-    Write-Warning $Message 
+    Write-Warning $Message
 }
 
-function Write-Err { 
+function Write-Err {
     param(
         [Parameter(Mandatory=$true)]
         [string]$Message
     )
-    Write-Host "ERROR: $Message" -ForegroundColor Red 
+    [Console]::Error.WriteLine("ERROR: $Message")
 }
 
-function Validate-Environment {
+function Test-EnvironmentState {
     if (-not $CURRENT_BRANCH) {
         Write-Err 'Unable to determine current feature'
         if ($HAS_GIT) { Write-Info "Make sure you're on a feature branch" } else { Write-Info 'Set SPECIFY_FEATURE environment variable or create a feature first' }
@@ -121,7 +122,7 @@ function Validate-Environment {
     }
 }
 
-function Extract-PlanField {
+function Get-PlanFieldValue {
     param(
         [Parameter(Mandatory=$true)]
         [string]$FieldPattern,
@@ -132,14 +133,14 @@ function Extract-PlanField {
     # Lines like **Language/Version**: Python 3.12
     $regex = "^\*\*$([Regex]::Escape($FieldPattern))\*\*: (.+)$"
     Get-Content -LiteralPath $PlanFile -Encoding utf8 | ForEach-Object {
-        if ($_ -match $regex) { 
+        if ($_ -match $regex) {
             $val = $Matches[1].Trim()
             if ($val -notin @('NEEDS CLARIFICATION','N/A')) { return $val }
         }
     } | Select-Object -First 1
 }
 
-function Parse-PlanData {
+function Import-PlanData {
     param(
         [Parameter(Mandatory=$true)]
         [string]$PlanFile
@@ -154,10 +155,10 @@ function Parse-PlanData {
         return $true
     }
     Write-Info "Parsing plan data from $PlanFile"
-    $script:NEW_LANG        = Extract-PlanField -FieldPattern 'Language/Version' -PlanFile $PlanFile
-    $script:NEW_FRAMEWORK   = Extract-PlanField -FieldPattern 'Primary Dependencies' -PlanFile $PlanFile
-    $script:NEW_DB          = Extract-PlanField -FieldPattern 'Storage' -PlanFile $PlanFile
-    $script:NEW_PROJECT_TYPE = Extract-PlanField -FieldPattern 'Project Type' -PlanFile $PlanFile
+    $script:NEW_LANG        = Get-PlanFieldValue -FieldPattern 'Language/Version' -PlanFile $PlanFile
+    $script:NEW_FRAMEWORK   = Get-PlanFieldValue -FieldPattern 'Primary Dependencies' -PlanFile $PlanFile
+    $script:NEW_DB          = Get-PlanFieldValue -FieldPattern 'Storage' -PlanFile $PlanFile
+    $script:NEW_PROJECT_TYPE = Get-PlanFieldValue -FieldPattern 'Project Type' -PlanFile $PlanFile
 
     if ($NEW_LANG) { Write-Info "Found language: $NEW_LANG" } else { Write-WarningMsg 'No language information found in plan' }
     if ($NEW_FRAMEWORK) { Write-Info "Found framework: $NEW_FRAMEWORK" }
@@ -180,15 +181,15 @@ function Format-TechnologyStack {
     return ($parts -join ' + ')
 }
 
-function Get-ProjectStructure { 
+function Get-ProjectStructure {
     param(
         [Parameter(Mandatory=$false)]
         [string]$ProjectType
     )
-    if ($ProjectType -match 'web') { return "backend/`nfrontend/`ntests/" } else { return "src/`ntests/" } 
+    if ($ProjectType -match 'web') { return "backend/`nfrontend/`ntests/" } else { return "src/`ntests/" }
 }
 
-function Get-CommandsForLanguage { 
+function Get-CommandsForLanguage {
     param(
         [Parameter(Mandatory=$false)]
         [string]$Lang
@@ -201,15 +202,17 @@ function Get-CommandsForLanguage {
     }
 }
 
-function Get-LanguageConventions { 
+function Get-LanguageConvention {
     param(
         [Parameter(Mandatory=$false)]
         [string]$Lang
     )
-    if ($Lang) { "${Lang}: Follow standard conventions" } else { 'General: Follow standard conventions' } 
+    if ($Lang) { "${Lang}: Follow standard conventions" } else { 'General: Follow standard conventions' }
 }
 
 function New-AgentFile {
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory=$true)]
         [string]$TargetFile,
@@ -219,12 +222,13 @@ function New-AgentFile {
         [datetime]$Date
     )
     if (-not (Test-Path $TEMPLATE_FILE)) { Write-Err "Template not found at $TEMPLATE_FILE"; return $false }
+    if (-not $PSCmdlet.ShouldProcess($TargetFile, 'Create agent context file')) { return $true }
     $temp = New-TemporaryFile
     Copy-Item -LiteralPath $TEMPLATE_FILE -Destination $temp -Force
 
     $projectStructure = Get-ProjectStructure -ProjectType $NEW_PROJECT_TYPE
     $commands = Get-CommandsForLanguage -Lang $NEW_LANG
-    $languageConventions = Get-LanguageConventions -Lang $NEW_LANG
+    $languageConventions = Get-LanguageConvention -Lang $NEW_LANG
 
     $escaped_lang = $NEW_LANG
     $escaped_framework = $NEW_FRAMEWORK
@@ -233,7 +237,7 @@ function New-AgentFile {
     $content = Get-Content -LiteralPath $temp -Raw -Encoding utf8
     $content = $content -replace '\[PROJECT NAME\]',$ProjectName
     $content = $content -replace '\[DATE\]',$Date.ToString('yyyy-MM-dd')
-    
+
     # Build the technology stack string safely
     $techStackForTemplate = ""
     if ($escaped_lang -and $escaped_framework) {
@@ -243,7 +247,7 @@ function New-AgentFile {
     } elseif ($escaped_framework) {
         $techStackForTemplate = "- $escaped_framework ($escaped_branch)"
     }
-    
+
     $content = $content -replace '\[EXTRACTED FROM ALL PLAN.MD FILES\]',$techStackForTemplate
     # For project structure we manually embed (keep newlines)
     $escapedStructure = [Regex]::Escape($projectStructure)
@@ -251,7 +255,7 @@ function New-AgentFile {
     # Replace escaped newlines placeholder after all replacements
     $content = $content -replace '\[ONLY COMMANDS FOR ACTIVE TECHNOLOGIES\]',$commands
     $content = $content -replace '\[LANGUAGE-SPECIFIC, ONLY FOR LANGUAGES IN USE\]',$languageConventions
-    
+
     # Build the recent changes string safely
     $recentChangesForTemplate = ""
     if ($escaped_lang -and $escaped_framework) {
@@ -261,7 +265,7 @@ function New-AgentFile {
     } elseif ($escaped_framework) {
         $recentChangesForTemplate = "- ${escaped_branch}: Added ${escaped_framework}"
     }
-    
+
     $content = $content -replace '\[LAST 3 FEATURES AND WHAT THEY ADDED\]',$recentChangesForTemplate
     # Convert literal \n sequences introduced by Escape to real newlines
     $content = $content -replace '\\n',[Environment]::NewLine
@@ -280,6 +284,8 @@ function New-AgentFile {
 }
 
 function Update-ExistingAgentFile {
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory=$true)]
         [string]$TargetFile,
@@ -287,19 +293,20 @@ function Update-ExistingAgentFile {
         [datetime]$Date
     )
     if (-not (Test-Path $TargetFile)) { return (New-AgentFile -TargetFile $TargetFile -ProjectName (Split-Path $REPO_ROOT -Leaf) -Date $Date) }
+    if (-not $PSCmdlet.ShouldProcess($TargetFile, 'Update existing agent context file')) { return $true }
 
     $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
     $newTechEntries = @()
     if ($techStack) {
         $escapedTechStack = [Regex]::Escape($techStack)
-        if (-not (Select-String -Pattern $escapedTechStack -Path $TargetFile -Quiet)) { 
-            $newTechEntries += "- $techStack ($CURRENT_BRANCH)" 
+        if (-not (Select-String -Pattern $escapedTechStack -Path $TargetFile -Quiet)) {
+            $newTechEntries += "- $techStack ($CURRENT_BRANCH)"
         }
     }
     if ($NEW_DB -and $NEW_DB -notin @('N/A','NEEDS CLARIFICATION')) {
         $escapedDB = [Regex]::Escape($NEW_DB)
-        if (-not (Select-String -Pattern $escapedDB -Path $TargetFile -Quiet)) { 
-            $newTechEntries += "- $NEW_DB ($CURRENT_BRANCH)" 
+        if (-not (Select-String -Pattern $escapedDB -Path $TargetFile -Quiet)) {
+            $newTechEntries += "- $NEW_DB ($CURRENT_BRANCH)"
         }
     }
     $newChangeEntry = ''
@@ -308,7 +315,7 @@ function Update-ExistingAgentFile {
 
     $lines = Get-Content -LiteralPath $TargetFile -Encoding utf8
     $output = New-Object System.Collections.Generic.List[string]
-    $inTech = $false; $inChanges = $false; $techAdded = $false; $changeAdded = $false; $existingChanges = 0
+    $inTech = $false; $inChanges = $false; $techAdded = $false; $existingChanges = 0
 
     for ($i=0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
@@ -327,7 +334,7 @@ function Update-ExistingAgentFile {
         }
         if ($line -eq '## Recent Changes') {
             $output.Add($line)
-            if ($newChangeEntry) { $output.Add($newChangeEntry); $changeAdded = $true }
+            if ($newChangeEntry) { $output.Add($newChangeEntry) }
             $inChanges = $true
             continue
         }
@@ -359,6 +366,8 @@ function Update-ExistingAgentFile {
 }
 
 function Update-AgentFile {
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory=$true)]
         [string]$TargetFile,
@@ -366,6 +375,7 @@ function Update-AgentFile {
         [string]$AgentName
     )
     if (-not $TargetFile -or -not $AgentName) { Write-Err 'Update-AgentFile requires TargetFile and AgentName'; return $false }
+    if (-not $PSCmdlet.ShouldProcess($TargetFile, "Update $AgentName context file")) { return $true }
     Write-Info "Updating $AgentName context file: $TargetFile"
     $projectName = Split-Path $REPO_ROOT -Leaf
     $date = Get-Date
@@ -387,10 +397,13 @@ function Update-AgentFile {
 }
 
 function Update-SpecificAgent {
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory=$true)]
         [string]$Type
     )
+    if (-not $PSCmdlet.ShouldProcess($Type, 'Update specific agent context')) { return $true }
     switch ($Type) {
         'claude'   { Update-AgentFile -TargetFile $CLAUDE_FILE   -AgentName 'Claude Code' }
         'gemini'   { Update-AgentFile -TargetFile $GEMINI_FILE   -AgentName 'Gemini CLI' }
@@ -422,9 +435,14 @@ function Update-SpecificAgent {
     }
 }
 
-function Update-AllExistingAgents {
+function Update-ExistingAgentContext {
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([bool])]
+    param()
+
     $found = $false
     $ok = $true
+    if (-not $PSCmdlet.ShouldProcess('existing agent files', 'Update agent context files')) { return $true }
     if (Test-Path $CLAUDE_FILE)   { if (-not (Update-AgentFile -TargetFile $CLAUDE_FILE   -AgentName 'Claude Code')) { $ok = $false }; $found = $true }
     if (Test-Path $GEMINI_FILE)   { if (-not (Update-AgentFile -TargetFile $GEMINI_FILE   -AgentName 'Gemini CLI')) { $ok = $false }; $found = $true }
     if (Test-Path $COPILOT_FILE)  { if (-not (Update-AgentFile -TargetFile $COPILOT_FILE  -AgentName 'GitHub Copilot')) { $ok = $false }; $found = $true }
@@ -454,31 +472,36 @@ function Update-AllExistingAgents {
     return $ok
 }
 
-function Print-Summary {
-    Write-Host ''
+function Show-Summary {
+    Write-Output ''
     Write-Info 'Summary of changes:'
-    if ($NEW_LANG) { Write-Host "  - Added language: $NEW_LANG" }
-    if ($NEW_FRAMEWORK) { Write-Host "  - Added framework: $NEW_FRAMEWORK" }
-    if ($NEW_DB -and $NEW_DB -ne 'N/A') { Write-Host "  - Added database: $NEW_DB" }
-    Write-Host ''
+    if ($NEW_LANG) { Write-Output "  - Added language: $NEW_LANG" }
+    if ($NEW_FRAMEWORK) { Write-Output "  - Added framework: $NEW_FRAMEWORK" }
+    if ($NEW_DB -and $NEW_DB -ne 'N/A') { Write-Output "  - Added database: $NEW_DB" }
+    Write-Output ''
     Write-Info 'Usage: ./update-agent-context.ps1 [-AgentType claude|gemini|copilot|cursor-agent|qwen|opencode|codex|windsurf|junie|kilocode|auggie|roo|codebuddy|amp|shai|tabnine|kiro-cli|agy|bob|vibe|qodercli|kimi|trae|pi|iflow|generic]'
 }
 
 function Main {
-    Validate-Environment
+    param(
+        [Parameter(Mandatory=$false)]
+        [string]$SelectedAgentType
+    )
+
+    Test-EnvironmentState
     Write-Info "=== Updating agent context files for feature $CURRENT_BRANCH ==="
-    if (-not (Parse-PlanData -PlanFile $NEW_PLAN)) { Write-Err 'Failed to parse plan data'; exit 1 }
+    if (-not (Import-PlanData -PlanFile $NEW_PLAN)) { Write-Err 'Failed to parse plan data'; exit 1 }
     $success = $true
-    if ($AgentType) {
-        Write-Info "Updating specific agent: $AgentType"
-        if (-not (Update-SpecificAgent -Type $AgentType)) { $success = $false }
+    if ($SelectedAgentType) {
+        Write-Info "Updating specific agent: $SelectedAgentType"
+        if (-not (Update-SpecificAgent -Type $SelectedAgentType)) { $success = $false }
     }
     else {
         Write-Info 'No agent specified, updating all existing agent files...'
-        if (-not (Update-AllExistingAgents)) { $success = $false }
+        if (-not (Update-ExistingAgentContext)) { $success = $false }
     }
-    Print-Summary
+    Show-Summary
     if ($success) { Write-Success 'Agent context update completed successfully'; exit 0 } else { Write-Err 'Agent context update completed with errors'; exit 1 }
 }
 
-Main
+Main -SelectedAgentType $AgentType

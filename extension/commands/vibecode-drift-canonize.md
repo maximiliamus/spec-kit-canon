@@ -1,20 +1,12 @@
 ---
-description: Apply a fully-ACCEPTED canon plan to canon files — vibecode shortcut that skips inference (canon.drift.md must already exist with all entries ACCEPTED).
-handoffs:
-  - label: Analyze Canon
-    agent: speckit.canon.drift-analyze
-    prompt: Verify the applied canon entries against canon files and produce repair candidates if needed.
-    send: true
-  - label: Repair Canon
-    agent: speckit.canon.drift-repair
-    prompt: Read the analyze report and apply corrections to canon files.
-    send: false
+description: Apply a fully-`ACCEPTED` draft canon plan to canon files — vibecoding shortcut that skips inference once `canon.drift.md` is prepared.
+handoffs: []
 scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-canon-drift --canon
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json -RequireCanonDrift -Canon
+  sh: bash .specify/extensions/canon/scripts/bash/check-prerequisites.sh --json --require-canon-drift --canon
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-prerequisites.ps1 -Json -RequireCanonDrift -Canon
 agent_scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/update-agent-context.sh
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/update-agent-context.ps1
+  sh: bash .specify/extensions/canon/scripts/bash/update-agent-context.sh __AGENT__
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
 ---
 
 ## Pre-conditions (execute before any other step)
@@ -45,16 +37,19 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Step 1 — Load context
 
-- Read `CANON_DRIFT`
+- **REQUIRED**: Read `CANON_DRIFT` for the authoritative canon change plan, entry statuses, target canon files, and section-level instructions that this command will apply without further inference
 - Check top-level `Status` field:
-  - If `applied` → stop and report: "canon.drift.md is already marked as applied. Delete it and re-run /speckit.canon.vibecode-drift-reconcile to re-generate, or check canon files for the applied changes."
-- Read `SPEC_DRIFT`, `CANON_TOC`, and all canon files targeted by ACCEPTED entries
+  - If `applied` → stop and report: "`canon.drift.md` is already marked as `applied`. Delete it and re-run /speckit.canon.vibecode-drift-reconcile to re-generate, or check canon files for the applied changes."
+  - If not `draft` → stop and report: "`canon.drift.md` must be in `draft` status before `/speckit.canon.vibecode-drift-canonize` can run."
+- **REQUIRED**: Read `SPEC_DRIFT` for the accepted spec-level drift context and traceability needed to ensure canon updates reflect the approved behavior changes
+- **REQUIRED**: Read `CANON_TOC` for the current canon structure and file organization so added or updated canon content lands in the correct place
+- **REQUIRED**: Read all canon files targeted by `ACCEPTED` entries for the existing section structure, surrounding context, and exact locations where canon changes must be applied
 
 ---
 
 ## Step 2 — Gate check
 
-Scan all entries in canon.drift.md. Every entry **MUST** have status `ACCEPTED`. If any entry has a status other than `ACCEPTED`, stop and report: "canon.drift.md contains non-ACCEPTED entries — this vibecode workflow expects all entries to be ACCEPTED. Edit the file or re-run /speckit.canon.vibecode-drift-reconcile."
+Scan all entries in `canon.drift.md`. Every entry **MUST** have status `ACCEPTED`. If any entry has a status other than `ACCEPTED`, stop and report: "`canon.drift.md` contains entries that are not `ACCEPTED` — this vibecoding workflow expects all entries to be `ACCEPTED`. Edit the file or re-run /speckit.canon.vibecode-drift-reconcile."
 
 ---
 
@@ -91,7 +86,7 @@ In each updated canon section, append: `<!-- Canonicalized from specs/<BRANCH>/s
 
 ---
 
-## Step 7 — Mark canon.drift.md as applied
+## Step 7 — Mark `canon.drift.md` as `applied`
 
 Update the top-level `Status` field in `CANON_DRIFT` to `applied`.
 
@@ -99,7 +94,7 @@ Update the top-level `Status` field in `CANON_DRIFT` to `applied`.
 
 ## Step 8 — Update agent context
 
-Run `{AGENT_SCRIPT} codex` to refresh context after canon updates.
+Run `{AGENT_SCRIPT}` to refresh the current agent-specific context after canon updates.
 
 ---
 
@@ -107,7 +102,7 @@ Run `{AGENT_SCRIPT} codex` to refresh context after canon updates.
 
 - List all modified canon files with a summary of changes per section
 - "Canon updated successfully."
-- "Run /speckit.canon.drift-analyze to verify canon consistency. If issues are found, run /speckit.canon.drift-repair to apply corrections."
+- "If you later revise `canon.drift.md`, consider running /speckit.canon.vibecode-drift-analyze again before canonizing the new draft."
 
 ---
 
@@ -119,5 +114,4 @@ Run `{AGENT_SCRIPT} codex` to refresh context after canon updates.
 - Canon must read as authoritative present-tense truth.
 - Use Canon terminology exactly; avoid synonyms.
 - Only modify `CANON_ROOT/**` and `CANON_TOC`. Do not modify `SPEC_DRIFT`.
-- This is the apply-only vibecode workflow. All entries must be ACCEPTED — no inference or classification is performed.
-
+- This is the apply-only vibecoding workflow. All entries must be `ACCEPTED` — no inference or classification is performed.

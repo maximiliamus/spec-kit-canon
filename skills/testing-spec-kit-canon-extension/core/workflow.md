@@ -7,7 +7,7 @@ tested.
 
 Read [test-flow.md](./test-flow.md) before starting the first command
 sequence. It contains the exact prompts and verification targets for the
-baseline API, the drift update, and the web UI vibecode pass.
+baseline API, the drift update, and the web UI vibecoding pass.
 
 ## Progress Tracking
 
@@ -259,14 +259,22 @@ and get behavior.
 
 Then run `/speckit.canon.drift`.
 
-If `/speckit.canon.drift` reaches interactive resolve prompts, act as the
-operator and keep the pipeline moving:
+The orchestrator runs in manual mode by default. When it reaches the resolve
+step, it runs directly in the orchestrator and asks the user for each
+`UNRESOLVED` item whether the implementation or the spec should be
+authoritative. Keep the pipeline moving:
 
-- approve spec updates for `SPEC-REJECTED` items when the code is the intended
-  new truth
-- prefer `F` fix-now over deferring tasks for `IMPL-REJECTED` items unless the
-  fix is clearly outside the trivial scope
+- accept the implementation as truth for each `UNRESOLVED` item (since the
+  code change was intentional); these become `IMPL-ACCEPTED`
+- if any `IMPL-REJECTED` items need alignment work, prefer fixing now rather
+  than deferring unless the fix is clearly outside the trivial scope
 - overwrite generated drift artifacts when prompted
+
+When the orchestrator reaches the analyze step, it runs a read-only review
+of the draft canon plan before canonize. If analyze reports zero remediation
+items, the orchestrator continues to canonize. If remediation items are
+reported, choose `remediate now` to let the orchestrator update
+`canon.drift.md` with the reported CR-XXX items and then verify.
 
 After the orchestrator finishes, inspect the canon root and confirm it now
 captures the update behavior at the WHAT level, not just in implementation
@@ -280,7 +288,7 @@ python skills/testing-spec-kit-canon-extension/scripts/manage_progress.py comple
 
 ### 6. Merge the first branch back to `master` (`merge_to_master`)
 
-The vibecode entry command must start from `master`.
+The vibecoding entry command must start from `master`.
 
 Before starting the second pass:
 
@@ -296,7 +304,7 @@ When `master` contains the first feature and the worktree is clean, run:
 python skills/testing-spec-kit-canon-extension/scripts/manage_progress.py complete merge_to_master --note "Committed the first feature branch and fast-forward merged it back into master."
 ```
 
-### 7. Run the vibecode web UI pass (`web_ui_vibecode`)
+### 7. Run the vibecoding web UI pass (`web_ui_vibecode`)
 
 From `master`, run `/speckit.canon.vibecode-specify` with the web UI prompt
 from [test-flow.md](./test-flow.md).
@@ -304,10 +312,15 @@ from [test-flow.md](./test-flow.md).
 Let the command create the branch, write `vibecode.md`, and implement the
 change. After the UI exists, run `/speckit.canon.vibecode-drift`.
 
-When the UI implementation and vibecode drift pass finish, run:
+The vibecoding orchestrator runs reverse, detect, and reconcile
+automatically, then runs analyze as a read-only draft canon review before
+canonize. If analyze reports remediation items, choose `remediate now` or
+`continue with current draft` to keep the pipeline moving to canonize.
+
+When the UI implementation and vibecoding drift pass finish, run:
 
 ```bash
-python skills/testing-spec-kit-canon-extension/scripts/manage_progress.py complete web_ui_vibecode --note "Ran the vibecode UI flow and confirmed canon drift captured the list, load, and update UI behavior."
+python skills/testing-spec-kit-canon-extension/scripts/manage_progress.py complete web_ui_vibecode --note "Ran the vibecoding UI flow and confirmed canon drift captured the list, load, and update UI behavior."
 ```
 
 ### 8. Verify the final canon (`verify_final_canon`)
@@ -368,7 +381,15 @@ intentionally want to skip that behavior.
   `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`,
   `/speckit.tasks`, `/speckit.analyze`, `/speckit.implement`,
   `/speckit.canon.drift`, `/speckit.canon.vibecode-specify`, and
-  `/speckit.canon.vibecode-drift`.
+  `/speckit.canon.vibecode-drift`. The orchestrators
+  (`/speckit.canon.drift` and `/speckit.canon.vibecode-drift`) internally
+  invoke step commands such as `/speckit.canon.drift-resolve`,
+  `/speckit.canon.drift-implement`, `/speckit.canon.drift-analyze`, and
+  `/speckit.canon.vibecode-drift-analyze`; do not call those step commands
+  directly during the test.
+- Run both orchestrators in their default manual mode unless the test step
+  says otherwise. Manual mode keeps resolve and analyze interactions
+  visible so the tester can verify the orchestration gates.
 - Any test step that works with `/speckit.*` commands must finish within
   5 minutes. If it trends longer, tighten prompt boundaries or reduce scope
   before treating the flow as acceptable.

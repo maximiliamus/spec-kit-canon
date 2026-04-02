@@ -46,6 +46,11 @@ If you install only the extension, you get the namespaced
 `/speckit.canon.*` commands. The full canon-driven workflow documented here
 assumes the `canon-core` preset is also installed.
 
+For a focused reference covering the available workflows, step commands, and
+handoff behavior for `speckit.canon.*`, see [WORKFLOWS.md](./WORKFLOWS.md). The
+end-to-end orchestrator commands are documented in
+[WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
+
 The preset overrides these core commands:
 
 - `speckit.specify`
@@ -169,17 +174,11 @@ and follow.
   lifecycle to stay canon-driven end to end.
 - Use the standard drift workflow when implementation already changed and you
   want a reviewed path back to canon.
-- Use the vibecode workflow when you want to start coding immediately and sync
+- Use the vibecoding workflow when you want to start coding immediately and sync
   canon afterward.
-- Use the individual step commands when you need to inspect or edit
-  intermediate drift artifacts manually.
 - Optional orchestration commands are available when you want the extension to
-  run a full multi-step drift pipeline for you instead of invoking each phase
-  manually.
-- `/speckit.canon.drift` is the standard drift orchestrator.
-- `/speckit.canon.vibecode-drift` is the zero-touch vibecode sync orchestrator.
-- `/speckit.canon.vibecode-drift-express` is the shorter all-in-one path for
-  smaller codebase changes.
+  run a full multi-step drift pipeline for you. See
+  [WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
 
 ## Workflow 1: Canon-Driven Standard Spec Kit / Spec-First
 
@@ -206,35 +205,28 @@ Compared with stock Spec Kit:
   planning, task generation, analysis, and implementation
 - drift workflows compare against the configured `branching.base` branch
 
-## Workflow 2: Standard Spec Kit Canon Drift Recovery / Spec-Drift
+## Workflow 2: Standard Spec Kit Canon Drift Recovery / Standard Spec-Drift
 
 Use this when implementation already changed on a feature branch and you want
 to bring canon back in sync.
 
-Recommended entry point:
-
-```text
-/speckit.canon.drift
-```
-
-The orchestrator:
-
-1. reverse-engineers implementation work into `tasks.drift.md`
-2. detects spec-level drift into `spec.drift.md`
-3. stops for developer review during `/speckit.canon.drift-resolve`
-4. reconciles accepted drift into `canon.drift.md`
-5. applies canon updates
-6. analyzes canon consistency and repairs it if needed
-
-Manual phases:
+Run the step commands in order:
 
 - `/speckit.canon.drift-reverse`
 - `/speckit.canon.drift-detect`
 - `/speckit.canon.drift-resolve`
+- `/speckit.canon.drift-implement` when `tasks.alignment.md` is created
 - `/speckit.canon.drift-reconcile`
-- `/speckit.canon.drift-canonize`
 - `/speckit.canon.drift-analyze`
-- `/speckit.canon.drift-repair`
+- `/speckit.canon.drift-canonize`
+
+`/speckit.canon.drift-resolve` is the manual decision and re-verification
+step command. Zero-touch implementation-authoritative resolution belongs to
+the automatic `/speckit.canon.drift` orchestrator, not to
+`/speckit.canon.drift-resolve` itself.
+
+An orchestration command is available to automate this pipeline end to end.
+See [WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
 
 ## Workflow 3: Canon-Driven Vibecoding / Code-First
 
@@ -267,52 +259,26 @@ This command:
 
 After running this command, start implementing whatever you need on the newly created feature branch.
 
-## Workflow 4: Vibecoding Canon Drift Recovery / Spec-Drift
+## Workflow 4: Vibecoding Canon Drift Recovery / Vibecoding Spec-Drift
 
-After a vibecoding session, use one of these paths to bring canon back in sync
-with the code on your feature branch.
-
-Fast path:
-
-```text
-/speckit.canon.vibecode-drift-express
-```
-
-Zero-touch path:
-
-```text
-/speckit.canon.vibecode-drift
-```
-
-Manual path:
+After a vibecoding session, run the step commands in order to bring canon back
+in sync with the code on your feature branch:
 
 - `/speckit.canon.vibecode-drift-reverse`
 - `/speckit.canon.vibecode-drift-detect`
 - `/speckit.canon.vibecode-drift-reconcile`
+- `/speckit.canon.vibecode-drift-analyze`
 - `/speckit.canon.vibecode-drift-canonize`
-- `/speckit.canon.drift-analyze`
-- `/speckit.canon.drift-repair`
 
-Run the vibecode sync commands from the feature branch created for the session,
+Orchestration commands are available to automate this pipeline end to end.
+See [WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
+
+Run the vibecoding sync commands from the feature branch created for the session,
 not from the configured base branch.
 
 ## Files And Artifacts
 
-The main files introduced by these packages are:
-
-- `.specify/extensions/canon/canon-config.yml`: project canon settings
-- `.specify/memory/constitution.md`: active constitution used by Spec Kit
-- `<canon.root>/_toc.md`: root canon entry point and top-level table of
-  contents
-- `<feature>/vibecode.md`: lightweight intent file for code-first sessions
-- `<feature>/tasks.drift.md`: reverse-engineered implementation tasks
-- `<feature>/spec.drift.md`: spec-level drift findings
-- `<feature>/canon.drift.md`: proposed or applied canon updates
-- `<feature>/canon.repair.md`: optional repair artifact when analysis finds
-  canon issues after canon apply
-
-There is intentionally no separate analyze artifact file.
-`/speckit.canon.drift-analyze`, like `/speckit.analyze`, outputs a report only.
+See [WORKFLOWS.md](./WORKFLOWS.md) for the full artifact reference.
 
 ## Development
 
@@ -321,6 +287,8 @@ install/test loop, and release packaging details.
 
 ## Notes
 
+- Standard spec-drift never rewrites the original `spec.md` or `tasks.md`;
+  they remain read-only baseline artifacts.
 - The extension expects the standard Spec Kit commands referenced by the canon
   workflows, especially `speckit.specify`, `speckit.tasks`, and
   `speckit.implement`.

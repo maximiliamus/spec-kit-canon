@@ -1,13 +1,13 @@
 ---
-description: Reverse-engineer tasks from implementation — group worktree changes into logical tasks and write tasks.drift.md. Vibecode variant — no original tasks.md required; all tasks classified as ADDED.
+description: Reverse-engineer tasks from implementation — group worktree changes into logical tasks and write tasks.drift.md. Vibecoding variant — no original tasks.md required; all tasks classified as `ADDED`.
 handoffs:
   - label: Detect Spec Drift
     agent: speckit.canon.vibecode-drift-detect
     prompt: Scan tasks.drift.md and detect spec-level drift against canon.
     send: true
 scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json
+  sh: bash .specify/extensions/canon/scripts/bash/check-prerequisites.sh --json
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-prerequisites.ps1 -Json
 ---
 
 ## Pre-conditions (execute before any other step)
@@ -36,13 +36,12 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Then check `TASKS_DRIFT`:
 
-- If it exists, read it first and ask the operator whether to overwrite or abort.
+- If it exists, read it first and ask the user whether to overwrite or abort.
 
 ---
 
 ## Step 1 — Load context
 
-- **REQUIRED**: Read `.specify/memory/constitution.md`
 - **REQUIRED**: Read `FEATURE_SPEC` for feature requirements context (if it exists)
 - **IF EXISTS**: Read `FEATURE_DIR/plan.md` for intended architecture and file structure
 - **IF EXISTS**: Read `FEATURE_DIR/data-model.md` for intended entity definitions
@@ -73,15 +72,15 @@ Then check `TASKS_DRIFT`:
 
 ---
 
-## Step 3 — Classify all tasks as ADDED
+## Step 3 — Classify All Tasks as `ADDED`
 
-This is a vibecode workflow — there is no original `tasks.md` to compare against. All reverse-engineered tasks are classified as drift kind `ADDED`.
+This is a vibecoding workflow — there is no original `tasks.md` to compare against. All reverse-engineered tasks are classified as drift kind `ADDED`.
 
 ---
 
 ## Step 4 — Write `TASKS_DRIFT`
 
-Load `.specify/extensions/canon/templates/tasks-drift-template.md` and use it as the structural guide. Fill in findings from Steps 2–3, replacing placeholders with concrete data. Set `**Resolution Status**: classified`.
+Load `.specify/extensions/canon/templates/tasks-drift-template.md` and use it as the structural guide. Fill in findings from Steps 2–3, replacing placeholders with concrete data. Set `**Resolution Status**` to `classified`.
 
 - Use globally incrementing IDs (TD-001, TD-002, ...) across all sections
 - Include file-level evidence for each task
@@ -113,4 +112,3 @@ After completing all steps, output:
 - Do NOT modify `FEATURE_SPEC`, canon files, or any other file. Only write `TASKS_DRIFT`.
 - Do NOT classify at the spec level — that is done by /speckit.canon.vibecode-drift-detect.
 - Ensure each output task follows the tasks-drift-template format exactly.
-

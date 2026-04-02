@@ -3,16 +3,17 @@
 # Unified prerequisite checking for the drift workflow.
 #
 # Provides REPO_ROOT, BRANCH, FEATURE_DIR, FEATURE_SPEC, TASKS, TASKS_DRIFT,
-# SPEC_DRIFT, CANON_DRIFT, and CANON_REPAIR always.
+# TASKS_ALIGNMENT, SPEC_DRIFT, and CANON_DRIFT always.
 # Optionally validates drift-specific artifacts and includes canon paths.
 #
-# Usage: ./check-drift-prerequisites.sh [OPTIONS]
+# Usage: ./check-prerequisites.sh [OPTIONS]
 #
 # OPTIONS:
 #   --json                  Output in JSON format
 #   --require-tasks         Require tasks.md to exist
 #   --require-tasks-drift   Require tasks.drift.md to exist
 #   --require-spec-drift    Require spec.drift.md to exist
+#   --require-tasks-alignment Require tasks.alignment.md to exist
 #   --require-canon-drift   Require canon.drift.md to exist
 #   --canon                 Include CANON_ROOT and CANON_TOC in output
 #   --help, -h              Show help message
@@ -24,6 +25,7 @@ JSON_MODE=false
 REQUIRE_TASKS=false
 REQUIRE_TASKS_DRIFT=false
 REQUIRE_SPEC_DRIFT=false
+REQUIRE_TASKS_ALIGNMENT=false
 REQUIRE_CANON_DRIFT=false
 INCLUDE_CANON=false
 
@@ -41,6 +43,9 @@ for arg in "$@"; do
         --require-spec-drift)
             REQUIRE_SPEC_DRIFT=true
             ;;
+        --require-tasks-alignment)
+            REQUIRE_TASKS_ALIGNMENT=true
+            ;;
         --require-canon-drift)
             REQUIRE_CANON_DRIFT=true
             ;;
@@ -49,12 +54,13 @@ for arg in "$@"; do
             ;;
         --help|-h)
             cat << 'EOF'
-Usage: check-drift-prerequisites.sh [OPTIONS]
+Usage: check-prerequisites.sh [OPTIONS]
 
 Unified prerequisite checking for the drift workflow.
 
 Always outputs: REPO_ROOT, BRANCH, FEATURE_DIR, FEATURE_SPEC, TASKS,
-                TASKS_DRIFT, SPEC_DRIFT, CANON_DRIFT, CANON_REPAIR, BASE_BRANCH
+                TASKS_DRIFT, TASKS_ALIGNMENT, SPEC_DRIFT, CANON_DRIFT,
+                BASE_BRANCH
 With --canon:   Also outputs CANON_ROOT, CANON_TOC
 
 OPTIONS:
@@ -62,25 +68,29 @@ OPTIONS:
   --require-tasks         Require tasks.md to exist
   --require-tasks-drift   Require tasks.drift.md to exist
   --require-spec-drift    Require spec.drift.md to exist
+  --require-tasks-alignment Require tasks.alignment.md to exist
   --require-canon-drift   Require canon.drift.md to exist
   --canon                 Include canon paths in output
   --help, -h              Show this help message
 
 EXAMPLES:
   # drift.reverse: needs tasks.md
-  ./check-drift-prerequisites.sh --json --require-tasks
+  ./check-prerequisites.sh --json --require-tasks
 
   # drift.detect: needs tasks.drift.md
-  ./check-drift-prerequisites.sh --json --require-tasks-drift
+  ./check-prerequisites.sh --json --require-tasks-drift
 
   # drift.resolve: needs spec.drift.md
-  ./check-drift-prerequisites.sh --json --require-spec-drift
+  ./check-prerequisites.sh --json --require-spec-drift
+
+  # drift.implement: needs spec.drift.md + tasks.alignment.md
+  ./check-prerequisites.sh --json --require-spec-drift --require-tasks-alignment
 
   # drift.reconcile: needs spec.drift.md + canon paths
-  ./check-drift-prerequisites.sh --json --require-spec-drift --canon
+  ./check-prerequisites.sh --json --require-spec-drift --canon
 
   # drift.canonize: needs canon.drift.md + canon paths
-  ./check-drift-prerequisites.sh --json --require-canon-drift --canon
+  ./check-prerequisites.sh --json --require-canon-drift --canon
 
 EOF
             exit 0
@@ -200,9 +210,9 @@ check_feature_branch "$CURRENT_BRANCH" "$HAS_GIT" || exit 1
 
 # Derive drift-specific paths
 TASKS_DRIFT="$FEATURE_DIR/tasks.drift.md"
+TASKS_ALIGNMENT="$FEATURE_DIR/tasks.alignment.md"
 SPEC_DRIFT="$FEATURE_DIR/spec.drift.md"
 CANON_DRIFT="$FEATURE_DIR/canon.drift.md"
-CANON_REPAIR="$FEATURE_DIR/canon.repair.md"
 mapfile -t CANON_SETTINGS < <(resolve_canon_settings)
 CANON_ROOT_REL="${CANON_SETTINGS[0]:-specs/000-canon}"
 BASE_BRANCH="${CANON_SETTINGS[1]:-main}"
@@ -230,26 +240,32 @@ fi
 
 if $REQUIRE_TASKS_DRIFT && [[ ! -f "$TASKS_DRIFT" ]]; then
     echo "ERROR: tasks.drift.md not found in $FEATURE_DIR" >&2
-    echo "Run /speckit.drift.reverse first to reverse-engineer task drift." >&2
+    echo "Run /speckit.canon.drift-reverse first to reverse-engineer task drift." >&2
     exit 1
 fi
 
 if $REQUIRE_SPEC_DRIFT && [[ ! -f "$SPEC_DRIFT" ]]; then
     echo "ERROR: spec.drift.md not found in $FEATURE_DIR" >&2
-    echo "Run /speckit.drift.detect first to discover spec-level drift." >&2
+    echo "Run /speckit.canon.drift-detect first to discover spec-level drift." >&2
+    exit 1
+fi
+
+if $REQUIRE_TASKS_ALIGNMENT && [[ ! -f "$TASKS_ALIGNMENT" ]]; then
+    echo "ERROR: tasks.alignment.md not found in $FEATURE_DIR" >&2
+    echo "Run /speckit.canon.drift-resolve first and defer implementation work to create the alignment queue." >&2
     exit 1
 fi
 
 if $REQUIRE_CANON_DRIFT && [[ ! -f "$CANON_DRIFT" ]]; then
     echo "ERROR: canon.drift.md not found in $FEATURE_DIR" >&2
-    echo "Run /speckit.drift.reconcile first to infer canon gaps." >&2
+    echo "Run /speckit.canon.drift-reconcile first to infer canon gaps." >&2
     exit 1
 fi
 
 # Output results
 if $JSON_MODE; then
-    json_output=$(printf '{"REPO_ROOT":"%s","BRANCH":"%s","FEATURE_DIR":"%s","FEATURE_SPEC":"%s","TASKS":"%s","TASKS_DRIFT":"%s","SPEC_DRIFT":"%s","CANON_DRIFT":"%s","CANON_REPAIR":"%s","BASE_BRANCH":"%s"' \
-        "$REPO_ROOT" "$CURRENT_BRANCH" "$FEATURE_DIR" "$FEATURE_SPEC" "$TASKS" "$TASKS_DRIFT" "$SPEC_DRIFT" "$CANON_DRIFT" "$CANON_REPAIR" "$BASE_BRANCH")
+    json_output=$(printf '{"REPO_ROOT":"%s","BRANCH":"%s","FEATURE_DIR":"%s","FEATURE_SPEC":"%s","TASKS":"%s","TASKS_DRIFT":"%s","TASKS_ALIGNMENT":"%s","SPEC_DRIFT":"%s","CANON_DRIFT":"%s","BASE_BRANCH":"%s"' \
+        "$REPO_ROOT" "$CURRENT_BRANCH" "$FEATURE_DIR" "$FEATURE_SPEC" "$TASKS" "$TASKS_DRIFT" "$TASKS_ALIGNMENT" "$SPEC_DRIFT" "$CANON_DRIFT" "$BASE_BRANCH")
 
     if $INCLUDE_CANON; then
         json_output+=$(printf ',"CANON_ROOT":"%s","CANON_TOC":"%s"' "$CANON_ROOT" "$CANON_TOC")
@@ -264,9 +280,9 @@ else
     echo "FEATURE_SPEC: $FEATURE_SPEC"
     echo "TASKS: $TASKS"
     echo "TASKS_DRIFT: $TASKS_DRIFT"
+    echo "TASKS_ALIGNMENT: $TASKS_ALIGNMENT"
     echo "SPEC_DRIFT: $SPEC_DRIFT"
     echo "CANON_DRIFT: $CANON_DRIFT"
-    echo "CANON_REPAIR: $CANON_REPAIR"
     echo "BASE_BRANCH: $BASE_BRANCH"
     if $INCLUDE_CANON; then
         echo "CANON_ROOT: $CANON_ROOT"

@@ -173,6 +173,51 @@ For these, inspect and test against `../spec-kit` directly, especially under:
 - `../spec-kit/templates/`
 - `../spec-kit/scripts/`
 
+## Workflow Terminology And Naming
+
+Use the following naming rule consistently across docs, prompts, templates, and
+user-facing command descriptions:
+
+- Use `vibecoding` for the human-facing workflow or process name.
+- Use `vibecoding` in prose such as `vibecoding workflow`,
+  `vibecoding session`, `vibecoding path`, and `vibecoding drift`.
+- Keep `vibecode` only for stable identifiers and artifact names such as
+  `/speckit.canon.vibecode-specify`, `/speckit.canon.vibecode-drift`,
+  `vibecode.md`, and the default slug `vibecode`.
+- Do not rename command IDs, filenames, or slugs from `vibecode` to
+  `vibecoding` unless you are intentionally making a breaking interface change.
+- In headings and labels, prefer `Vibecoding` for workflow names and `Vibecode`
+  only when you are showing the exact identifier or artifact title.
+
+Examples:
+
+- Correct prose: `Use the vibecoding workflow when you want to start coding immediately.`
+- Correct identifier usage: `Run /speckit.canon.vibecode-drift after implementation changes.`
+- Correct artifact usage: `The session writes vibecode.md.`
+- Avoid in prose: `vibecode workflow`, `vibecode session`, `vibecode path`.
+
+## Command Markdown Formatting
+
+There does not currently appear to be a dedicated upstream formatting-rules
+document for command Markdown, so follow the prevailing style in the upstream
+command sources themselves.
+
+Use the local upstream checkout as the reference point, especially:
+
+- `../spec-kit/templates/commands/analyze.md`
+- `../spec-kit/templates/commands/checklist.md`
+
+Those upstream command files keep prefixed identifiers as plain text in prose,
+for example FR-###, SC-###, CHK###, and similar task or finding IDs.
+
+For this repo's command docs, follow these rules:
+
+- Do not wrap prefixed identifiers in backticks when they appear as prose or in tables.
+- This applies to both upstream-style IDs such as FR-###, SC-###, CHK###, T###, Q#, and A#, and canon-specific IDs such as TD-XXX, SD-XXX, TA-XXX, CD-XXX, and CR-XXX.
+- Do wrap filenames, artifact names, commands, config paths, and other literal file-or-command references in backticks.
+- Examples that should stay backticked: `spec.md`, `tasks.drift.md`, `canon.drift.md`, `.specify/extensions/canon/canon-config.yml`, and `/speckit.canon.drift`.
+- If a prefixed identifier appears inside a larger inline code example or fenced code block, keep the code example intact; do not add extra identifier-only backticks in surrounding prose.
+
 ## Marked Local Overlays
 
 For regular preset core command overrides that still track upstream `spec-kit`
@@ -222,14 +267,14 @@ when you specifically need the Windows variant.
 ### Bash
 
 ```bash
-bash -n extension/scripts/bash/check-drift-prerequisites.sh
+bash -n extension/scripts/bash/check-prerequisites.sh
 ```
 
 ### PowerShell Alternative
 
 ```powershell
 $null = [System.Management.Automation.Language.Parser]::ParseFile(
-  (Resolve-Path 'extension/scripts/powershell/check-drift-prerequisites.ps1'),
+  (Resolve-Path 'extension/scripts/powershell/check-prerequisites.ps1'),
   [ref]$null,
   [ref]$null
 )
@@ -326,3 +371,33 @@ bash .codex/unregister-skills.sh
 pwsh -NoProfile -File .codex/register-skills.ps1
 pwsh -NoProfile -File .codex/unregister-skills.ps1
 ```
+
+## Identifier Prefix Reference
+
+The tables below summarize the identifier families used by original Spec Kit
+and by the canon extension workflows in this repository.
+
+### Original Spec Kit Prefixes
+
+| Prefix | Used for | Typical artifact or context | Notes |
+| --- | --- | --- | --- |
+| `FR-###` | Functional requirement identifiers | `spec.md` | Example: `FR-001`. |
+| `SC-###` | Success criteria identifiers | `spec.md` | Example: `SC-001`. |
+| `CHK###` | Checklist item identifiers | Checklist files | Example: `CHK001`. No hyphen. |
+| `T###` | Implementation task identifiers | `tasks.md` | Example: `T001`. No hyphen. |
+| `US#` | User story labels | `tasks.md`, task-generation guidance | Example: `US1`. Story grouping label, not a standalone task ID. |
+| `Q#` | Question labels | Clarification and checklist questioning flows | Example: `Q1`. Used for interactive prompts. |
+| `A#` | Analysis finding labels | Compact analysis reports | Example: `A1`. Used in report output, not feature artifacts. |
+
+### Canon Extension Prefixes
+
+| Prefix | Used for | Typical artifact or context | Notes |
+| --- | --- | --- | --- |
+| `TD-###` | Task drift item identifiers | `tasks.drift.md` | Example: `TD-001`. |
+| `SD-###` | Spec drift finding identifiers | `spec.drift.md` | Example: `SD-001`. |
+| `TA-###` | Deferred alignment task identifiers | `tasks.alignment.md` | Example: `TA-001`. |
+| `CD-###` | Canon drift entry identifiers | `canon.drift.md` | Example: `CD-001`. |
+| `CR-###` | Canon remediation item identifiers | `speckit.canon.drift-analyze` report output | Example: `CR-001`. Zero-padded. |
+
+Note: bare `C-XXX` is reserved for future native canon entry references that
+may later be cited directly from specs or other canon-aware artifacts.

@@ -104,7 +104,7 @@ Implement this directly on the first feature branch before running
 Add a third API capability: update an existing todo. Preserve the list and get behavior. Allow changing the todo title and completed state, and keep the change minimal enough that the resulting drift should canonize cleanly.
 ```
 
-## Web UI Vibecode Prompt
+## Web UI Vibecoding Prompt
 
 Use this with `/speckit.canon.vibecode-specify` from `master`:
 
@@ -133,12 +133,17 @@ After `/speckit.canon.drift`, verify canon evidence for:
 - a Todo update capability in the API canon
 - the Todo fields needed by that update behavior
 - `_toc.md` still linking all canon files
+- the orchestrator completed the full pipeline including the analyze step
+  before canonize (either clean or with remediation applied)
+- `tasks.alignment.md` was not created (the update-todo drift is simple
+  enough that no alignment work should be needed)
 
 After `/speckit.canon.vibecode-drift`, verify canon evidence for:
 
 - a web UI page or section in canon
 - list, load, and update behavior described for the UI
 - any new canon file linked from `_toc.md`
+- the orchestrator completed the analyze step before canonize
 
 Do not stop at grep matches. Open the canon files and confirm the text is
 actually authoritative canon content.

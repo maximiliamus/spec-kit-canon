@@ -40,7 +40,7 @@ function Get-RepoRoot {
             return $result
         }
     } catch {
-        # Git command failed
+        Write-Verbose "Git root detection failed: $_"
     }
 
     # Final fallback to script location for non-git repos
@@ -63,33 +63,33 @@ function Get-CurrentBranch {
                 return $result
             }
         } catch {
-            # Git command failed
+            Write-Verbose "Current branch detection failed: $_"
         }
     }
 
     # For non-git repos, try to find the latest feature directory
     $specsDir = Join-Path $repoRoot "specs"
-    
+
     if (Test-Path $specsDir) {
         $latestFeature = ""
         $highest = 0
         $latestTimestamp = ""
 
-        Get-ChildItem -Path $specsDir -Directory | ForEach-Object {
-            if ($_.Name -match '^(\d{8}-\d{6})-') {
+        foreach ($specDir in (Get-ChildItem -Path $specsDir -Directory)) {
+            if ($specDir.Name -match '^(\d{8}-\d{6})-') {
                 # Timestamp-based branch: compare lexicographically
-                $ts = $matches[1]
+                $ts = $Matches[1]
                 if ($ts -gt $latestTimestamp) {
                     $latestTimestamp = $ts
-                    $latestFeature = $_.Name
+                    $latestFeature = $specDir.Name
                 }
-            } elseif ($_.Name -match '^(\d{3})-') {
-                $num = [int]$matches[1]
+            } elseif ($specDir.Name -match '^(\d{3})-') {
+                $num = [int]$Matches[1]
                 if ($num -gt $highest) {
                     $highest = $num
                     # Only update if no timestamp branch found yet
                     if (-not $latestTimestamp) {
-                        $latestFeature = $_.Name
+                        $latestFeature = $specDir.Name
                     }
                 }
             }
@@ -99,7 +99,7 @@ function Get-CurrentBranch {
             return $latestFeature
         }
     }
-    
+
     # Final fallback
     return "main"
 }
@@ -132,13 +132,13 @@ function Test-FeatureBranch {
         [string]$Branch,
         [bool]$HasGit = $true
     )
-    
+
     # For non-git repos, we can't enforce branch naming but still provide output
     if (-not $HasGit) {
         Write-Warning "[specify] Warning: Git repository not detected; skipped branch validation"
         return $true
     }
-    
+
     if ($Branch -notmatch '^[0-9]{3}-' -and $Branch -notmatch '^\d{8}-\d{6}-') {
         Write-Output "ERROR: Not on a feature branch. Current branch: $Branch"
         Write-Output "Feature branches should be named like: 001-feature-name or 20260319-143022-feature-name"
@@ -172,22 +172,22 @@ function Find-FeatureDirByPrefix {
         return (Join-Path $specsDir $BranchName)
     }
 
-    $matches = @()
+    $matchingDirs = @()
     if (Test-Path -LiteralPath $specsDir -PathType Container) {
-        $matches = Get-ChildItem -LiteralPath $specsDir -Directory -ErrorAction SilentlyContinue |
+        $matchingDirs = Get-ChildItem -LiteralPath $specsDir -Directory -ErrorAction SilentlyContinue |
             Where-Object { $_.Name -like "$prefix-*" } |
             Sort-Object Name
     }
 
-    if ($matches.Count -eq 0) {
+    if ($matchingDirs.Count -eq 0) {
         return (Join-Path $specsDir $BranchName)
     }
 
-    if ($matches.Count -eq 1) {
-        return $matches[0].FullName
+    if ($matchingDirs.Count -eq 1) {
+        return $matchingDirs[0].FullName
     }
 
-    $names = ($matches | ForEach-Object { $_.Name }) -join ', '
+    $names = ($matchingDirs | ForEach-Object { $_.Name }) -join ', '
     throw "Multiple spec directories found with prefix '$prefix': $names. Please ensure only one spec directory exists per prefix."
 }
 
@@ -196,7 +196,7 @@ function Get-FeaturePathsEnv {
     $currentBranch = Get-CurrentBranch
     $hasGit = Test-HasGit
     $featureDir = Find-FeatureDirByPrefix -RepoRoot $repoRoot -BranchName $currentBranch
-    
+
     [PSCustomObject]@{
         REPO_ROOT     = $repoRoot
         CURRENT_BRANCH = $currentBranch
@@ -212,24 +212,24 @@ function Get-FeaturePathsEnv {
     }
 }
 
-function Test-FileExists {
+function Test-FilePresent {
     param([string]$Path, [string]$Description)
     if (Test-Path -Path $Path -PathType Leaf) {
-        Write-Output "  ✓ $Description"
+        Write-Output "  [OK] $Description"
         return $true
     } else {
-        Write-Output "  ✗ $Description"
+        Write-Output "  [MISSING] $Description"
         return $false
     }
 }
 
-function Test-DirHasFiles {
+function Test-DirectoryFilePresent {
     param([string]$Path, [string]$Description)
     if ((Test-Path -Path $Path -PathType Container) -and (Get-ChildItem -Path $Path -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer } | Select-Object -First 1)) {
-        Write-Output "  ✓ $Description"
+        Write-Output "  [OK] $Description"
         return $true
     } else {
-        Write-Output "  ✗ $Description"
+        Write-Output "  [MISSING] $Description"
         return $false
     }
 }

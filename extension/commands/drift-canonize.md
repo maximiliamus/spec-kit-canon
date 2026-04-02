@@ -1,20 +1,12 @@
 ---
-description: Apply ACCEPTED canon entries to canon files — reads canon.drift.md and modifies the configured canon root.
-handoffs:
-  - label: Analyze Canon
-    agent: speckit.canon.drift-analyze
-    prompt: Verify the applied canon entries against canon files and produce repair candidates if needed.
-    send: true
-  - label: Repair Canon
-    agent: speckit.canon.drift-repair
-    prompt: Read the analyze report and apply corrections to canon files.
-    send: false
+description: Apply a draft `canon.drift.md` plan to canon files — reads `ACCEPTED` entries from the draft canon plan and modifies the configured canon root.
+handoffs: []
 scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/check-drift-prerequisites.sh --json --require-canon-drift --canon
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-drift-prerequisites.ps1 -Json -RequireCanonDrift -Canon
+  sh: bash .specify/extensions/canon/scripts/bash/check-prerequisites.sh --json --require-canon-drift --canon
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/check-prerequisites.ps1 -Json -RequireCanonDrift -Canon
 agent_scripts:
-  sh: bash .specify/extensions/canon/scripts/bash/update-agent-context.sh
-  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/update-agent-context.ps1
+  sh: bash .specify/extensions/canon/scripts/bash/update-agent-context.sh __AGENT__
+  ps: pwsh -NoProfile -File .specify/extensions/canon/scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
 ---
 
 ## Pre-conditions (execute before any other step)
@@ -45,16 +37,20 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Step 1 — Load context
 
-- Read `CANON_DRIFT`
-- Check top-level `Status` field:
-  - If `applied` → stop and report: "canon.drift.md is already marked as applied. Delete it and re-run /speckit.canon.drift-reconcile to re-infer, or check canon files for the applied changes."
-- Read `FEATURE_SPEC`, `CANON_TOC`, and all canon files targeted by ACCEPTED entries
+- **REQUIRED**: Read `CANON_DRIFT` for the canon change plan, entry statuses, target files, and exact canon edits proposed for application
+- **REQUIRED**: Check the top-level `Status` field in `CANON_DRIFT`
+  - If `applied` → stop and report: "`canon.drift.md` is already marked as `applied`. Delete it and re-run `/speckit.canon.drift-reconcile` to re-infer, or check canon files for the applied changes."
+  - If not `draft` → stop and report: "`canon.drift.md` must be in `draft` status before `/speckit.canon.drift-canonize` can run."
+- **REQUIRED**: Read `SPEC_DRIFT` for the resolved spec-level drift outcomes that justify each canon change
+- **IF EXISTS**: Read `FEATURE_SPEC` for the original feature baseline used only as background context when interpreting the canon changes
+- **REQUIRED**: Read `CANON_TOC` for canon structure and entry points used to locate the target canon sections
+- **REQUIRED**: Read all canon files targeted by `ACCEPTED` entries in `CANON_DRIFT` for the current wording and structure that will be updated
 
 ---
 
 ## Step 2 — Gate check
 
-Scan all entries in `CANON_DRIFT`. If any entry has a status other than `ACCEPTED` or `REJECTED`, stop and report: "canon.drift.md contains unresolved entries — edit the file to assign valid statuses (ACCEPTED or REJECTED) before proceeding."
+Scan all entries in `CANON_DRIFT`. If any entry has a status other than `ACCEPTED` or `REJECTED`, stop and report: "canon.drift.md contains `unresolved` entries — edit the file to assign valid statuses (`ACCEPTED` or `REJECTED`) before proceeding."
 
 ---
 
@@ -92,7 +88,7 @@ In each updated canon section, append: `<!-- Canonicalized from specs/<BRANCH>/s
 
 ---
 
-## Step 7 — Mark canon.drift.md as applied
+## Step 7 — Mark canon.drift.md as `applied`
 
 Update the top-level `Status` field in `CANON_DRIFT` to `applied`.
 
@@ -100,16 +96,16 @@ Update the top-level `Status` field in `CANON_DRIFT` to `applied`.
 
 ## Step 8 — Update agent context
 
-Run `{AGENT_SCRIPT} codex` to refresh context after canon updates.
+Run `{AGENT_SCRIPT}` to refresh the current agent-specific context after canon updates.
 
 ---
 
 ## Step 9 — Report
 
 - List all modified canon files with a summary of changes per section
-- List all REJECTED items that were skipped
+- List all `REJECTED` items that were skipped
 - "Canon updated successfully."
-- "Run /speckit.canon.drift-analyze to verify canon consistency. If issues are found, run /speckit.canon.drift-repair to apply corrections."
+- "If you later revise `canon.drift.md`, consider running /speckit.canon.drift-analyze again before canonizing the new draft."
 
 ---
 
@@ -117,9 +113,8 @@ Run `{AGENT_SCRIPT} codex` to refresh context after canon updates.
 
 - Do NOT compress canon into a single file.
 - Do NOT copy the entire incremental spec into canon.
-- Do NOT invent content not in `FEATURE_SPEC` or directly observable in the implementation.
+- Do NOT invent content not in `CANON_DRIFT`, `SPEC_DRIFT`, or directly observable in the implementation.
 - Canon must read as authoritative present-tense truth.
 - Use Canon terminology exactly; avoid synonyms.
 - Only modify `CANON_ROOT/**` and `CANON_TOC`. Do not modify `FEATURE_SPEC`.
 - This command applies only — no inference or classification is performed.
-

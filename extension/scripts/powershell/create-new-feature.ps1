@@ -15,19 +15,21 @@ $ErrorActionPreference = 'Stop'
 
 # Show help if requested
 if ($Help) {
-    Write-Host "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] [-Number N] [-Timestamp] <feature description>"
-    Write-Host ""
-    Write-Host "Options:"
-    Write-Host "  -Json               Output in JSON format"
-    Write-Host "  -ShortName <name>   Provide a custom short name (2-4 words) for the branch"
-    Write-Host "  -Number N           Specify branch number manually (overrides auto-detection)"
-    Write-Host "  -Timestamp          Use timestamp prefix (YYYYMMDD-HHMMSS) instead of sequential numbering"
-    Write-Host "  -Help               Show this help message"
-    Write-Host ""
-    Write-Host "Examples:"
-    Write-Host "  ./create-new-feature.ps1 'Add user authentication system' -ShortName 'user-auth'"
-    Write-Host "  ./create-new-feature.ps1 'Implement OAuth2 integration for API'"
-    Write-Host "  ./create-new-feature.ps1 -Timestamp -ShortName 'user-auth' 'Add user authentication'"
+    Write-Output @"
+Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] [-Number N] [-Timestamp] <feature description>
+
+Options:
+  -Json               Output in JSON format
+  -ShortName <name>   Provide a custom short name (2-4 words) for the branch
+  -Number N           Specify branch number manually (overrides auto-detection)
+  -Timestamp          Use timestamp prefix (YYYYMMDD-HHMMSS) instead of sequential numbering
+  -Help               Show this help message
+
+Examples:
+  ./create-new-feature.ps1 'Add user authentication system' -ShortName 'user-auth'
+  ./create-new-feature.ps1 'Implement OAuth2 integration for API'
+  ./create-new-feature.ps1 -Timestamp -ShortName 'user-auth' 'Add user authentication'
+"@
     exit 0
 }
 
@@ -45,9 +47,9 @@ if ([string]::IsNullOrWhiteSpace($featureDesc)) {
     exit 1
 }
 
-function Get-HighestNumberFromSpecs {
+function Get-HighestSpecNumber {
     param([string]$SpecsDir)
-    
+
     $highest = 0
     if (Test-Path $SpecsDir) {
         Get-ChildItem -Path $SpecsDir -Directory | ForEach-Object {
@@ -60,9 +62,9 @@ function Get-HighestNumberFromSpecs {
     return $highest
 }
 
-function Get-HighestNumberFromBranches {
+function Get-HighestBranchNumber {
     param()
-    
+
     $highest = 0
     try {
         $branches = git branch -a 2>$null
@@ -70,7 +72,7 @@ function Get-HighestNumberFromBranches {
             foreach ($branch in $branches) {
                 # Clean branch name: remove leading markers and remote prefixes
                 $cleanBranch = $branch.Trim() -replace '^\*?\s+', '' -replace '^remotes/[^/]+/', ''
-                
+
                 # Extract feature number if branch matches pattern ###-*
                 if ($cleanBranch -match '^(\d{3})-') {
                     $num = [int]$matches[1]
@@ -94,14 +96,14 @@ function Get-NextBranchNumber {
     try {
         git fetch --all --prune 2>$null | Out-Null
     } catch {
-        # Ignore fetch errors
+        Write-Verbose "Git fetch failed while calculating next branch number: $_"
     }
 
     # Get highest number from ALL branches (not just matching short name)
-    $highestBranch = Get-HighestNumberFromBranches
+    $highestBranch = Get-HighestBranchNumber
 
     # Get highest number from ALL specs (not just matching short name)
-    $highestSpec = Get-HighestNumberFromSpecs -SpecsDir $SpecsDir
+    $highestSpec = Get-HighestSpecNumber -SpecsDir $SpecsDir
 
     # Take the maximum of both
     $maxNum = [Math]::Max($highestBranch, $highestSpec)
@@ -112,7 +114,7 @@ function Get-NextBranchNumber {
 
 function ConvertTo-CleanBranchName {
     param([string]$Name)
-    
+
     return $Name.ToLower() -replace '[^a-z0-9]', '-' -replace '-{2,}', '-' -replace '^-', '' -replace '-$', ''
 }
 
@@ -220,7 +222,7 @@ New-Item -ItemType Directory -Path $specsDir -Force | Out-Null
 # Function to generate branch name with stop word filtering and length filtering
 function Get-BranchName {
     param([string]$Description)
-    
+
     # Common stop words to filter out
     $stopWords = @(
         'i', 'a', 'an', 'the', 'to', 'for', 'of', 'in', 'on', 'at', 'by', 'with', 'from',
@@ -229,17 +231,17 @@ function Get-BranchName {
         'this', 'that', 'these', 'those', 'my', 'your', 'our', 'their',
         'want', 'need', 'add', 'get', 'set'
     )
-    
+
     # Convert to lowercase and extract words (alphanumeric only)
     $cleanName = $Description.ToLower() -replace '[^a-z0-9\s]', ' '
     $words = $cleanName -split '\s+' | Where-Object { $_ }
-    
+
     # Filter words: remove stop words and words shorter than 3 chars (unless they're uppercase acronyms in original)
     $meaningfulWords = @()
     foreach ($word in $words) {
         # Skip stop words
         if ($stopWords -contains $word) { continue }
-        
+
         # Keep words that are length >= 3 OR appear as uppercase in original (likely acronyms)
         if ($word.Length -ge 3) {
             $meaningfulWords += $word
@@ -248,7 +250,7 @@ function Get-BranchName {
             $meaningfulWords += $word
         }
     }
-    
+
     # If we have meaningful words, use first 3-4 of them
     if ($meaningfulWords.Count -gt 0) {
         $maxWords = if ($meaningfulWords.Count -eq 4) { 4 } else { 3 }
@@ -289,7 +291,7 @@ if ($Timestamp) {
             $Number = Get-NextBranchNumber -SpecsDir $specsDir
         } else {
             # Fall back to local directory check
-            $Number = (Get-HighestNumberFromSpecs -SpecsDir $specsDir) + 1
+            $Number = (Get-HighestSpecNumber -SpecsDir $specsDir) + 1
         }
     }
 
@@ -305,15 +307,15 @@ if ($branchName.Length -gt $maxBranchLength) {
     # Account for prefix length: timestamp (15) + hyphen (1) = 16, or sequential (3) + hyphen (1) = 4
     $prefixLength = $featureNum.Length + 1
     $maxSuffixLength = $maxBranchLength - $prefixLength
-    
+
     # Truncate suffix
     $truncatedSuffix = $branchSuffix.Substring(0, [Math]::Min($branchSuffix.Length, $maxSuffixLength))
     # Remove trailing hyphen if truncation created one
     $truncatedSuffix = $truncatedSuffix -replace '-$', ''
-    
+
     $originalBranchName = $branchName
     $branchName = "$featureNum-$truncatedSuffix"
-    
+
     Write-Warning "[specify] Branch name exceeded GitHub's 244-byte limit"
     Write-Warning "[specify] Original: $originalBranchName ($($originalBranchName.Length) bytes)"
     Write-Warning "[specify] Truncated to: $branchName ($($branchName.Length) bytes)"
@@ -327,7 +329,7 @@ if ($hasGit) {
             $branchCreated = $true
         }
     } catch {
-        # Exception during git command
+        Write-Verbose "Git branch creation threw an exception for '$branchName': $_"
     }
 
     if (-not $branchCreated) {
@@ -354,17 +356,17 @@ New-Item -ItemType Directory -Path $featureDir -Force | Out-Null
 
 $template = Resolve-Template -TemplateName 'spec-template' -RepoRoot $repoRoot
 $specFile = Join-Path $featureDir 'spec.md'
-if ($template -and (Test-Path $template)) { 
-    Copy-Item $template $specFile -Force 
-} else { 
-    New-Item -ItemType File -Path $specFile | Out-Null 
+if ($template -and (Test-Path $template)) {
+    Copy-Item $template $specFile -Force
+} else {
+    New-Item -ItemType File -Path $specFile | Out-Null
 }
 
 # Set the SPECIFY_FEATURE environment variable for the current session
 $env:SPECIFY_FEATURE = $branchName
 
 if ($Json) {
-    $obj = [PSCustomObject]@{ 
+    $obj = [PSCustomObject]@{
         BRANCH_NAME = $branchName
         SPEC_FILE = $specFile
         FEATURE_NUM = $featureNum

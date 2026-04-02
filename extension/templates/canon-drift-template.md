@@ -5,13 +5,13 @@
 **Status**: `[draft|applied]`
 **Canon Root**: `[CANON_ROOT]`
 
-Use globally incrementing `C-XXX` identifiers across all sections. Each entry should reference the originating `D-XXX` item and, where possible, the related `TD-XXX` item.
+Use globally incrementing `CD-XXX` identifiers across all sections. Each entry should reference the originating `SD-XXX` item and, where possible, the related `TD-XXX` item.
 
 ## Accepted Entries
 
-### C-001 - [accepted canon change title]
+### CD-001 - [accepted canon change title]
 - Status: `ACCEPTED`
-- Spec Drift Ref: `D-001`
+- Spec Drift Ref: `SD-001`
 - Task Drift Ref: `TD-001`
 - Canon Target: `[CANON_ROOT]/[file].md § [section heading]`
 - Change Type: `add|modify|remove`
@@ -26,9 +26,9 @@ Use globally incrementing `C-XXX` identifiers across all sections. Each entry sh
 
 ## Rejected Entries
 
-### C-002 - [rejected canon change title]
+### CD-002 - [rejected canon change title]
 - Status: `REJECTED`
-- Spec Drift Ref: `D-002`
+- Spec Drift Ref: `SD-002`
 - Task Drift Ref: `TD-002`
 - Canon Target: `[CANON_ROOT]/[file].md § [section heading]` or `-`
 - Change Type: `-`

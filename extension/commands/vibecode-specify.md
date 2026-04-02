@@ -20,8 +20,8 @@ Before doing anything:
 
 1. Read `.specify/memory/constitution.md` in full.
 2. Apply the following from the constitution to all subsequent steps:
-   - **Section 6 — Git Branching Strategy**: the branch prefix follows the project's Spec Kit numbering mode (`###-` by default or `YYYYMMDD-HHMMSS-` in timestamp mode); the suffix for this vibecode workflow is the slug
-   - **Section 3 — Separation of Abstraction Levels**: vibecode.md captures intent at WHAT level — no implementation details beyond what the user provided
+   - **Section 6 — Git Branching Strategy**: the branch prefix follows the project's Spec Kit numbering mode (`###-` by default or `YYYYMMDD-HHMMSS-` in timestamp mode); the suffix for this vibecoding workflow is the slug
+   - **Section 3 — Separation of Abstraction Levels**: `vibecode.md` captures intent at WHAT level — no implementation details beyond what the user provided
 
 ## User Input
 
@@ -138,7 +138,7 @@ The create-new-feature helper copies `spec-template.md` into the feature directo
 Output:
 
 ```
-Vibecode session started.
+Vibecoding session started.
 Branch: <BRANCH_NAME>
 Directory: <FEATURE_DIR>
 Artifact: <FEATURE_DIR>/vibecode.md

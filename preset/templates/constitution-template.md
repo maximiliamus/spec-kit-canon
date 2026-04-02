@@ -145,6 +145,16 @@ Describes:
 - HOW-level drift grouped into granular, independently reviewable work units
 - input for /speckit.canon.drift-detect
 
+#### tasks.alignment.md
+
+Describes:
+
+- deferred implementation-alignment work created from unresolved
+  `IMPL-REJECTED` spec drift items
+- executable corrective tasks that bring implementation back into line with
+  the accepted feature truth
+- input for /speckit.canon.drift-implement
+
 #### spec.drift.md
 
 Describes:
@@ -160,17 +170,9 @@ Describes:
 
 - canon gaps between the incremental spec and the canon
 - proposed canon text to be applied to the canon
-- input for /speckit.canon.drift-canonize to update canon accurately
-
-#### canon.repair.md
-
-Describes:
-
-- an optional post-canon repair plan and trace artifact created only when
-  `/speckit.canon.drift-analyze` finds canon issues after canon apply
-- targeted WHAT-level corrections to canon content, placement,
-  cross-references, or contradictions
-- input for /speckit.canon.drift-repair
+- input for /speckit.canon.drift-analyze to verify the draft canon plan and,
+  if needed, suggest remediation before /speckit.canon.drift-canonize updates
+  canon accurately
 
 If abstraction levels are mixed, fix structure before proceeding.
 
@@ -209,18 +211,10 @@ Describes:
 
 - canon gaps between the incremental spec and the canon
 - proposed canon text to be applied to the canon
-- input for /speckit.canon.vibecode-drift-canonize to update canon accurately
-
-#### canon.repair.md
-
-Describes:
-
-- an optional post-canon repair plan and trace artifact created only when
-  `/speckit.canon.drift-analyze` finds canon issues after canon apply in the
-  vibecoding flow
-- targeted WHAT-level corrections to canon content, placement,
-  cross-references, or contradictions
-- input for /speckit.canon.drift-repair
+- input for /speckit.canon.vibecode-drift-analyze when you want a reviewed
+  draft canon pass before /speckit.canon.vibecode-drift-canonize
+- direct canonize plan for /speckit.canon.vibecode-drift-express when the change
+  is small and straightforward enough to skip the separate analyze step
 
 If abstraction levels are mixed, fix structure before proceeding.
 
@@ -342,12 +336,12 @@ Spec-Drift command order:
 9. /speckit.canon.drift-reverse
 10. /speckit.canon.drift-detect
 11. /speckit.canon.drift-resolve
-12. /speckit.canon.drift-reconcile
-13. /speckit.canon.drift-canonize
+12. /speckit.canon.drift-implement (only when tasks.alignment.md is created)
+13. /speckit.canon.drift-reconcile
 14. /speckit.canon.drift-analyze
-15. /speckit.canon.drift-repair (only when analysis reports repair candidates)
+15. /speckit.canon.drift-canonize
 
-Required standard path after implementation: steps 9-13. Use step 8 instead when you want the extension to orchestrate the full drift pipeline automatically. Run step 14 after canon updates are applied. Run step 15 only when step 14 finds issues.
+Required standard path after implementation: steps 9-15, with step 12 required only when `tasks.alignment.md` is created by resolve. Use step 8 instead when you want the extension to orchestrate the full drift pipeline automatically, including one alignment implementation and re-verification cycle when needed. Run step 14 to verify the draft canon plan and, if needed, gather remediation suggestions before step 15 applies canon updates.
 
 A step is **successful** when it produces zero violations or blocking issues. Warnings may be noted but do not block progression.
 
@@ -357,15 +351,21 @@ No /speckit.canon.drift before /speckit.implement is complete (all tasks checked
 No /speckit.canon.drift-reverse before /speckit.implement is complete (all tasks checked off).
 No /speckit.canon.drift-detect before /speckit.implement is complete (all tasks checked off).
 No /speckit.canon.drift-resolve before /speckit.canon.drift-detect is complete.
-No /speckit.canon.drift-reconcile before /speckit.canon.drift-resolve is complete.
-No /speckit.canon.drift-canonize before /speckit.canon.drift-reconcile is complete.
-No /speckit.canon.drift-analyze before /speckit.canon.drift-canonize is complete.
-No /speckit.canon.drift-repair before /speckit.canon.drift-analyze identifies repair candidates.
+No /speckit.canon.drift-implement before /speckit.canon.drift-resolve creates `tasks.alignment.md`.
+No /speckit.canon.drift-reconcile before /speckit.canon.drift-resolve is complete and any `tasks.alignment.md` queue is fully implemented and re-verified.
+No /speckit.canon.drift-analyze before /speckit.canon.drift-reconcile is complete.
+No /speckit.canon.drift-canonize before /speckit.canon.drift-analyze confirms the draft canon plan is ready.
 No Canon edits before /speckit.canon.drift-canonize is complete.
 
 Note: The `/speckit.canon.drift-reverse` → `/speckit.canon.drift-detect` →
 `/speckit.canon.drift-resolve` → `/speckit.canon.drift-reconcile` chain is the
-step-by-step flow. `/speckit.canon.drift` runs that pipeline for you. If
+step-by-step flow when no deferred alignment work is needed. When
+`/speckit.canon.drift-resolve` creates `tasks.alignment.md`, run
+`/speckit.canon.drift-implement` and then `/speckit.canon.drift-resolve` again
+before reconcile. `/speckit.canon.drift` runs that pipeline for you,
+including one automatic `/speckit.canon.drift-implement` →
+`/speckit.canon.drift-resolve` follow-up cycle when alignment work is created.
+If drift remains unresolved after that follow-up resolve pass,
 reverse engineering, detection, and resolution are skipped, undocumented
 implementation changes may not be reflected in canon.
 
@@ -377,29 +377,31 @@ Code-First command order:
 
 Spec-Drift command order:
 
-2. /speckit.canon.vibecode-drift (optional orchestrator for steps 4-7)
-3. /speckit.canon.vibecode-drift-express (optional express shortcut for steps 4-7)
+2. /speckit.canon.vibecode-drift (optional orchestrator for steps 4-8)
+3. /speckit.canon.vibecode-drift-express (optional express shortcut for steps 4-6 plus direct canonize)
 4. /speckit.canon.vibecode-drift-reverse
 5. /speckit.canon.vibecode-drift-detect
 6. /speckit.canon.vibecode-drift-reconcile
-7. /speckit.canon.vibecode-drift-canonize
-8. /speckit.canon.drift-analyze
-9. /speckit.canon.drift-repair (only when analysis reports repair candidates)
+7. /speckit.canon.vibecode-drift-analyze
+8. /speckit.canon.vibecode-drift-canonize
 
-Required vibecoding path after implementation changes: steps 4-7. Step 2 is
-the full orchestrated vibecode drift pipeline. Step 3 is the express path for
-small, narrowly scoped codebase changes where only a few aspects changed and
-the full workflow would be too long and time-consuming; it provides a faster
-way to sync those small changes back into the canon.
+Required vibecoding path after implementation changes: steps 4-8 on the full
+reviewed path. Step 2 is the full orchestrated vibecoding drift pipeline. Step 3
+is the express path for small, narrowly scoped codebase changes where only a
+few aspects changed and the full workflow would be too long and time-consuming;
+it skips step 7 and proceeds directly from reconcile to the final canonize
+confirmation for a faster sync back into the canon.
 
 A step is **successful** when it produces zero violations or blocking issues. Warnings may be noted but do not block progression.
 
 No /speckit.canon.vibecode-drift, /speckit.canon.vibecode-drift-express, or /speckit.canon.vibecode-drift-reverse before implementation changes exist on the branch.
 No /speckit.canon.vibecode-drift-detect before /speckit.canon.vibecode-drift-reverse is complete.
 No /speckit.canon.vibecode-drift-reconcile before /speckit.canon.vibecode-drift-detect is complete.
-No /speckit.canon.vibecode-drift-canonize before /speckit.canon.vibecode-drift-reconcile is complete.
+No /speckit.canon.vibecode-drift-analyze before /speckit.canon.vibecode-drift-reconcile is complete.
+No standalone /speckit.canon.vibecode-drift-canonize before /speckit.canon.vibecode-drift-analyze confirms the draft canon plan is ready.
+`/speckit.canon.vibecode-drift-express` is the only vibecoding shortcut allowed to skip the separate analyze step, and only for small, straightforward changes. It applies canon within its own command flow rather than by invoking the standalone canonize command in the vibecoding workflow.
 
-Note: /speckit.canon.vibecode-drift-reverse → /speckit.canon.vibecode-drift-detect → /speckit.canon.vibecode-drift-reconcile is the step-by-step vibecode flow. /speckit.canon.vibecode-drift orchestrates that path, while /speckit.canon.vibecode-drift-express is the low-ceremony shortcut.
+Note: /speckit.canon.vibecode-drift-reverse → /speckit.canon.vibecode-drift-detect → /speckit.canon.vibecode-drift-reconcile is the step-by-step vibecoding flow. /speckit.canon.vibecode-drift orchestrates the reviewed path, while /speckit.canon.vibecode-drift-express is the low-ceremony shortcut that skips the separate analyze step.
 
 ---
 
@@ -431,6 +433,8 @@ A change is complete only when:
 - Implementation matches spec
 - Tests validate acceptance criteria
 - /speckit.canon.drift-reverse, /speckit.canon.drift-detect, and /speckit.canon.drift-resolve have been run, and tasks.drift.md and spec.drift.md have been reviewed for unintended deviations
+- If `tasks.alignment.md` was created, it has been completed via /speckit.canon.drift-implement and the linked drift items have been re-verified by /speckit.canon.drift-resolve
+- Draft `canon.drift.md` has been verified via /speckit.canon.drift-analyze before canonize, and any reported issues were either addressed manually or consciously accepted
 - Canon `CANON_ROOT/**` is updated via /speckit.canon.drift-reconcile and /speckit.canon.drift-canonize when the change introduces new behavior, modifies existing behavior, or deprecates a component described in the canon
 - Migration steps documented (if breaking)
 
@@ -439,7 +443,8 @@ A change is complete only when:
 A change is complete only when:
 
 - /speckit.canon.vibecode-drift-reverse and /speckit.canon.vibecode-drift-detect have been run, and tasks.drift.md and spec.drift.md have been reviewed for unintended deviations
-- Canon `CANON_ROOT/**` is updated via /speckit.canon.vibecode-drift-reconcile and /speckit.canon.vibecode-drift-canonize when the change introduces new behavior, modifies existing behavior, or deprecates a component described in the canon
+- Draft `canon.drift.md` has either been reviewed via /speckit.canon.vibecode-drift-analyze before canonize or applied through /speckit.canon.vibecode-drift-express on the small-change shortcut path
+- Canon `CANON_ROOT/**` is updated either through the reviewed `/speckit.canon.vibecode-drift-reconcile` + `/speckit.canon.vibecode-drift-canonize` path or directly through `/speckit.canon.vibecode-drift-express` on the small-change shortcut path when the change introduces new behavior, modifies existing behavior, or deprecates a component described in the canon
 - Migration steps documented (if breaking)
 
 ---

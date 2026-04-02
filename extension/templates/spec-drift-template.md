@@ -3,13 +3,13 @@
 **Branch**: `[branch]`
 **Source Task Drift**: `[FEATURE_DIR]/tasks.drift.md`
 **Spec Source**: `[FEATURE_DIR]/spec.md`
-**Resolution Status**: `[classified|resolved]`
+**Resolution Status**: `[unresolved|resolved]`
 
-Use globally incrementing `D-XXX` identifiers across all sections. Every finding must reference its originating `TD-XXX` item.
+Use globally incrementing `SD-XXX` identifiers across all sections. Every finding must reference its originating `TD-XXX` item.
 
 ## Undocumented Features
 
-### D-001 - [undocumented feature title]
+### SD-001 - [undocumented feature title]
 - Status: `ACCEPTED`
 - Category: `Undocumented feature`
 - Task Drift Ref: `TD-001`
@@ -22,8 +22,8 @@ Use globally incrementing `D-XXX` identifiers across all sections. Every finding
 
 ## Behavioral Deviations
 
-### D-002 - [behavioral deviation title]
-- Status: `IMPL-REJECTED|SPEC-REJECTED|ACCEPTED`
+### SD-002 - [behavioral deviation title]
+- Status: `UNRESOLVED|IMPL-REJECTED|ACCEPTED`
 - Category: `Behavioral deviation`
 - Task Drift Ref: `TD-002`
 - Spec Reference: `[FEATURE_DIR]/spec.md § [section]`
@@ -35,7 +35,7 @@ Use globally incrementing `D-XXX` identifiers across all sections. Every finding
 
 ## New Entities Or Fields
 
-### D-003 - [new entity or field title]
+### SD-003 - [new entity or field title]
 - Status: `ACCEPTED`
 - Category: `New entity or field`
 - Task Drift Ref: `TD-003`
@@ -48,8 +48,8 @@ Use globally incrementing `D-XXX` identifiers across all sections. Every finding
 
 ## Removed Or Skipped Requirements
 
-### D-004 - [removed or skipped requirement title]
-- Status: `IMPL-REJECTED|SPEC-REJECTED|REJECTED`
+### SD-004 - [removed or skipped requirement title]
+- Status: `UNRESOLVED|IMPL-REJECTED|REJECTED`
 - Category: `Removed or skipped requirement`
 - Task Drift Ref: `TD-004`
 - Spec Reference: `[FEATURE_DIR]/spec.md § [section]`
@@ -61,8 +61,8 @@ Use globally incrementing `D-XXX` identifiers across all sections. Every finding
 
 ## Terminology Drift
 
-### D-005 - [terminology drift title]
-- Status: `ACCEPTED|IMPL-REJECTED|SPEC-REJECTED`
+### SD-005 - [terminology drift title]
+- Status: `ACCEPTED|UNRESOLVED|IMPL-REJECTED`
 - Category: `Terminology drift`
 - Task Drift Ref: `TD-005`
 - Spec Reference: `[FEATURE_DIR]/spec.md § [section]`
@@ -74,11 +74,11 @@ Use globally incrementing `D-XXX` identifiers across all sections. Every finding
 
 ## Resolution
 
-Include this section only when the file is fully resolved, or immediately for vibecode workflows that skip the resolve step.
+Include this section only when the file is fully resolved, whether that happened during detect, during resolve, or immediately in vibecoding workflows that skip the resolve step.
 
-| Drift ID | Task Drift Ref | Terminal Status | Resolution Action | Updated Spec / Code | Notes |
+| Drift ID | Task Drift Ref | Terminal Status | Resolution Action | Updated Artifact | Notes |
 |----------|----------------|-----------------|-------------------|---------------------|-------|
-| D-001 | TD-001 | ACCEPTED | Retain as authoritative behavior | `-` | No further action |
-| D-002 | TD-002 | SPEC-ACCEPTED | Implementation corrected to match spec | `[path/to/file]` | Fixed in code |
-| D-003 | TD-003 | IMPL-ACCEPTED | spec.md updated to match implementation | `[FEATURE_DIR]/spec.md § [section]` | Spec corrected |
-| D-004 | TD-004 | REJECTED | Excluded from canon consideration | `-` | Below canon abstraction level |
+| SD-001 | TD-001 | ACCEPTED | Accepted as authoritative behavior | `-` | No further action |
+| SD-002 | TD-002 | SPEC-ACCEPTED | Implementation updated to match specification | `[path/to/file]` | Fixed in code |
+| SD-003 | TD-003 | IMPL-ACCEPTED | Specification updated to match implementation | `SD-003 in [FEATURE_DIR]/spec.drift.md` | No code change required |
+| SD-004 | TD-004 | REJECTED | Excluded from canon consideration | `-` | Below canon abstraction level |

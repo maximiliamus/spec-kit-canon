@@ -13,5 +13,7 @@
 			"path": "../spec-kit-canon-test"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"powershell.cwd": "spec-kit-canon"
+	}
 }

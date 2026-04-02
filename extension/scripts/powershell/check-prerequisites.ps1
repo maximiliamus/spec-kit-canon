@@ -3,16 +3,17 @@
 # Unified prerequisite checking for the drift workflow.
 #
 # Provides REPO_ROOT, BRANCH, FEATURE_DIR, FEATURE_SPEC, TASKS, TASKS_DRIFT,
-# SPEC_DRIFT, CANON_DRIFT, and CANON_REPAIR always.
+# TASKS_ALIGNMENT, SPEC_DRIFT, and CANON_DRIFT always.
 # Optionally validates drift-specific artifacts and includes canon paths.
 #
-# Usage: ./check-drift-prerequisites.ps1 [OPTIONS]
+# Usage: ./check-prerequisites.ps1 [OPTIONS]
 #
 # OPTIONS:
 #   -Json                 Output in JSON format
 #   -RequireTasks         Require tasks.md to exist
 #   -RequireTasksDrift    Require tasks.drift.md to exist
 #   -RequireSpecDrift     Require spec.drift.md to exist
+#   -RequireTasksAlignment Require tasks.alignment.md to exist
 #   -RequireCanonDrift    Require canon.drift.md to exist
 #   -Canon                Include CANON_ROOT and CANON_TOC in output
 #   -Help, -h             Show help message
@@ -23,6 +24,7 @@ param(
     [switch]$RequireTasks,
     [switch]$RequireTasksDrift,
     [switch]$RequireSpecDrift,
+    [switch]$RequireTasksAlignment,
     [switch]$RequireCanonDrift,
     [switch]$Canon,
     [Alias('h')]
@@ -46,12 +48,13 @@ function Write-FailAndExit {
 
 if ($Help) {
     Write-Output @"
-Usage: check-drift-prerequisites.ps1 [OPTIONS]
+Usage: check-prerequisites.ps1 [OPTIONS]
 
 Unified prerequisite checking for the drift workflow.
 
 Always outputs: REPO_ROOT, BRANCH, FEATURE_DIR, FEATURE_SPEC, TASKS,
-                TASKS_DRIFT, SPEC_DRIFT, CANON_DRIFT, CANON_REPAIR, BASE_BRANCH
+                TASKS_DRIFT, TASKS_ALIGNMENT, SPEC_DRIFT, CANON_DRIFT,
+                BASE_BRANCH
 With -Canon:    Also outputs CANON_ROOT, CANON_TOC
 
 OPTIONS:
@@ -59,25 +62,29 @@ OPTIONS:
   -RequireTasks         Require tasks.md to exist
   -RequireTasksDrift    Require tasks.drift.md to exist
   -RequireSpecDrift     Require spec.drift.md to exist
+  -RequireTasksAlignment Require tasks.alignment.md to exist
   -RequireCanonDrift    Require canon.drift.md to exist
   -Canon                Include canon paths in output
   -Help, -h             Show this help message
 
 EXAMPLES:
   # drift.reverse: needs tasks.md
-  ./check-drift-prerequisites.ps1 -Json -RequireTasks
+  ./check-prerequisites.ps1 -Json -RequireTasks
 
   # drift.detect: needs tasks.drift.md
-  ./check-drift-prerequisites.ps1 -Json -RequireTasksDrift
+  ./check-prerequisites.ps1 -Json -RequireTasksDrift
 
   # drift.resolve: needs spec.drift.md
-  ./check-drift-prerequisites.ps1 -Json -RequireSpecDrift
+  ./check-prerequisites.ps1 -Json -RequireSpecDrift
+
+  # drift.implement: needs spec.drift.md + tasks.alignment.md
+  ./check-prerequisites.ps1 -Json -RequireSpecDrift -RequireTasksAlignment
 
   # drift.reconcile: needs spec.drift.md + canon paths
-  ./check-drift-prerequisites.ps1 -Json -RequireSpecDrift -Canon
+  ./check-prerequisites.ps1 -Json -RequireSpecDrift -Canon
 
   # drift.canonize: needs canon.drift.md + canon paths
-  ./check-drift-prerequisites.ps1 -Json -RequireCanonDrift -Canon
+  ./check-prerequisites.ps1 -Json -RequireCanonDrift -Canon
 
 "@
     exit 0
@@ -85,7 +92,7 @@ EXAMPLES:
 
 . "$PSScriptRoot/common.ps1"
 
-function Get-CanonConfigSettings {
+function Get-CanonConfigSetting {
     param(
         [Parameter(Mandatory = $true)]
         [string]$ExtensionDir
@@ -188,13 +195,13 @@ if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit:$paths.HAS_GI
 }
 
 $extensionDir = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
-$configSettings = Get-CanonConfigSettings -ExtensionDir $extensionDir
+$configSettings = Get-CanonConfigSetting -ExtensionDir $extensionDir
 $canonRootRelative = $configSettings.CanonRoot
 $baseBranch = $configSettings.BaseBranch
 $tasksDrift = Join-Path $paths.FEATURE_DIR 'tasks.drift.md'
+$tasksAlignment = Join-Path $paths.FEATURE_DIR 'tasks.alignment.md'
 $specDrift = Join-Path $paths.FEATURE_DIR 'spec.drift.md'
 $canonDrift = Join-Path $paths.FEATURE_DIR 'canon.drift.md'
-$canonRepair = Join-Path $paths.FEATURE_DIR 'canon.repair.md'
 $canonRoot = if ([System.IO.Path]::IsPathRooted($canonRootRelative)) {
     $canonRootRelative
 } else {
@@ -230,6 +237,13 @@ if ($RequireSpecDrift -and -not (Test-Path -LiteralPath $specDrift -PathType Lea
     )
 }
 
+if ($RequireTasksAlignment -and -not (Test-Path -LiteralPath $tasksAlignment -PathType Leaf)) {
+    Write-FailAndExit @(
+        "ERROR: tasks.alignment.md not found in $($paths.FEATURE_DIR)",
+        'Run /speckit.canon.drift-resolve first and defer implementation work to create the alignment queue.'
+    )
+}
+
 if ($RequireCanonDrift -and -not (Test-Path -LiteralPath $canonDrift -PathType Leaf)) {
     Write-FailAndExit @(
         "ERROR: canon.drift.md not found in $($paths.FEATURE_DIR)",
@@ -245,9 +259,9 @@ if ($Json) {
         FEATURE_SPEC = $paths.FEATURE_SPEC
         TASKS = $paths.TASKS
         TASKS_DRIFT = $tasksDrift
+        TASKS_ALIGNMENT = $tasksAlignment
         SPEC_DRIFT = $specDrift
         CANON_DRIFT = $canonDrift
-        CANON_REPAIR = $canonRepair
         BASE_BRANCH = $baseBranch
     }
 
@@ -266,9 +280,9 @@ Write-Output "FEATURE_DIR: $($paths.FEATURE_DIR)"
 Write-Output "FEATURE_SPEC: $($paths.FEATURE_SPEC)"
 Write-Output "TASKS: $($paths.TASKS)"
 Write-Output "TASKS_DRIFT: $tasksDrift"
+Write-Output "TASKS_ALIGNMENT: $tasksAlignment"
 Write-Output "SPEC_DRIFT: $specDrift"
 Write-Output "CANON_DRIFT: $canonDrift"
-Write-Output "CANON_REPAIR: $canonRepair"
 Write-Output "BASE_BRANCH: $baseBranch"
 if ($Canon) {
     Write-Output "CANON_ROOT: $canonRoot"
