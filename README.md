@@ -217,7 +217,7 @@ Run the step commands in order:
 - `/speckit.canon.drift-resolve`
 - `/speckit.canon.drift-implement` when `tasks.alignment.md` is created
 - `/speckit.canon.drift-reconcile`
-- `/speckit.canon.drift-analyze`
+- `/speckit.canon.drift-analyze` (optional)
 - `/speckit.canon.drift-canonize`
 
 `/speckit.canon.drift-resolve` is the manual decision and re-verification
@@ -267,7 +267,7 @@ in sync with the code on your feature branch:
 - `/speckit.canon.vibecode-drift-reverse`
 - `/speckit.canon.vibecode-drift-detect`
 - `/speckit.canon.vibecode-drift-reconcile`
-- `/speckit.canon.vibecode-drift-analyze`
+- `/speckit.canon.vibecode-drift-analyze` (optional)
 - `/speckit.canon.vibecode-drift-canonize`
 
 Orchestration commands are available to automate this pipeline end to end.
