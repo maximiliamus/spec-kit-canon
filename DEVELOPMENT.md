@@ -1,7 +1,7 @@
 # Development
 
 The monorepo keeps the two publishable packages in separate first-level
-directories: `extension` and `preset`.
+directories: `extension/` and `preset/`.
 
 ## Package Layout
 
