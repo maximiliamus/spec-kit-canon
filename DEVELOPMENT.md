@@ -1,12 +1,9 @@
 # Development
 
-This repository is developed and tested against a local checkout of the
-upstream `spec-kit` repository.
+The monorepo keeps the two publishable packages in separate first-level
+directories: extension and preset.
 
 ## Package Layout
-
-The monorepo keeps the two publishable packages in separate first-level
-directories:
 
 ```text
 spec-kit-canon/
@@ -23,7 +20,7 @@ spec-kit-canon/
 
 ## Minimum Workspace Layout
 
-At minimum, keep both repositories in the same workspace:
+At minimum, keep following directories in the same workspace:
 
 ```text
 workspace/
@@ -40,7 +37,7 @@ local test project for validating extension and preset installs.
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.14+
 - `uv`
 - Git
 - a test Spec Kit project where the extension and preset can be installed
@@ -312,7 +309,7 @@ skills/testing-spec-kit-canon-extension
 skills/syncing-spec-kit-canon-core-preset
 ```
 
-These skills are not Codex-specific. The shared workflows, prompts, scripts,
+These skills are shared for any agent. The shared workflows, prompts, scripts,
 references, and template assets live under those shared skill folders.
 Project-local entrypoints and shortcuts live in agent-specific repo folders:
 
