@@ -276,15 +276,6 @@ See [WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
 Run the vibecoding sync commands from the feature branch created for the session,
 not from the configured base branch.
 
-## Files And Artifacts
-
-See [WORKFLOWS.md](./WORKFLOWS.md) for the full artifact reference.
-
-## Development
-
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for the workspace layout, local
-install/test loop, and release packaging details.
-
 ## Notes
 
 - Standard spec-drift never rewrites the original `spec.md` or `tasks.md`;
@@ -296,3 +287,8 @@ install/test loop, and release packaging details.
 - Successful use of this extension assumes the `canon-core` preset is also
   installed, because the workflows rely on the preset's canon-driven core
   commands and constitution initialization.
+
+## Development
+
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for the workspace layout, local
+install/test loop, and release packaging details.
