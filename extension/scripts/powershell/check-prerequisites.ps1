@@ -167,8 +167,10 @@ print(base_branch or DEFAULT_BASE_BRANCH)
     $env:SPECKIT_CANON_CONFIG = $configFile
     $env:SPECKIT_CANON_EXTENSION = $extensionFile
 
+    $tmpScript = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N') + '.py')
     try {
-        $values = @(& $pythonCmd.Source -c $script 2>$null)
+        [System.IO.File]::WriteAllText($tmpScript, $script, [System.Text.Encoding]::UTF8)
+        $values = @(& $pythonCmd.Source $tmpScript 2>$null)
         if ($LASTEXITCODE -eq 0 -and $values.Count -ge 1) {
             $canonRoot = $values[0].Trim().TrimEnd('/', '\')
             $baseBranch = if ($values.Count -ge 2) { $values[1].Trim() } else { $defaultBaseBranch }
@@ -179,6 +181,7 @@ print(base_branch or DEFAULT_BASE_BRANCH)
             }
         }
     } finally {
+        Remove-Item $tmpScript -ErrorAction SilentlyContinue
         Remove-Item Env:SPECKIT_CANON_CONFIG -ErrorAction SilentlyContinue
         Remove-Item Env:SPECKIT_CANON_EXTENSION -ErrorAction SilentlyContinue
     }
