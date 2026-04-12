@@ -1,6 +1,6 @@
 ---
 name: bumping-spec-kit-canon-version
-description: Bump the shared release version in both publishable Spec Kit Canon manifests and automatically update the repo changelog. Use when preparing the next release, aligning `extension/extension.yml` and `preset/preset.yml`, defaulting to the next minor version when the prompt just asks to bump the extension version, bumping only patch or major when that scope is explicitly requested, or applying an exact `X.Y.Z` or `vX.Y.Z` version only when the user explicitly asks for a specific version.
+description: Bump the shared release version in both publishable Spec Kit Canon manifests, update the version-pinned release commands in `INSTALL.md` and `UPGRADE.md`, keep any documented base Spec Kit version in sync with `preset/spec-kit-release.json`, and automatically update the repo changelog. Use when preparing the next release, aligning `extension/extension.yml` and `preset/preset.yml`, defaulting to the next minor version when the prompt just asks to bump the extension version, bumping only patch or major when that scope is explicitly requested, or applying an exact `X.Y.Z` or `vX.Y.Z` version only when the user explicitly asks for a specific version.
 ---
 
 # Bumping Spec Kit Canon Version
@@ -23,6 +23,10 @@ local git history in the same step.
 3. Run the bundled script from the repo root. By default it updates:
    - `extension/extension.yml`
    - `preset/preset.yml`
+   - `INSTALL.md`
+   - `UPGRADE.md`
+   - any managed Spec Kit version mentions in those docs, using
+     `preset/spec-kit-release.json`
    - `CHANGELOG.md`
 4. Generate the changelog deterministically from local git history using the
    Conventional Commits subjects:
@@ -69,17 +73,20 @@ PowerShell alternative for the default bump:
 python skills/bumping-spec-kit-canon-version/scripts/set_manifest_versions.py
 ```
 
-5. Verify the manifests and changelog:
+5. Verify the manifests, pinned release docs, and changelog:
 
 ```bash
 rg -n '^  version: "' extension/extension.yml preset/preset.yml
+rg -n 'spec-kit-canon-v|spec-kit-canon-core-v' INSTALL.md UPGRADE.md
 rg -n '^## v' CHANGELOG.md
 ```
 
 ## Rules
 
-- Update `extension/extension.yml`, `preset/preset.yml`, and `CHANGELOG.md` by
-  default unless the user explicitly asks to skip the changelog.
+- Update `extension/extension.yml`, `preset/preset.yml`, `INSTALL.md`, and
+  `UPGRADE.md` by default, keep any managed Spec Kit version mentions aligned
+  with `preset/spec-kit-release.json`, plus update `CHANGELOG.md` unless the
+  user explicitly asks to skip the changelog.
 - Keep the two manifest versions identical.
 - Default to the next minor version when the prompt does not specify a bump
   type or an exact version.
@@ -89,6 +96,8 @@ rg -n '^## v' CHANGELOG.md
 - Do not write the leading `v` into either manifest.
 - If the user is preparing a publish, remind them that the release tag still
   needs the `v` prefix expected by `.github/workflows/release-packages.yml`.
+- Do not guess the base Spec Kit version for docs; read it from
+  `preset/spec-kit-release.json` `spec_kit_release.resolved_tag`.
 - Generate changelog entries from git commit subjects, not invented summaries or
   GitHub release-note APIs.
 - If the current manifest versions do not match and the user asks for a
@@ -100,5 +109,7 @@ rg -n '^## v' CHANGELOG.md
 
 - `scripts/set_manifest_versions.py`: read the current manifest versions,
   default to the next minor version, support explicit patch or major bumps,
-  accept an explicit version override, update `CHANGELOG.md` from local git
-  history, and report what changed.
+  accept an explicit version override, update `INSTALL.md` and `UPGRADE.md`
+  release commands to the same version, update managed Spec Kit version
+  mentions from `preset/spec-kit-release.json`, update `CHANGELOG.md` from
+  local git history, and report what changed.

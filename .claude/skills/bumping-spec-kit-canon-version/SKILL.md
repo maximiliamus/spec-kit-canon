@@ -1,6 +1,6 @@
 ---
 name: bumping-spec-kit-canon-version
-description: Claude skill entrypoint for the shared Spec Kit Canon version bump workflow. Use when Claude needs to default to the next minor version in `extension/extension.yml` and `preset/preset.yml`, update `CHANGELOG.md` automatically from Conventional Commit subjects, bump only patch or major when that scope is explicitly requested, or apply an exact version only when the user explicitly provides one.
+description: Claude skill entrypoint for the shared Spec Kit Canon version bump workflow. Use when Claude needs to default to the next minor version in `extension/extension.yml` and `preset/preset.yml`, update the pinned release commands in `INSTALL.md` and `UPGRADE.md`, keep documented base Spec Kit versions aligned with `preset/spec-kit-release.json`, update `CHANGELOG.md` automatically from Conventional Commit subjects, bump only patch or major when that scope is explicitly requested, or apply an exact version only when the user explicitly provides one.
 ---
 
 # Bumping Spec Kit Canon Version

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -44,6 +45,19 @@ SECTION_ORDER = [
     "Chores",
     "Miscellaneous",
 ]
+CANON_RELEASE_URL_RE = re.compile(
+    r"https://github\.com/maximiliamus/spec-kit-canon/releases/download/"
+    r"(?:<tag>|vX\.Y\.Z|v\d+\.\d+\.\d+)/"
+    r"spec-kit-canon-(?:<tag>|vX\.Y\.Z|v\d+\.\d+\.\d+)\.zip"
+)
+CANON_CORE_RELEASE_URL_RE = re.compile(
+    r"https://github\.com/maximiliamus/spec-kit-canon/releases/download/"
+    r"(?:<tag>|vX\.Y\.Z|v\d+\.\d+\.\d+)/"
+    r"spec-kit-canon-core-(?:<tag>|vX\.Y\.Z|v\d+\.\d+\.\d+)\.zip"
+)
+SPEC_KIT_GIT_URL_RE = re.compile(
+    r"git\+https://github\.com/github/spec-kit\.git@(?:vX\.Y\.Z|v\d+\.\d+\.\d+)"
+)
 
 
 @dataclass
@@ -190,6 +204,72 @@ def replace_manifest_version(
         path.write_text(updated_text, encoding="utf-8")
 
     return current_version, changed
+
+
+def replace_release_doc_versions(
+    path: Path,
+    new_version: str,
+    spec_kit_tag: str,
+    dry_run: bool,
+) -> bool:
+    text = path.read_text(encoding="utf-8")
+    line_ending = "\r\n" if "\r\n" in text else "\n"
+    had_trailing_newline = text.endswith(("\r", "\n"))
+    target_tag = f"v{new_version}"
+
+    updated_text = CANON_RELEASE_URL_RE.sub(
+        "https://github.com/maximiliamus/spec-kit-canon/releases/download/"
+        f"{target_tag}/spec-kit-canon-{target_tag}.zip",
+        text,
+    )
+    updated_text = CANON_CORE_RELEASE_URL_RE.sub(
+        "https://github.com/maximiliamus/spec-kit-canon/releases/download/"
+        f"{target_tag}/spec-kit-canon-core-{target_tag}.zip",
+        updated_text,
+    )
+    updated_text = SPEC_KIT_GIT_URL_RE.sub(
+        f"git+https://github.com/github/spec-kit.git@{spec_kit_tag}",
+        updated_text,
+    )
+
+    changed = updated_text != text
+    if changed and not dry_run:
+        if line_ending != "\n":
+            updated_text = updated_text.replace("\n", line_ending)
+        elif had_trailing_newline and not updated_text.endswith("\n"):
+            updated_text += "\n"
+        path.write_text(updated_text, encoding="utf-8")
+
+    return changed
+
+
+def read_spec_kit_release_tag(path: Path) -> str:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as error:
+        raise ValueError(f"Missing Spec Kit release metadata file: {path}") from error
+    except json.JSONDecodeError as error:
+        raise ValueError(f"Invalid JSON in Spec Kit release metadata file: {path}") from error
+
+    resolved_tag = (
+        payload.get("spec_kit_release", {}).get("resolved_tag")
+        if isinstance(payload, dict)
+        else None
+    )
+    if not isinstance(resolved_tag, str) or not resolved_tag.strip():
+        raise ValueError(
+            "Missing spec_kit_release.resolved_tag in "
+            f"Spec Kit release metadata file: {path}"
+        )
+
+    normalized_tag = resolved_tag.strip()
+    if parse_release_tag(normalized_tag) is None:
+        raise ValueError(
+            "Invalid spec_kit_release.resolved_tag in "
+            f"Spec Kit release metadata file: {path}: {normalized_tag}"
+        )
+
+    return normalized_tag
 
 
 def resolve_previous_release_tag(repo_root: Path, target_version: str) -> str | None:
@@ -395,6 +475,21 @@ def parse_args() -> argparse.Namespace:
         help="Override the changelog path. Defaults to <repo>/CHANGELOG.md.",
     )
     parser.add_argument(
+        "--install-doc",
+        type=Path,
+        help="Override the install doc path. Defaults to <repo>/INSTALL.md.",
+    )
+    parser.add_argument(
+        "--upgrade-doc",
+        type=Path,
+        help="Override the upgrade doc path. Defaults to <repo>/UPGRADE.md.",
+    )
+    parser.add_argument(
+        "--spec-kit-release-metadata",
+        type=Path,
+        help="Override the Spec Kit release metadata path. Defaults to <repo>/preset/spec-kit-release.json.",
+    )
+    parser.add_argument(
         "--skip-changelog",
         action="store_true",
         help="Skip automatic CHANGELOG.md generation.",
@@ -425,10 +520,26 @@ def main() -> int:
         if args.changelog_path is not None
         else repo_root / "CHANGELOG.md"
     )
+    install_doc = (
+        args.install_doc.resolve()
+        if args.install_doc is not None
+        else repo_root / "INSTALL.md"
+    )
+    upgrade_doc = (
+        args.upgrade_doc.resolve()
+        if args.upgrade_doc is not None
+        else repo_root / "UPGRADE.md"
+    )
+    spec_kit_release_metadata = (
+        args.spec_kit_release_metadata.resolve()
+        if args.spec_kit_release_metadata is not None
+        else repo_root / "preset" / "spec-kit-release.json"
+    )
 
     try:
         extension_current = read_manifest_version(extension_manifest, "extension")
         preset_current = read_manifest_version(preset_manifest, "preset")
+        spec_kit_tag = read_spec_kit_release_tag(spec_kit_release_metadata)
 
         if args.version is not None:
             normalized_version = normalize_version(args.version)
@@ -464,6 +575,18 @@ def main() -> int:
             normalized_version,
             args.dry_run,
         )
+        install_doc_changed = replace_release_doc_versions(
+            install_doc,
+            normalized_version,
+            spec_kit_tag,
+            args.dry_run,
+        )
+        upgrade_doc_changed = replace_release_doc_versions(
+            upgrade_doc,
+            normalized_version,
+            spec_kit_tag,
+            args.dry_run,
+        )
 
         changelog_changed = False
         if changelog_plan is not None:
@@ -477,6 +600,7 @@ def main() -> int:
 
     print(f"Resolved target: {resolution_label}")
     print(f"Normalized version: {normalized_version}")
+    print(f"Resolved Spec Kit base tag: {spec_kit_tag}")
 
     extension_label = format_path(extension_manifest, repo_root)
     if extension_changed:
@@ -496,11 +620,23 @@ def main() -> int:
     else:
         print(f"{already} {preset_label}: {normalized_version}")
 
+    install_doc_label = format_path(install_doc, repo_root)
+    if install_doc_changed:
+        print(f"{action} {install_doc_label}: release commands -> v{normalized_version}")
+    else:
+        print(f"{already} {install_doc_label}: release commands at v{normalized_version}")
+
+    upgrade_doc_label = format_path(upgrade_doc, repo_root)
+    if upgrade_doc_changed:
+        print(f"{action} {upgrade_doc_label}: release commands -> v{normalized_version}")
+    else:
+        print(f"{already} {upgrade_doc_label}: release commands at v{normalized_version}")
+
     if args.skip_changelog:
         print("Skipped CHANGELOG.md generation.")
     else:
         changelog_label = format_path(changelog_path, repo_root)
-        commit_count = len(changelog_plan.commit_subjects)
+        commit_count = changelog_plan.commit_count
         if changelog_changed:
             print(
                 f"{action} {changelog_label}: "

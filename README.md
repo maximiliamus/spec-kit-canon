@@ -16,31 +16,18 @@ details that define how the system is supposed to work.
 This repository publishes two packages that are meant to be installed together:
 
 - `canon` extension: adds `/speckit.canon.*` namespaced commands for canon drift management in spec-first (original Spec Kit) and code-first (new vibecoding) workflows
-- `canon-core` preset: overrides core `/speckit.*` commands with
-  canon-driven variants and replaces the default constitution/bootstrap behavior
+- `canon-core` preset: adapts core `/speckit.*` commands for
+  canon-driven workflows and replaces the default constitution/bootstrap behavior
 
-## Install
+## Install and Upgrade
 
-Install both packages from a release:
+Install both packages together from the current release. For step-by-step
+release installation commands, see
+[INSTALL.md](./INSTALL.md).
 
-```bash
-specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-<tag>.zip
-specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/<tag>/spec-kit-canon-core-<tag>.zip
-```
-
-Example for `v0.1.0`:
-
-```bash
-specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-v0.1.0.zip
-specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-core-v0.1.0.zip
-```
-
-Install both packages from a local checkout:
-
-```bash
-specify extension add --dev /path/to/spec-kit-canon/extension
-specify preset add --dev /path/to/spec-kit-canon/preset
-```
+For existing projects, upgrade the Spec Kit CLI and refresh the target
+project before reinstalling `canon` and `canon-core` from the same version.
+The full upgrade procedure is in [UPGRADE.md](./UPGRADE.md).
 
 If you install only the extension, you get the namespaced
 `/speckit.canon.*` commands. The full canon-driven workflow documented here
@@ -49,9 +36,10 @@ assumes the `canon-core` preset is also installed.
 For a focused reference covering the available workflows, step commands, and
 handoff behavior for `speckit.canon.*`, see [WORKFLOWS.md](./WORKFLOWS.md). The
 end-to-end orchestrator commands are documented in
-[WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
+[WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md), and the workflow
+diagrams are collected in [WORKFLOW-DIAGRAMS.md](./WORKFLOW-DIAGRAMS.md).
 
-The preset overrides these core commands:
+The preset adapts these core commands to work together with the extension:
 
 - `speckit.specify`
 - `speckit.clarify`
@@ -155,16 +143,21 @@ After updating the configuration, run:
 /speckit.constitution
 ```
 
-That initializes or repairs the canon-driven project baseline:
+That initializes or repairs the canon-driven project baseline using:
+
+- [extension/canon-config.yml](./extension/canon-config.yml)
+- [preset/templates/constitution-template.md](./preset/templates/constitution-template.md)
+- [preset/templates/canon-toc-template.md](./preset/templates/canon-toc-template.md)
+
+It writes or refreshes:
 
 - `.specify/memory/constitution.md`
 - `.specify/templates/constitution-template.md`
 - `<canon.root>/_toc.md` and any nested canon area structure that hangs off it
 
-After generation, read `.specify/memory/constitution.md` in full. It contains
-the detailed project-specific rules, branch strategy, canon structure, and
-workflow expectations that make the canon-driven process easier to understand
-and follow.
+After generation, review `.specify/memory/constitution.md` and confirm the
+rendered project name, branch strategy, and canon structure match your
+configuration.
 
 ## Which Workflow To Use
 
@@ -188,8 +181,8 @@ Run the familiar core commands in order:
 ```text
 /speckit.specify "Add bulk user import"
 /speckit.clarify
-/speckit.plan
 /speckit.checklist
+/speckit.plan
 /speckit.tasks
 /speckit.analyze
 /speckit.implement
