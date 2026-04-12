@@ -61,6 +61,7 @@ Anything that contains spaces or reads as natural language (e.g., `"Add retry lo
 Run the create-new-feature helper to create the branch and feature directory. Use the slug from Step 1 as `--short-name`. Pass the slug itself as the feature description argument (the script requires a non-empty description).
 
 **Branch numbering mode**: Before running the script, check if `.specify/init-options.json` exists and read the `branch_numbering` value.
+
 - If `"timestamp"`, add `--timestamp` (Bash) or `-Timestamp` (PowerShell) to the script invocation
 - If `"sequential"` or absent, do not add any extra flag (default behavior)
 
@@ -72,6 +73,7 @@ Examples:
 - PowerShell (timestamp): `{SCRIPT} -Json -Timestamp -ShortName "api-cleanup" "api-cleanup"`
 
 **IMPORTANT**:
+
 - Do NOT pass `--number` — the script determines the correct next number automatically
 - Always include `--json` so the output can be parsed reliably
 - Parse JSON output for `BRANCH_NAME`, `SPEC_FILE`, `FEATURE_NUM`
@@ -142,15 +144,21 @@ Vibecoding session started.
 Branch: <BRANCH_NAME>
 Directory: <FEATURE_DIR>
 Artifact: <FEATURE_DIR>/vibecode.md
+
+> Switch to the default development agent now before making any code changes.
+> This agent (vibecode-specify) is for session setup only.
 ```
 
 ### If category C (descriptive text):
 
-After the report, proceed to accomplish the user's tasks described in the intent. You are free to write code, create files, and make changes as needed. The vibecoding workflow is code-first — no further spec ceremony is required before implementation.
+After the report, proceed to accomplish the user's tasks described in the intent. You are free to write
+code, create files, and make changes as needed. The vibecoding workflow is code-first — no further spec
+ceremony is required before implementation.
 
 ### If category A or B:
 
-After the report: _"Ready for vibecoding. Make your changes, then run /speckit.canon.vibecode-drift-express (or /speckit.canon.vibecode-drift-reverse) to sync with canon."_
+After the report: _"Ready for vibecoding. Switch to the default development agent, make your changes, then
+run /speckit.canon.vibecode-drift-express (or /speckit.canon.vibecode-drift-reverse) to sync with canon."_
 
 ---
 
