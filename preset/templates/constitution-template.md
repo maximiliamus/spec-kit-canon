@@ -33,6 +33,19 @@ specification as "Canon" or "the canon".
 - Do NOT compress the canon into a single file.
 - Do NOT duplicate the canon into feature specs.
 - Do NOT invent requirements not present in the canon.
+- Do NOT include code examples in any programming language (Python, JavaScript,
+  SQL, etc.).
+- Do NOT include implementation details, class names, module paths, or
+  low-level HOW-level content that describes how a feature is built in a
+  specific technology. Canon answers WHAT the system is and does, not HOW it
+  is coded.
+- System-level architectural decisions that define structure, boundaries, or
+  protocols across the whole system ARE part of canon.
+- Abstract algorithmic pseudocode that captures core domain logic or know-how
+  (e.g., a risk-calculation formula or a key classification rule) IS permitted
+  when that logic is itself the essential WHAT of the system, provided it uses
+  language-neutral notation and contains no references to specific technologies,
+  libraries, or implementation constructs.
 - Always reference the canon sections by exact file path.
 
 Canon is the "System Bible".
@@ -102,7 +115,29 @@ start the corresponding workflows from that configured base branch.
 
 ## 3. Separation of Abstraction Levels
 
-Strict separation must be maintained in each workflow.
+Strict separation must be maintained in the canon and each workflow.
+
+### Canon
+
+Describes:
+
+- WHAT the system does (behavior, capabilities, constraints)
+- system-level architectural decisions that affect the whole system (e.g., service boundaries, communication protocols, data flow)
+- observable data shapes, contracts, and invariants expressed in prose
+- system-level requirements and rules
+
+Must NOT include:
+
+- code examples in any specific programming language (Python, JavaScript, SQL, etc.)
+- implementation details (class names, module paths, library calls, language-specific constructs)
+- low-level architectural details that are internal to a single component and do not affect the rest of the system
+- tool-specific configuration syntax
+
+MAY include:
+
+- abstract algorithmic pseudocode in language-neutral notation when the algorithm
+  itself is core domain know-how (e.g., a risk formula, a classification rule)
+  and contains no references to specific technologies or implementation constructs
 
 ### Standard Workflow
 
