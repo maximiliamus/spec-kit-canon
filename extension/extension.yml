@@ -91,7 +91,7 @@ provides:
 
     - name: "speckit.canon.vibecode-drift-analyze"
       file: "commands/vibecode-drift-analyze.md"
-      description: "Vibecoding entrypoint alias for the shared draft canon analysis workflow."
+      description: "Analyze draft canon.drift.md for vibecoding workflows before canonize and suggest remediation."
 
     - name: "speckit.canon.vibecode-drift-canonize"
       file: "commands/vibecode-drift-canonize.md"

@@ -146,7 +146,7 @@ same numbering and naming rules as `/speckit.specify`, writes
 | `speckit.canon.vibecode-drift-reverse` | Reverse-engineers implementation changes into vibecoding task drift without comparing to an original `tasks.md`. | Git diff and worktree state, optional `plan.md`, related changed source files. | `tasks.drift.md` with all tasks treated as `ADDED`. |
 | `speckit.canon.vibecode-drift-detect` | Converts vibecoding task drift into WHAT-level spec findings and auto-accepts them. | `tasks.drift.md`, related source files. | `spec.drift.md` with all items `ACCEPTED` and resolution status `resolved`. |
 | `speckit.canon.vibecode-drift-reconcile` | Maps accepted vibecoding spec drift to canon gaps and proposed canon changes. | Resolved `spec.drift.md`, relevant canon files, `<canon.root>/_toc.md`. | `canon.drift.md` with all entries `ACCEPTED` and overall status `draft`. |
-| `speckit.canon.vibecode-drift-analyze` | Vibecoding entrypoint alias for the shared draft canon analysis workflow before canonize. | Same inputs as `speckit.canon.drift-analyze`. | Same read-only report and remediation-item output as `speckit.canon.drift-analyze`. |
+| `speckit.canon.vibecode-drift-analyze` | Reviews the vibecoding draft canon plan before canonize using the same analysis contract as the standard drift analyzer. | Same inputs as `speckit.canon.drift-analyze`. | Same read-only report and remediation-item output shape as `speckit.canon.drift-analyze`, with vibecoding follow-up guidance. |
 | `speckit.canon.vibecode-drift-canonize` | Applies a fully accepted vibecoding canon plan from the current draft. | Draft `canon.drift.md` with only `ACCEPTED` entries, relevant canon files, `<canon.root>/_toc.md`. | Updated canon files, updated `_toc.md` when needed, and `canon.drift.md` marked `applied`. |
 
 ## Orchestrators
@@ -180,5 +180,6 @@ There is intentionally no separate analyze artifact file.
 `speckit.canon.drift-analyze` produces a read-only report with remediation
 items and never modifies `canon.drift.md` directly. Users may apply those
 remediation items to the draft canon plan, but analyze itself always stays
-read-only. `speckit.canon.vibecode-drift-analyze` is a thin alias for that
-same shared workflow.
+read-only. `speckit.canon.vibecode-drift-analyze` follows the same shared
+analysis contract while keeping its own standalone vibecoding entrypoint and
+next-step wording.
