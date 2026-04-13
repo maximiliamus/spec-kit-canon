@@ -89,8 +89,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release_tag.outputs.tag }}
+          body: |
+            **Full Changelog**: https://github.com/${{ github.repository }}/blob/${{ steps.release_tag.outputs.tag }}/CHANGELOG.md
           files: |
             spec-kit-canon-${{ steps.release_tag.outputs.tag }}.zip
             spec-kit-canon-core-${{ steps.release_tag.outputs.tag }}.zip
           fail_on_unmatched_files: true
-          generate_release_notes: true
