@@ -159,13 +159,23 @@ Severity levels:
 
 #### Remediation Items
 
-If any remediation items were generated in Step 4, include this table:
+If any remediation items were generated in Step 4, include this table. If zero remediation items were generated, omit the table and output: _"Canon drift plan review found no actionable issues."_
 
 | ID | Category | Severity | Canon Drift Target | Canon Target | Action | Refs | Description |
 |----|----------|----------|--------------------|--------------|--------|------|-------------|
 | CR-001 | `CANON-FIX` | HIGH | `CANON_DRIFT § Accepted Entries / CD-003` | `CANON_ROOT/api.md § Endpoints` | modify | CD-003, SD-004, TD-002 | Wrong field name in proposed canon text; update to authoritative name. |
 
-If zero remediation items: _"Canon drift plan review found no actionable issues."_
+#### Canonize Preview
+
+If zero remediation items, include this final apply preview for the current draft canon plan. If any remediation items were generated, omit this section entirely because the apply set is not yet stable:
+
+| CD-XXX | Action | Canon Target | Summary |
+|--------|--------|--------------|---------|
+| CD-001 | modify | `CANON_ROOT/api.md § Endpoints` | [brief summary of the canon text that will be applied] |
+
+This preview must list every current `ACCEPTED` entry that `/speckit.canon.drift-canonize` would apply from the draft as it exists in this analysis pass.
+
+If remediation items exist, omit this section because the current draft still requires revision and the apply preview may change after remediation.
 
 #### Metrics
 

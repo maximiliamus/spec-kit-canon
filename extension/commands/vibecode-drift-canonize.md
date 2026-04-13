@@ -53,13 +53,12 @@ Scan all entries in `canon.drift.md`. Every entry **MUST** have status `ACCEPTED
 
 ---
 
-## Step 3 — Final confirmation
+## Step 3 — Build apply summary
 
-Display a summary of all changes that will be applied:
+Before modifying canon, compile the apply set for this run:
 
 - List each `ACCEPTED` entry with its target canon file, section, and change type (add / modify / remove)
-- Ask: _"[N] canon changes will be applied to [files]. Proceed? (yes / no)"_
-  - **no** → stop; no files are modified
+- Treat every `ACCEPTED` entry as already approved for application; do **not** ask for a final confirmation prompt
 
 ---
 
@@ -115,3 +114,4 @@ Run `{AGENT_SCRIPT}` to refresh the current agent-specific context after canon u
 - Use Canon terminology exactly; avoid synonyms.
 - Only modify `CANON_ROOT/**` and `CANON_TOC`. Do not modify `SPEC_DRIFT`.
 - This is the apply-only vibecoding workflow. All entries must be `ACCEPTED` — no inference or classification is performed.
+- Do not add a separate final confirmation gate; `ACCEPTED` entries are the confirmed outcomes to apply.

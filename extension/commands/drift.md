@@ -42,7 +42,6 @@ direct and user-visible:
 For delegated steps, instruct each subagent:
 
 - Existing artifact overwrite prompts → answer **yes** (overwrite)
-- Confirmation gates before applying canon → answer **yes** (proceed)
 - Classification choices → use best judgment and proceed
 - Any yes/no prompt that belongs only to delegated operational flow → answer **yes**
 
@@ -78,7 +77,7 @@ next.
 When spawning each subagent, include in the prompt:
 
 1. The command to execute (e.g., `/speckit.canon.drift-reverse`)
-2. The delegated-step autonomy instruction: _"Do NOT ask the user any delegated operational questions. If a prompt asks for overwrite confirmation or whether to proceed with canon apply, answer yes and continue."_
+2. The delegated-step autonomy instruction: _"Do NOT ask the user any delegated operational questions. If a prompt asks for overwrite confirmation or another delegated yes/no operational decision, answer yes and continue."_
 3. Any user input from `$ARGUMENTS` if relevant
 
 ### Step 1 — Reverse

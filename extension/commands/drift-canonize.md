@@ -54,14 +54,13 @@ Scan all entries in `CANON_DRIFT`. If any entry has a status other than `ACCEPTE
 
 ---
 
-## Step 3 — Final confirmation
+## Step 3 — Build apply summary
 
-Display a summary of all changes that will be applied:
+Before modifying canon, compile the apply set for this run:
 
 - List each `ACCEPTED` entry with its target canon file, section, and change type (add / modify / remove)
 - List `REJECTED` entries that will be skipped
-- Ask: _"[N] canon changes will be applied to [files]. Proceed? (yes / no)"_
-  - **no** → stop; no files are modified
+- Treat every `ACCEPTED` entry as already approved for application; do **not** ask for a final confirmation prompt
 
 ---
 
@@ -118,3 +117,4 @@ Run `{AGENT_SCRIPT}` to refresh the current agent-specific context after canon u
 - Use Canon terminology exactly; avoid synonyms.
 - Only modify `CANON_ROOT/**` and `CANON_TOC`. Do not modify `FEATURE_SPEC`.
 - This command applies only — no inference or classification is performed.
+- Do not add a separate final confirmation gate; `ACCEPTED` entries are the confirmed outcomes to apply.

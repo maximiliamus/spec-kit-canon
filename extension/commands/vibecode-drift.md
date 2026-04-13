@@ -46,7 +46,6 @@ changes and applies canon within its own command flow.
 For delegated steps in this pipeline only:
 
 - overwrite prompts → answer **yes** (overwrite)
-- canon apply confirmation → answer **yes** (proceed)
 - non-user-intent ambiguities → use best judgment and proceed
 
 The only reasons to stop are a hard error, an early exit, an analyze-review
@@ -71,7 +70,7 @@ user-visible draft canon review step.
 When spawning each subagent, include in the prompt:
 
 1. The command to execute (e.g., `/speckit.canon.vibecode-drift-reverse`)
-2. The delegated-step autonomy instruction: _"Do not surface delegated overwrite or apply prompts to the user. If asked whether to overwrite an existing artifact or whether to proceed with canon apply, answer yes and continue."_
+2. The delegated-step autonomy instruction: _"Do not surface delegated operational prompts to the user. If asked whether to overwrite an existing artifact or another delegated yes/no operational question, answer yes and continue."_
 3. Any user input from `$ARGUMENTS` if relevant
 
 ### Step 1 — Reverse
