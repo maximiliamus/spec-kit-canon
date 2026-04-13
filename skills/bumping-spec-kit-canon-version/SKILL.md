@@ -34,6 +34,10 @@ local git history in the same step.
    - collect rolling commit subjects from that tag to `HEAD`
    - group the matching Conventional Commit subjects by type into titled
      sections and list them under `CHANGELOG.md`
+   - format each release heading as `## [X.Y.Z] - YYYY-MM-DD` to match
+     Keep a Changelog
+   - prepend the new entry after the file header, before any existing sections,
+     so the changelog is in reverse chronological order (newest release first)
    - if there are no commits since the previous tag, write a short note
      instead of inventing entries
 
@@ -78,7 +82,7 @@ python skills/bumping-spec-kit-canon-version/scripts/set_manifest_versions.py
 ```bash
 rg -n '^  version: "' extension/extension.yml preset/preset.yml
 rg -n 'spec-kit-canon-v|spec-kit-canon-core-v' INSTALL.md UPGRADE.md
-rg -n '^## v' CHANGELOG.md
+rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 ```
 
 ## Rules
@@ -100,6 +104,11 @@ rg -n '^## v' CHANGELOG.md
   `preset/spec-kit-release.json` `spec_kit_release.resolved_tag`.
 - Generate changelog entries from git commit subjects, not invented summaries or
   GitHub release-note APIs.
+- Do not include a commit count footer (e.g. `*Total: N commit(s)*`) in changelog entries.
+- Use square-bracketed Keep a Changelog release headings in the form
+  `## [X.Y.Z] - YYYY-MM-DD`.
+- Always prepend new changelog entries after the file header so the changelog
+  remains in reverse chronological order (newest release first).
 - If the current manifest versions do not match and the user asks for a
   relative bump, stop and resolve that mismatch before guessing a base version.
 - If an explicit version is requested and it is not valid semver, stop and ask

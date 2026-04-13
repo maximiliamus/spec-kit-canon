@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "canon"
   name: "Canon"
-  version: "0.1.0"
+  version: "0.2.0"
   description: "Adds canon-driven (baseline-driven) workflows: spec-first, code-first, spec-drift. Requires Canon Core preset installation."
   author: "Maxim Stupakov"
   repository: "https://github.com/maximiliamus/spec-kit-canon/tree/master/extension"

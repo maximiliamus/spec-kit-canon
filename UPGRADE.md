@@ -12,7 +12,7 @@ This keeps the base Spec Kit installation and the canon packages aligned.
 ## 1. Upgrade The Spec Kit CLI
 
 ```bash
-uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@v0.4.3
+uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@v0.6.1
 ```
 
 ## 2. Refresh The Target Project
@@ -45,8 +45,8 @@ specify preset remove canon-core
 Install the current release assets:
 
 ```bash
-specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-v0.1.0.zip
-specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.1.0/spec-kit-canon-core-v0.1.0.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.0/spec-kit-canon-v0.2.0.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.0/spec-kit-canon-core-v0.2.0.zip
 ```
 
 `--keep-config` preserves `.specify/extensions/canon/canon-config.yml`.

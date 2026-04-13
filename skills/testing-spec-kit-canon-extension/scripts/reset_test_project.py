@@ -225,56 +225,22 @@ def run(command: list[str], cwd: Path) -> None:
 
 
 def initialize_test_project(spec_kit_dir: Path, test_project_dir: Path, script: str) -> None:
-    inline_script = f"""
-import importlib
-import json
-from pathlib import Path
-
-cli = importlib.import_module("specify_cli.__init__")
-project = Path.cwd()
-
-ok = cli.scaffold_from_core_pack(project, "codex", "{script}", True)
-if not ok:
-    raise SystemExit("scaffold_from_core_pack failed")
-
-cli.ensure_executable_scripts(project)
-cli.ensure_constitution_from_template(project)
-
-if not cli._has_bundled_skills(project, "codex"):
-    if not cli.install_ai_skills(project, "codex", overwrite_existing=True):
-        raise SystemExit("install_ai_skills failed")
-
-success, error = cli.init_git_repo(project, quiet=True)
-if not success:
-    raise SystemExit(error or "init_git_repo failed")
-
-cli.save_init_options(
-    project,
-    {{
-        "ai": "codex",
-        "ai_skills": True,
-        "ai_commands_dir": None,
-        "branch_numbering": "sequential",
-        "here": True,
-        "preset": None,
-        "offline": True,
-        "script": "{script}",
-        "speckit_version": cli.get_speckit_version(),
-    }},
-)
-
-print(json.dumps({{"project_dir": str(project), "status": "ready_for_extension_install"}}, indent=2))
-"""
-
     run(
         [
             "uv",
             "run",
             "--project",
             str(spec_kit_dir),
-            "python",
-            "-c",
-            inline_script,
+            "specify",
+            "init",
+            ".",
+            "--ai",
+            "codex",
+            "--script",
+            script,
+            "--force",
+            "--here",
+            "--ignore-agent-tools",
         ],
         cwd=test_project_dir,
     )

@@ -365,7 +365,10 @@ def strip_existing_version_section(text: str, target_version: str) -> str:
     filtered_sections = [
         section
         for section in sections
-        if not section[0].startswith(f"## v{target_version}")
+        if not (
+            section[0].startswith(f"## v{target_version}")
+            or section[0].startswith(f"## [{target_version}]")
+        )
     ]
 
     chunks = ["\n".join(header_lines).strip()]
@@ -379,7 +382,7 @@ def build_changelog_entry(
     entries_by_section: dict[str, list[str]],
     commit_count: int,
 ) -> str:
-    lines = [f"## v{target_version} - {date.today().isoformat()}", ""]
+    lines = [f"## [{target_version}] - {date.today().isoformat()}", ""]
     added_section = False
 
     for section in SECTION_ORDER:
@@ -398,9 +401,6 @@ def build_changelog_entry(
             lines.append(f"- No recorded changes since {previous_tag}.")
         else:
             lines.append("- No recorded changes available from git history.")
-    else:
-        lines.append("")
-        lines.append(f"*Total: {commit_count} commit(s)*")
 
     return "\n".join(lines).rstrip()
 
@@ -423,7 +423,15 @@ def plan_changelog_update(
         entries_by_section,
         commit_count,
     )
-    updated_text = f"{stripped_text}\n\n{entry_text}\n"
+    # Insert new entry after the header preamble, before any existing sections,
+    # so the changelog is always in reverse chronological order (newest first).
+    first_section_idx = stripped_text.find("\n\n## ")
+    if first_section_idx == -1:
+        updated_text = f"{stripped_text}\n\n{entry_text}\n"
+    else:
+        preamble = stripped_text[:first_section_idx]
+        rest = stripped_text[first_section_idx:]
+        updated_text = f"{preamble}\n\n{entry_text}{rest}\n"
 
     return ChangelogPlan(
         path=changelog_path,

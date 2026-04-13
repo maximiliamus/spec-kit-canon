@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-04-13
+
+### Features
+- Sync canon-core with Spec Kit v0.6.1 and tighten sync workflow.
+- Clarify canon abstraction boundaries in constitution template.
+- Prompt agent switch after vibecoding session init, before code changes.
+
+### Bug Fixes
+- Move final apply preview to analyze and remove canonize confirm.
+- Fix vibecode-drift-analyze semantics and document handoff design.
+- Avoid PS 5.1 python -c quoting issues in canon config helpers
+
+### Documentation
+- Extract install/upgrade docs and sync bump skill with release versions.
+- Fix formatting.
+- Fix formatting.
+- Improve the wordings
+- Reorganize structure.
+- Highlight optional commands.
+
 ## [0.1.0] - 2026-04-05
 
 ### Added
@@ -43,5 +63,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `testing-spec-kit-canon-extension`: Automated extension verification workflow.
 - Established GitHub Actions workflow for automated release packaging and publishing.
 - Bootstrapped documentation and project structure for the canon ecosystem.
-
-[0.1.0]: https://github.com/maximiliamus/spec-kit-canon/releases/tag/v0.1.0

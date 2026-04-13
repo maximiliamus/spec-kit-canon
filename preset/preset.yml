@@ -3,7 +3,7 @@ schema_version: "1.0"
 preset:
   id: "canon-core"
   name: "Canon Core"
-  version: "0.1.0"
+  version: "0.2.0"
   description: "Adapts original Spec Kit workflow to work together with Canon extension."
   author: "Maxim Stupakov"
   repository: "https://github.com/maximiliamus/spec-kit-canon/tree/master/preset"
