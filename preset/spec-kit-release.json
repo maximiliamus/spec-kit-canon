@@ -1,11 +1,11 @@
 {
-  "updated_at_utc": "2026-03-27T19:22:03.542720+00:00",
+  "updated_at_utc": "2026-04-13T05:24:19.7434094Z",
   "preset_target": "preset",
   "spec_kit_release": {
     "requested_tag": "latest",
-    "resolved_tag": "v0.4.3",
-    "release_commit": "cb235ca30e909dfd8e248bdd04d2f0e586b415a2",
-    "export_generated_at_utc": "2026-03-27T19:12:33.578909+00:00"
+    "resolved_tag": "v0.6.1",
+    "release_commit": "2499c9a1a667b51d7bc33b442ba631384d4d0bd5",
+    "export_generated_at_utc": "2026-04-13T05:24:19.7434094Z"
   },
   "sync_scope": {
     "regular_commands": [

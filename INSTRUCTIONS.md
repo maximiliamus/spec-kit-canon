@@ -8,4 +8,8 @@
 
 - Guide for Spec Kit presets development: ../spec-kit/presets
 
+- For repo-specific workflows that already have a local skill under `skills/`,
+  open that `SKILL.md` and follow it directly even if the agent session does
+  not currently expose the repo-local skill as a registered global skill.
+
 @INSTRUCTIONS.local.md

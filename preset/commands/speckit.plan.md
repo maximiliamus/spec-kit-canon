@@ -9,11 +9,11 @@ handoffs:
     agent: speckit.checklist
     prompt: Create a checklist for the following domain...
 scripts:
-  sh: bash .specify/scripts/bash/setup-plan.sh --json
-  ps: pwsh -NoProfile -File .specify/scripts/powershell/setup-plan.ps1 -Json
+  sh: scripts/bash/setup-plan.sh --json
+  ps: scripts/powershell/setup-plan.ps1 -Json
 agent_scripts:
-  sh: bash .specify/scripts/bash/update-agent-context.sh __AGENT__
-  ps: pwsh -NoProfile -File .specify/scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
+  sh: scripts/bash/update-agent-context.sh __AGENT__
+  ps: scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
 ---
 
 <!-- spec-kit-canon:start preconditions -->

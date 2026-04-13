@@ -1,8 +1,8 @@
 ---
 description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
 scripts:
-  sh: bash .specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
-  ps: pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+  sh: scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
+  ps: scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
 ---
 
 <!-- spec-kit-canon:start preconditions -->

@@ -42,6 +42,11 @@ Canon-owned files:
 - `preset/templates/root-gitattributes-template.txt`
 - `preset/preset.yml`
 
+Documentation files that must stay aligned with the recorded upstream baseline:
+
+- `README.md`
+- `preset/README.md`
+
 ## Allowed Deltas
 
 Regular commands:
@@ -137,6 +142,13 @@ local frontmatter or prose to preserve that behavior in preset-installed form.
   - `.specify/templates/constitution-template.md`
   - `.specify/presets/canon-core/templates/canon-toc-template.md`
   - `.specify/presets/canon-core/templates/root-gitattributes-template.txt`
+- Verify that the visible upstream-baseline notes in `README.md` and
+  `preset/README.md` match the release recorded in
+  `preset/spec-kit-release.json`.
+- Verify that the command-inventory lists in `README.md` and `preset/README.md`
+  still match the actual core-command overrides shipped in `preset/commands/`.
+- Verify that `preset/preset.yml` was reviewed for any required
+  `requires.speckit_version` update implied by the new upstream baseline.
 - Update
   `preset/spec-kit-release.json`
   only after the preset rebase is complete and validated.
@@ -158,6 +170,9 @@ Minimum tracked fields:
 - merge timestamp
 - resolved upstream release tag
 - upstream release commit
+
+The same resolved upstream release tag must also be reflected in the visible
+upstream-baseline notes in `README.md` and `preset/README.md`.
 
 Do not update that file during the export step. Update it only after:
 

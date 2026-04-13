@@ -50,6 +50,11 @@ The preset adapts these core commands to work together with the extension:
 - `speckit.implement`
 - `speckit.constitution`
 
+Current upstream core-command baseline: `Spec Kit v0.6.1`.
+The checked-in sync metadata for the canon-core preset lives in
+[preset/spec-kit-release.json](./preset/spec-kit-release.json), including the
+exact upstream release tag and commit used for the current command rebase.
+
 ## First-Time Setup
 
 After installing both packages, the project-level canon config lives at:

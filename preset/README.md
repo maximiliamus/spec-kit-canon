@@ -40,6 +40,14 @@ specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-ca
 - `speckit.implement`
 - `speckit.constitution`
 
+## Upstream Baseline
+
+The current checked-in `canon-core` command overrides are synced against
+`Spec Kit v0.6.1`.
+
+For the exact upstream release tag and commit that were merged into this preset,
+see [spec-kit-release.json](./spec-kit-release.json).
+
 ## Notes
 
 - The preset overrides core command prompts and ships a
