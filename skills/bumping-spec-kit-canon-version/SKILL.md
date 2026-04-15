@@ -25,7 +25,7 @@ local git history in the same step.
    - `preset/preset.yml`
    - `INSTALL.md`
    - `UPGRADE.md`
-   - any managed Spec Kit version mentions in those docs, using
+   - the Spec Kit version badge in `README.md`, using
      `preset/spec-kit-release.json`
    - `CHANGELOG.md`
 4. Generate the changelog deterministically from local git history using the
@@ -77,20 +77,40 @@ PowerShell alternative for the default bump:
 python skills/bumping-spec-kit-canon-version/scripts/set_manifest_versions.py
 ```
 
-5. Verify the manifests, pinned release docs, and changelog:
+5. Verify the manifests, pinned release docs, readme badge, and changelog:
 
 ```bash
 rg -n '^  version: "' extension/extension.yml preset/preset.yml
 rg -n 'spec-kit-canon-v|spec-kit-canon-core-v' INSTALL.md UPGRADE.md
+rg -n 'spec--kit-v' README.md
 rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 ```
 
+6. Confirm each output matches expectations and report success or failure:
+
+- **Manifests**: both `extension/extension.yml` and `preset/preset.yml` must
+  show `version: "<new_version>"` — if either is missing or still shows the
+  old version, the bump failed; stop and report which manifest was not updated.
+- **Release docs**: `INSTALL.md` and `UPGRADE.md` must contain release URLs
+  ending in the new version tag (`v<new_version>`) — if no matches are found,
+  the pinned commands were not updated; stop and report.
+- **README badge**: `README.md` must contain the Spec Kit badge with the tag
+  from `preset/spec-kit-release.json`, i.e.
+  `spec--kit-v<spec_kit_tag>` in the badge URL — if the badge is missing or
+  still shows an old tag, stop and report the exact line found and the
+  expected tag.
+- **Changelog**: `CHANGELOG.md` must have a section heading for the new
+  version in the form `## [<new_version>] - YYYY-MM-DD` — if absent, stop and
+  report.
+- Only report success once all four checks pass. If any check fails, do not
+  report the overall bump as complete.
+
 ## Rules
 
-- Update `extension/extension.yml`, `preset/preset.yml`, `INSTALL.md`, and
-  `UPGRADE.md` by default, keep any managed Spec Kit version mentions aligned
-  with `preset/spec-kit-release.json`, plus update `CHANGELOG.md` unless the
-  user explicitly asks to skip the changelog.
+- Update `extension/extension.yml`, `preset/preset.yml`, `INSTALL.md`,
+  `UPGRADE.md`, and the Spec Kit version badge in `README.md` by default, keep
+  the Spec Kit version badge aligned with `preset/spec-kit-release.json`, plus
+  update `CHANGELOG.md` unless the user explicitly asks to skip the changelog.
 - Keep the two manifest versions identical.
 - Default to the next minor version when the prompt does not specify a bump
   type or an exact version.
@@ -100,7 +120,7 @@ rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 - Do not write the leading `v` into either manifest.
 - If the user is preparing a publish, remind them that the release tag still
   needs the `v` prefix expected by `.github/workflows/release-packages.yml`.
-- Do not guess the base Spec Kit version for docs; read it from
+- Do not guess the base Spec Kit version for the badge or docs; read it from
   `preset/spec-kit-release.json` `spec_kit_release.resolved_tag`.
 - Generate changelog entries from git commit subjects, not invented summaries or
   GitHub release-note APIs.
@@ -119,6 +139,6 @@ rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 - `scripts/set_manifest_versions.py`: read the current manifest versions,
   default to the next minor version, support explicit patch or major bumps,
   accept an explicit version override, update `INSTALL.md` and `UPGRADE.md`
-  release commands to the same version, update managed Spec Kit version
-  mentions from `preset/spec-kit-release.json`, update `CHANGELOG.md` from
+  release commands to the same version, update the Spec Kit version badge in
+  `README.md` from `preset/spec-kit-release.json`, update `CHANGELOG.md` from
   local git history, and report what changed.

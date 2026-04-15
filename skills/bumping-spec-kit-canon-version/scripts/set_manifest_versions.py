@@ -58,6 +58,9 @@ CANON_CORE_RELEASE_URL_RE = re.compile(
 SPEC_KIT_GIT_URL_RE = re.compile(
     r"git\+https://github\.com/github/spec-kit\.git@(?:vX\.Y\.Z|v\d+\.\d+\.\d+)"
 )
+README_SPEC_KIT_BADGE_RE = re.compile(
+    r"!\[Spec Kit Version\]\(https://img\.shields\.io/badge/spec--kit-v\d+\.\d+\.\d+-blue\?logo=github\)"
+)
 
 
 @dataclass
@@ -230,6 +233,31 @@ def replace_release_doc_versions(
     updated_text = SPEC_KIT_GIT_URL_RE.sub(
         f"git+https://github.com/github/spec-kit.git@{spec_kit_tag}",
         updated_text,
+    )
+
+    changed = updated_text != text
+    if changed and not dry_run:
+        if line_ending != "\n":
+            updated_text = updated_text.replace("\n", line_ending)
+        elif had_trailing_newline and not updated_text.endswith("\n"):
+            updated_text += "\n"
+        path.write_text(updated_text, encoding="utf-8")
+
+    return changed
+
+
+def replace_readme_spec_kit_badge(
+    path: Path,
+    spec_kit_tag: str,
+    dry_run: bool,
+) -> bool:
+    text = path.read_text(encoding="utf-8")
+    line_ending = "\r\n" if "\r\n" in text else "\n"
+    had_trailing_newline = text.endswith(("\r", "\n"))
+
+    updated_text = README_SPEC_KIT_BADGE_RE.sub(
+        f"![Spec Kit Version](https://img.shields.io/badge/spec--kit-{spec_kit_tag}-blue?logo=github)",
+        text,
     )
 
     changed = updated_text != text
@@ -493,6 +521,11 @@ def parse_args() -> argparse.Namespace:
         help="Override the upgrade doc path. Defaults to <repo>/UPGRADE.md.",
     )
     parser.add_argument(
+        "--readme",
+        type=Path,
+        help="Override the README path. Defaults to <repo>/README.md.",
+    )
+    parser.add_argument(
         "--spec-kit-release-metadata",
         type=Path,
         help="Override the Spec Kit release metadata path. Defaults to <repo>/preset/spec-kit-release.json.",
@@ -537,6 +570,11 @@ def main() -> int:
         args.upgrade_doc.resolve()
         if args.upgrade_doc is not None
         else repo_root / "UPGRADE.md"
+    )
+    readme = (
+        args.readme.resolve()
+        if args.readme is not None
+        else repo_root / "README.md"
     )
     spec_kit_release_metadata = (
         args.spec_kit_release_metadata.resolve()
@@ -595,6 +633,11 @@ def main() -> int:
             spec_kit_tag,
             args.dry_run,
         )
+        readme_badge_changed = replace_readme_spec_kit_badge(
+            readme,
+            spec_kit_tag,
+            args.dry_run,
+        )
 
         changelog_changed = False
         if changelog_plan is not None:
@@ -639,6 +682,12 @@ def main() -> int:
         print(f"{action} {upgrade_doc_label}: release commands -> v{normalized_version}")
     else:
         print(f"{already} {upgrade_doc_label}: release commands at v{normalized_version}")
+
+    readme_label = format_path(readme, repo_root)
+    if readme_badge_changed:
+        print(f"{action} {readme_label}: Spec Kit badge -> {spec_kit_tag}")
+    else:
+        print(f"{already} {readme_label}: Spec Kit badge at {spec_kit_tag}")
 
     if args.skip_changelog:
         print("Skipped CHANGELOG.md generation.")
