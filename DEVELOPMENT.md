@@ -14,7 +14,10 @@ spec-kit-canon/
 ```
 
 - `extension/` is the install root for the `canon` extension package
-- `preset/` is the install root for the `canon-core` preset package
+- `preset/` is the install root for the `canon-core` preset package. The
+  checked-in sync metadata for the canon-core preset lives in
+  [preset/spec-kit-release.json](./preset/spec-kit-release.json), including
+  the exact upstream release tag and commit used for the current command rebase.
 - `skills/` and `tests/` stay repo-local and are not part of the published
   package roots
 
