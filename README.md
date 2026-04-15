@@ -1,3 +1,5 @@
+# ![Latest Release](https://img.shields.io/github/v/release/maximiliamus/spec-kit-canon?logo=github&label=spec-kit-canon) ![Spec Kit Version](https://img.shields.io/badge/spec--kit-v0.6.1-blue?logo=github) 
+
 # Spec Kit Canon
 
 Spec Kit Canon adds canon-driven (baseline-driven) workflows to Spec Kit.
@@ -49,11 +51,6 @@ The preset adapts these core commands to work together with the extension:
 - `speckit.analyze`
 - `speckit.implement`
 - `speckit.constitution`
-
-Current upstream core-command baseline: `Spec Kit v0.6.1`.
-The checked-in sync metadata for the canon-core preset lives in
-[preset/spec-kit-release.json](./preset/spec-kit-release.json), including the
-exact upstream release tag and commit used for the current command rebase.
 
 ## First-Time Setup
 
@@ -189,7 +186,7 @@ Run the familiar core commands in order:
 /speckit.checklist
 /speckit.plan
 /speckit.tasks
-/speckit.analyze
+/speckit.analyze (optional)
 /speckit.implement
 ```
 
@@ -213,7 +210,7 @@ Run the step commands in order:
 - `/speckit.canon.drift-reverse`
 - `/speckit.canon.drift-detect`
 - `/speckit.canon.drift-resolve`
-- `/speckit.canon.drift-implement` when `tasks.alignment.md` is created
+- `/speckit.canon.drift-implement` (when `tasks.alignment.md` is created)
 - `/speckit.canon.drift-reconcile`
 - `/speckit.canon.drift-analyze` (optional)
 - `/speckit.canon.drift-canonize`
@@ -268,8 +265,12 @@ in sync with the code on your feature branch:
 - `/speckit.canon.vibecode-drift-analyze` (optional)
 - `/speckit.canon.vibecode-drift-canonize`
 
-Orchestration commands are available to automate this pipeline end to end.
+Orchestration command is available to automate this pipeline end to end.
 See [WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
+
+- `speckit.canon.vibecode-drift-express` is the fast path for small, straightforward
+changes that combines the full vibecoding drift pipeline into one command, skipping
+the separate analyze step before canonize.
 
 Run the vibecoding sync commands from the feature branch created for the session,
 not from the configured base branch.

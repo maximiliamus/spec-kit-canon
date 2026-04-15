@@ -220,7 +220,7 @@ reported item to `canon.drift.md`, re-runs analyze once for verification, and
 continues to canonize only if that verification pass is clean; otherwise it
 stops and preserves the revised draft for manual review.
 
-## Express Vibecoding Command
+## Express Vibecoding Spec-Drift
 
 `/speckit.canon.vibecode-drift-express` is the low-ceremony single-invocation
 path. It writes all drift artifacts, skips the separate draft canon analysis

@@ -136,18 +136,3 @@ orchestrator applies those CR-XXX items to `canon.drift.md`, re-runs analyze
 once, and canonizes only if the verification pass is clean; otherwise it stops
 with a report explaining the remaining issues. Use this command when you want
 the full canon sync flow handled end to end.
-
-## Vibecoding Express Fast Path
-
-`speckit.canon.vibecode-drift-express` is the fast path for small, non-complex
-changes. Invocation:
-
-```text
-/speckit.canon.vibecode-drift-express
-``` Use it when you want a quick low-ceremony drift sync and the change
-set is straightforward enough that you do not need the fuller orchestrated
-flow. Express intentionally skips the separate
-`speckit.canon.vibecode-drift-analyze` pass and goes from reconcile directly
-to the final canonize confirmation, then canonizes within its own command body
-rather than invoking `speckit.canon.vibecode-drift-canonize` as a separate
-step.
