@@ -2,18 +2,34 @@
 
 # Spec Kit Canon
 
-Spec Kit Canon adds canon-driven (baseline-driven) workflows to Spec Kit.
+## What is "Canon"?
+
+**Canon** is a body of work, rules, or descriptions that are considered
+authoritative and official. The same way a book series has a "canon"
+storyline that is considered official, a codebase can have a **canonical
+specification** — one agreed-upon description of how the system is supposed to
+work.
+
+Spec Kit Canon uses this idea: you maintain a set of Markdown files (the
+**canon**) that serve as the official, long-lived source of truth for your
+project's design. When the code drifts from that truth — through feature work,
+bug fixes, or quick vibecoding sessions — the extension gives you structured
+workflows to detect the drift and bring canon and code back in sync.
+
+## Why Spec Kit Canon?
+
+Spec Kit Canon adds canon-driven (baseline-driven) workflows to
+[Spec Kit](https://github.com/github/spec-kit).
 
 Use it when you want canon files to remain the long-lived source of truth even
 when the team moves between spec-first work, post-implementation drift repair,
 and low-ceremony vibecoding.
 
-Canon is the canonical system specification for your project: a set of
-Markdown files that fully describes your system. The canon is not meant to be
-a single file. It can be organized into nested areas or folders, each with its
-own `_toc.md` table-of-contents index, and it can include additional domain,
-business, architecture, terminology, workflow, or other project-specific
-details that define how the system is supposed to work.
+The canon is not meant to be a single file. It can be organized into nested
+areas or folders, each with its own `_toc.md` table-of-contents index, and it
+can include additional domain, business, architecture, terminology, workflow,
+or other project-specific details that define how the system is supposed to
+work.
 
 This repository publishes two packages that are meant to be installed together:
 
