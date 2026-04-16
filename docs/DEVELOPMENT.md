@@ -308,24 +308,42 @@ The shared skill sources for this repo stay in:
 
 ```text
 skills/bumping-spec-kit-canon-version
-skills/testing-spec-kit-canon-extension
+skills/committing-bulk-modifications
 skills/syncing-spec-kit-canon-core-preset
+skills/testing-spec-kit-canon-extension
 ```
 
 These skills are shared for any agent. The shared workflows, prompts, scripts,
 references, and template assets live under those shared skill folders.
+
+### Skill And Entrypoint Naming Conventions
+
+| Artifact | Location | Name format | Example |
+|---|---|---|---|
+| Shared skill source | `skills/` | `<verb>ing-<description>` | `committing-bulk-modifications` |
+| Claude skill entrypoint | `.claude/skills/` | same as shared skill (`<verb>ing-`) | `committing-bulk-modifications` |
+| Claude command shortcut | `.claude/commands/` | `<verb>-<description>` (no `-ing`) | `commit-bulk-modifications.md` |
+| Codex prompt shortcut | `.codex/prompts/` | `<verb>-<description>` (no `-ing`) | `commit-bulk-modifications.md` |
+
+The shared skill name and the Claude skill entrypoint folder always use the
+`<verb>ing-` form. Claude commands and Codex prompts always use the plain
+verb form without the `-ing` suffix.
+
 Project-local entrypoints and shortcuts live in agent-specific repo folders:
 
 ```text
 .claude/skills/bumping-spec-kit-canon-version/SKILL.md
 .claude/commands/bump-spec-kit-canon-version.md
-.codex/prompts/bumping-spec-kit-canon-version.md
-.claude/skills/testing-spec-kit-canon-extension/SKILL.md
-.claude/commands/test-spec-kit-canon-extension.md
-.codex/prompts/testing-spec-kit-canon-extension.md
+.codex/prompts/bump-spec-kit-canon-version.md
+.claude/skills/committing-bulk-modifications/SKILL.md
+.claude/commands/commit-bulk-modifications.md
+.codex/prompts/commit-bulk-modifications.md
 .claude/skills/syncing-spec-kit-canon-core-preset/SKILL.md
 .claude/commands/sync-spec-kit-canon-core-preset.md
-.codex/prompts/syncing-spec-kit-canon-core-preset.md
+.codex/prompts/sync-spec-kit-canon-core-preset.md
+.claude/skills/testing-spec-kit-canon-extension/SKILL.md
+.claude/commands/test-spec-kit-canon-extension.md
+.codex/prompts/test-spec-kit-canon-extension.md
 ```
 
 The testing workflow stores resumable run state in:
