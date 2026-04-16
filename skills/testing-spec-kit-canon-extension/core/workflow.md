@@ -373,7 +373,7 @@ intentionally want to skip that behavior.
 
 ## Shared Rules
 
-- Use the exact sibling workspace layout from `DEVELOPMENT.md`; do not point
+- Use the exact sibling workspace layout from `docs/DEVELOPMENT.md`; do not point
   the script at any other project.
 - Keep the sandbox feature scope intentionally trivial. The point is to
   validate the workflow, not to build a production app.

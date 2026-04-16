@@ -12,7 +12,7 @@ small preset-only normalizations.
 Read [references/sync-rules.md](./references/sync-rules.md) before editing
 `preset/`.
 Also read the `Marked Local Overlays` section in
-[`DEVELOPMENT.md`](../../DEVELOPMENT.md) before touching the regular command
+[`DEVELOPMENT.md`](../../docs/DEVELOPMENT.md) before touching the regular command
 files, because that section defines when the
 `<!-- spec-kit-canon:start ... -->` / `<!-- spec-kit-canon:end ... -->`
 markup should exist and what it is allowed to wrap.

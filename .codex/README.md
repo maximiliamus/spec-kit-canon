@@ -9,8 +9,9 @@ The registration scripts manage every repo-local skill under `skills/`.
 Current shared skill sources:
 
 - `skills/bumping-spec-kit-canon-version`
-- `skills/testing-spec-kit-canon-extension`
+- `skills/committing-bulk-modifications`
 - `skills/syncing-spec-kit-canon-core-preset`
+- `skills/testing-spec-kit-canon-extension`
 
 They link each repo skill source into the Codex skill registry under:
 
@@ -82,9 +83,10 @@ pwsh -NoProfile -File .codex/unregister-skills.ps1 -Force
 The Codex prompt entrypoints for this repo are:
 
 ```text
-.codex/prompts/bumping-spec-kit-canon-version.md
-.codex/prompts/testing-spec-kit-canon-extension.md
-.codex/prompts/syncing-spec-kit-canon-core-preset.md
+.codex/prompts/bump-spec-kit-canon-version.md
+.codex/prompts/commit-bulk-modifications.md
+.codex/prompts/sync-spec-kit-canon-core-preset.md
+.codex/prompts/test-spec-kit-canon-extension.md
 ```
 
 Those prompts should stay thin and point back to the shared skills instead of

@@ -1,4 +1,4 @@
 interface:
   display_name: "Bump Spec Kit Canon Version"
   short_description: "Update both canon manifest versions"
-  default_prompt: "Use $bumping-spec-kit-canon-version to bump the next minor release version, update extension/extension.yml and preset/preset.yml, update the pinned release commands in INSTALL.md and UPGRADE.md, keep any documented base Spec Kit version aligned with preset/spec-kit-release.json, and regenerate CHANGELOG.md from Conventional Commit subjects unless skipping the changelog is explicitly requested."
+  default_prompt: "Use $bumping-spec-kit-canon-version to bump the next minor release version, update extension/extension.yml and preset/preset.yml, update the pinned release commands in docs/INSTALL.md and docs/UPGRADE.md, keep any documented base Spec Kit version aligned with preset/spec-kit-release.json, and regenerate CHANGELOG.md from Conventional Commit subjects unless skipping the changelog is explicitly requested."

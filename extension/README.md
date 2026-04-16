@@ -47,6 +47,6 @@ specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-ca
 
 See the repository root [README.md](../README.md) for the combined extension +
 preset workflow guide. For a more focused reference on workflows, step
-commands, and command behavior, see [WORKFLOWS.md](../WORKFLOWS.md). The
+commands, and command behavior, see [WORKFLOWS.md](../docs/WORKFLOWS.md). The
 end-to-end orchestrator commands are documented in
-[WORKFLOW-ORCHESTRATORS.md](../WORKFLOW-ORCHESTRATORS.md).
+[WORKFLOW-ORCHESTRATORS.md](../docs/WORKFLOW-ORCHESTRATORS.md).

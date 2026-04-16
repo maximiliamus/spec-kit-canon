@@ -513,12 +513,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--install-doc",
         type=Path,
-        help="Override the install doc path. Defaults to <repo>/INSTALL.md.",
+        help="Override the install doc path. Defaults to <repo>/docs/INSTALL.md.",
     )
     parser.add_argument(
         "--upgrade-doc",
         type=Path,
-        help="Override the upgrade doc path. Defaults to <repo>/UPGRADE.md.",
+        help="Override the upgrade doc path. Defaults to <repo>/docs/UPGRADE.md.",
     )
     parser.add_argument(
         "--readme",
@@ -564,12 +564,12 @@ def main() -> int:
     install_doc = (
         args.install_doc.resolve()
         if args.install_doc is not None
-        else repo_root / "INSTALL.md"
+        else repo_root / "docs" / "INSTALL.md"
     )
     upgrade_doc = (
         args.upgrade_doc.resolve()
         if args.upgrade_doc is not None
-        else repo_root / "UPGRADE.md"
+        else repo_root / "docs" / "UPGRADE.md"
     )
     readme = (
         args.readme.resolve()

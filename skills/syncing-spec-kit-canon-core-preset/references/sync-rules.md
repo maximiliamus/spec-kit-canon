@@ -95,7 +95,7 @@ Current regular-command overlay inventory:
 
 If a future local command contains an additional named overlay block, treat it
 the same way as long as it still satisfies the overlay rules in
-`DEVELOPMENT.md`.
+`docs/DEVELOPMENT.md`.
 
 Constitution files:
 

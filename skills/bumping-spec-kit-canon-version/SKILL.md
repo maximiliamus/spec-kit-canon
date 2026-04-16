@@ -1,6 +1,6 @@
 ---
 name: bumping-spec-kit-canon-version
-description: Bump the shared release version in both publishable Spec Kit Canon manifests, update the version-pinned release commands in `INSTALL.md` and `UPGRADE.md`, keep any documented base Spec Kit version in sync with `preset/spec-kit-release.json`, and automatically update the repo changelog. Use when preparing the next release, aligning `extension/extension.yml` and `preset/preset.yml`, defaulting to the next minor version when the prompt just asks to bump the extension version, bumping only patch or major when that scope is explicitly requested, or applying an exact `X.Y.Z` or `vX.Y.Z` version only when the user explicitly asks for a specific version.
+description: Bump the shared release version in both publishable Spec Kit Canon manifests, update the version-pinned release commands in `docs/INSTALL.md` and `docs/UPGRADE.md`, keep any documented base Spec Kit version in sync with `preset/spec-kit-release.json`, and automatically update the repo changelog. Use when preparing the next release, aligning `extension/extension.yml` and `preset/preset.yml`, defaulting to the next minor version when the prompt just asks to bump the extension version, bumping only patch or major when that scope is explicitly requested, or applying an exact `X.Y.Z` or `vX.Y.Z` version only when the user explicitly asks for a specific version.
 ---
 
 # Bumping Spec Kit Canon Version
@@ -23,8 +23,8 @@ local git history in the same step.
 3. Run the bundled script from the repo root. By default it updates:
    - `extension/extension.yml`
    - `preset/preset.yml`
-   - `INSTALL.md`
-   - `UPGRADE.md`
+   - `docs/INSTALL.md`
+   - `docs/UPGRADE.md`
    - the Spec Kit version badge in `README.md`, using
      `preset/spec-kit-release.json`
    - `CHANGELOG.md`
@@ -81,7 +81,7 @@ python skills/bumping-spec-kit-canon-version/scripts/set_manifest_versions.py
 
 ```bash
 rg -n '^  version: "' extension/extension.yml preset/preset.yml
-rg -n 'spec-kit-canon-v|spec-kit-canon-core-v' INSTALL.md UPGRADE.md
+rg -n 'spec-kit-canon-v|spec-kit-canon-core-v' docs/INSTALL.md docs/UPGRADE.md
 rg -n 'spec--kit-v' README.md
 rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 ```
@@ -91,7 +91,7 @@ rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 - **Manifests**: both `extension/extension.yml` and `preset/preset.yml` must
   show `version: "<new_version>"` — if either is missing or still shows the
   old version, the bump failed; stop and report which manifest was not updated.
-- **Release docs**: `INSTALL.md` and `UPGRADE.md` must contain release URLs
+- **Release docs**: `docs/INSTALL.md` and `docs/UPGRADE.md` must contain release URLs
   ending in the new version tag (`v<new_version>`) — if no matches are found,
   the pinned commands were not updated; stop and report.
 - **README badge**: `README.md` must contain the Spec Kit badge with the tag
@@ -107,8 +107,8 @@ rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 
 ## Rules
 
-- Update `extension/extension.yml`, `preset/preset.yml`, `INSTALL.md`,
-  `UPGRADE.md`, and the Spec Kit version badge in `README.md` by default, keep
+- Update `extension/extension.yml`, `preset/preset.yml`, `docs/INSTALL.md`,
+  `docs/UPGRADE.md`, and the Spec Kit version badge in `README.md` by default, keep
   the Spec Kit version badge aligned with `preset/spec-kit-release.json`, plus
   update `CHANGELOG.md` unless the user explicitly asks to skip the changelog.
 - Keep the two manifest versions identical.
@@ -138,7 +138,7 @@ rg -n '^## \\[[0-9]+\\.[0-9]+\\.[0-9]+\\] - ' CHANGELOG.md
 
 - `scripts/set_manifest_versions.py`: read the current manifest versions,
   default to the next minor version, support explicit patch or major bumps,
-  accept an explicit version override, update `INSTALL.md` and `UPGRADE.md`
+  accept an explicit version override, update `docs/INSTALL.md` and `docs/UPGRADE.md`
   release commands to the same version, update the Spec Kit version badge in
   `README.md` from `preset/spec-kit-release.json`, update `CHANGELOG.md` from
   local git history, and report what changed.

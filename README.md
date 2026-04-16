@@ -41,21 +41,21 @@ This repository publishes two packages that are meant to be installed together:
 
 Install both packages together from the current release. For step-by-step
 release installation commands, see
-[INSTALL.md](./INSTALL.md).
+[INSTALL.md](./docs/INSTALL.md).
 
 For existing projects, upgrade the Spec Kit CLI and refresh the target
 project before reinstalling `canon` and `canon-core` from the same version.
-The full upgrade procedure is in [UPGRADE.md](./UPGRADE.md).
+The full upgrade procedure is in [UPGRADE.md](./docs/UPGRADE.md).
 
 If you install only the extension, you get the namespaced
 `/speckit.canon.*` commands. The full canon-driven workflow documented here
 assumes the `canon-core` preset is also installed.
 
 For a focused reference covering the available workflows, step commands, and
-handoff behavior for `speckit.canon.*`, see [WORKFLOWS.md](./WORKFLOWS.md). The
+handoff behavior for `speckit.canon.*`, see [WORKFLOWS.md](./docs/WORKFLOWS.md). The
 end-to-end orchestrator commands are documented in
-[WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md), and the workflow
-diagrams are collected in [WORKFLOW-DIAGRAMS.md](./WORKFLOW-DIAGRAMS.md).
+[WORKFLOW-ORCHESTRATORS.md](./docs/WORKFLOW-ORCHESTRATORS.md), and the workflow
+diagrams are collected in [WORKFLOW-DIAGRAMS.md](./docs/WORKFLOW-DIAGRAMS.md).
 
 The preset adapts these core commands to work together with the extension:
 
@@ -237,7 +237,7 @@ the automatic `/speckit.canon.drift` orchestrator, not to
 `/speckit.canon.drift-resolve` itself.
 
 An orchestration command is available to automate this pipeline end to end.
-See [WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
+See [WORKFLOW-ORCHESTRATORS.md](./docs/WORKFLOW-ORCHESTRATORS.md).
 
 ## Workflow 3: Canon-Driven Vibecoding / Code-First
 
@@ -282,7 +282,7 @@ in sync with the code on your feature branch:
 - `/speckit.canon.vibecode-drift-canonize`
 
 Orchestration command is available to automate this pipeline end to end.
-See [WORKFLOW-ORCHESTRATORS.md](./WORKFLOW-ORCHESTRATORS.md).
+See [WORKFLOW-ORCHESTRATORS.md](./docs/WORKFLOW-ORCHESTRATORS.md).
 
 - `speckit.canon.vibecode-drift-express` is the fast path for small, straightforward
 changes that combines the full vibecoding drift pipeline into one command, skipping
@@ -305,5 +305,5 @@ not from the configured base branch.
 
 ## Development
 
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for the workspace layout, local
+See [DEVELOPMENT.md](./docs/DEVELOPMENT.md) for the workspace layout, local
 install/test loop, and release packaging details.

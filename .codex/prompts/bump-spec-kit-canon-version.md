@@ -7,7 +7,7 @@ Default behavior:
 - default to the next minor version
 - bump `major` or `patch` only when explicitly requested
 - accept an exact `0.1.1` or `v0.1.1` only when explicitly requested
-- update `extension/extension.yml`, `preset/preset.yml`, `INSTALL.md`, and `UPGRADE.md`
+- update `extension/extension.yml`, `preset/preset.yml`, `docs/INSTALL.md`, and `docs/UPGRADE.md`
 - keep any documented base Spec Kit version aligned with `preset/spec-kit-release.json`
 - update `CHANGELOG.md` automatically from local git history
 - update `CHANGELOG.md` automatically from Conventional Commit subjects

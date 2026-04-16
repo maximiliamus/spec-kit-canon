@@ -12,7 +12,7 @@ Before doing any work:
 
 1. Read `skills/syncing-spec-kit-canon-core-preset/SKILL.md`.
 2. Read `skills/syncing-spec-kit-canon-core-preset/references/sync-rules.md`.
-3. Read the `Marked Local Overlays` section in `DEVELOPMENT.md`.
+3. Read the `Marked Local Overlays` section in `docs/DEVELOPMENT.md`.
 4. Run
    `skills/syncing-spec-kit-canon-core-preset/scripts/export_upstream_release.py`
    before editing `preset/`.

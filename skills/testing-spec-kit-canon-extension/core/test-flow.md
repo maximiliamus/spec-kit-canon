@@ -3,7 +3,7 @@
 ## Workspace Assumptions
 
 - Run the skill from `spec-kit-canon`.
-- Use the sibling layout from `DEVELOPMENT.md`:
+- Use the sibling layout from `docs/DEVELOPMENT.md`:
   - `../spec-kit`
   - `../spec-kit-canon`
   - `../spec-kit-canon/extension`
