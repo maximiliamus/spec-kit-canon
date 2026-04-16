@@ -16,15 +16,19 @@ not considered and must not be included in any commit.
 ## Workflow
 
 1. **Inspect the staging area.**
-   Run `git diff --cached --stat` to list every staged file and understand
-   the overall scope. Ignore anything that appears only in `git status` as
-   unstaged.
+   Run `git diff --cached --name-status` to list every staged file with its
+   change type (`M`, `A`, `D`, `R`). Note any rename entries (`R`) — these
+   require special handling during application. Ignore anything that appears
+   only in `git status` as unstaged.
 
 2. **Group files by logical concern.**
    Cluster the files into candidate commit groups. Each group must represent a
    single coherent change — for example: manifest bumps, changelog updates,
    documentation fixes, script changes, test additions. Do not mix unrelated
    concerns in one group.
+
+   When renames (`R`) are present, always keep both the old and new path of a
+   rename in the same commit group. Never split a rename across groups.
 
 3. **Draft a commit plan.**
    For each group, produce:
@@ -36,23 +40,45 @@ not considered and must not be included in any commit.
 
 4. **Apply the commit plan** (only when asked).
    Commit each group in dependency order — foundational changes (build config,
-   manifests) before derived changes (docs, changelogs). Use `git restore
-   --staged` to temporarily unstage files that belong to later commits, commit
-   the current group, then re-stage them:
+   manifests) before derived changes (docs, changelogs).
+
+   **When no renames are present** — use `git restore --staged` to temporarily
+   unstage files that belong to later commits, commit the current group, then
+   re-stage them:
 
    ```bash
    # Unstage files not in this commit
    git restore --staged <other-files...>
 
    # Commit only the files for this group (already staged)
-   git commit -m "<subject>" -m "<body>"
+   git commit -m "<subject>"
 
    # Re-stage files for subsequent commits
    git add <other-files...>
    ```
 
-   Never run `git add` on files that were not already staged before this
-   skill was invoked.
+   **When renames are present** — `git restore --staged` on a renamed file's
+   old path breaks rename detection and splits it into separate add+delete
+   entries, corrupting the commit. Use a full index reset instead:
+
+   ```bash
+   # Reset the entire index to HEAD (no working tree changes)
+   git restore --staged .
+
+   # Re-stage only the files for this commit group
+   # (including both old and new paths for any renames in the group)
+   git add <files-for-this-commit...>
+   git add -u <deleted-old-paths-for-renames...>
+
+   # Commit
+   git commit -m "<subject>"
+
+   # Repeat for each subsequent group
+   ```
+
+   Re-staging files that were originally staged is always permitted — the
+   restriction is against pulling in files that were **not** staged before
+   this skill was invoked.
 
 ## Commit Message Rules
 

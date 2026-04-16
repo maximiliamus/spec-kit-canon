@@ -20,7 +20,11 @@ Before doing any work:
 - Treat `skills/committing-bulk-modifications/SKILL.md` as the canonical
   workflow.
 - Never run `git add` on files that were not already staged before the skill
-  was invoked.
+  was invoked. Re-staging originally-staged files during the split process is
+  permitted.
 - Use `git restore --staged` to temporarily move files out of the index when
-  splitting staged changes across multiple commits.
+  splitting staged changes across multiple commits — **except** when the
+  staging area contains renames. In that case, reset the entire index with
+  `git restore --staged .` and re-stage each group from scratch to avoid
+  breaking rename detection.
 - Do not duplicate the commit workflow in this entrypoint.
