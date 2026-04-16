@@ -8,8 +8,8 @@ Spec Kit Canon ships as two packages that are usually installed together:
 Install both packages from the current published release:
 
 ```bash
-specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.0/spec-kit-canon-v0.2.0.zip
-specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.0/spec-kit-canon-core-v0.2.0.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.1/spec-kit-canon-v0.2.1.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.1/spec-kit-canon-core-v0.2.1.zip
 ```
 
 ## Extension-Only Install
@@ -19,7 +19,7 @@ If you install only the extension, you get the namespaced
 `/speckit.*` workflow.
 
 ```bash
-specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.0/spec-kit-canon-v0.2.0.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.1/spec-kit-canon-v0.2.1.zip
 ```
 
 ## Next Step

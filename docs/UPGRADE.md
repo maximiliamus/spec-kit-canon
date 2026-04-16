@@ -45,8 +45,8 @@ specify preset remove canon-core
 Install the current release assets:
 
 ```bash
-specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.0/spec-kit-canon-v0.2.0.zip
-specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.0/spec-kit-canon-core-v0.2.0.zip
+specify extension add canon --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.1/spec-kit-canon-v0.2.1.zip
+specify preset add canon-core --from https://github.com/maximiliamus/spec-kit-canon/releases/download/v0.2.1/spec-kit-canon-core-v0.2.1.zip
 ```
 
 `--keep-config` preserves `.specify/extensions/canon/canon-config.yml`.

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-04-17
+
+### Features
+- Add committing-bulk-modifications skill.
+
+### Bug Fixes
+- Handle rename detection in committing-bulk-modifications.
+- Clarify workflow optionality and replace Unicode symbols.
+
+### Documentation
+- Improve Why section and Install & Upgrade structure.
+- Update internal links and paths for docs/ reorganization.
+- Move documentation files into docs/ subdirectory.
+- Remove duplicate descriptions in What is Canon and Why sections.
+- Add "What is Canon?" intro section to README (#2).
+- Clarify spec-kit-release.json role in DEVELOPMENT.md.
+- Add Spec Kit badge to README and consolidate express workflow docs.
+
+### CI/CD
+- Replace generated release notes with changelog link.
+
+### Chores
+- Update TODO list.
+
+### Miscellaneous
+- Extend version bump script to update Spec Kit badge in README.
+
 ## [0.2.0] - 2026-04-13
 
 ### Features
