@@ -31,25 +31,34 @@ Use it when you want canon to remain the authoritative baseline as the team
 moves between spec-first work, post-implementation drift repair, and
 low-ceremony vibecoding.
 
-This repository publishes two packages that are meant to be installed together:
+The project constitution — generated from the
+[canon constitution template](./preset/templates/constitution-template.md) — is the
+governing document for the whole approach. It declares the canon as the
+authoritative "System Bible" (WHAT the system does, never HOW it is built),
+establishes Spec Kit's role as managing incremental evolution without replacing
+that baseline, and enforces strict abstraction-level separation across every
+artifact type — canon, `spec.md`, `plan.md`, `tasks.md`, and all drift files.
+It also defines the project's change-classification taxonomy, configures
+allowed branch type and scope codes, and records the canon root entry point
+that all drift and spec workflows read from.
+
+## Install and Upgrade
+
+This repository publishes two packages:
 
 - `canon` extension: adds `/speckit.canon.*` namespaced commands for canon drift management in spec-first (original Spec Kit) and code-first (new vibecoding) workflows
 - `canon-core` preset: adapts core `/speckit.*` commands for
   canon-driven workflows and replaces the default constitution/bootstrap behavior
 
-## Install and Upgrade
-
-Install both packages together from the current release. For step-by-step
-release installation commands, see
+Install both together from the current release; the full canon-driven workflow
+documented here assumes both are present. If you install only the extension,
+you get the namespaced `/speckit.canon.*` commands without the canon-driven
+core behavior. For step-by-step installation commands, see
 [INSTALL.md](./docs/INSTALL.md).
 
 For existing projects, upgrade the Spec Kit CLI and refresh the target
 project before reinstalling `canon` and `canon-core` from the same version.
 The full upgrade procedure is in [UPGRADE.md](./docs/UPGRADE.md).
-
-If you install only the extension, you get the namespaced
-`/speckit.canon.*` commands. The full canon-driven workflow documented here
-assumes the `canon-core` preset is also installed.
 
 For a focused reference covering the available workflows, step commands, and
 handoff behavior for `speckit.canon.*`, see [WORKFLOWS.md](./docs/WORKFLOWS.md). The
