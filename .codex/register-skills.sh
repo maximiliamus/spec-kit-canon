@@ -8,6 +8,9 @@ skills_dir="$codex_home/skills"
 
 mkdir -p "$skills_dir"
 
+echo "Unregistering existing Codex skills before re-registering..."
+bash "$(dirname "${BASH_SOURCE[0]}")/unregister-skills.sh" || true
+
 shopt -s nullglob
 source_paths=("$skills_source_dir"/*)
 shopt -u nullglob

@@ -35,6 +35,9 @@ if ([string]::IsNullOrWhiteSpace($CodexHome)) {
 $skillsDir = Join-Path $CodexHome "skills"
 New-Item -ItemType Directory -Path $skillsDir -Force | Out-Null
 
+Write-Output "Unregistering existing Codex skills before re-registering..."
+& "$PSScriptRoot\unregister-skills.ps1" -CodexHome $CodexHome -Force:$Force
+
 $skills = Get-RepoSkills -RepoRoot $repoRoot
 if ($skills.Count -eq 0) {
     Write-Output "No repo-local skills found under $(Join-Path $repoRoot 'skills')"
